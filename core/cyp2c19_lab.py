@@ -25,7 +25,7 @@ PHENOTYPES = {
         'genotypes': ['*17/*17', '*1/*17'],
         'activity_score': 3.0,
         'prevalence_me': '1-2%',
-        'prevalence_ar': '2%',
+        'prevalence_ar': '3%',
         'color': '#3b82f6',
     },
     'NM': {
@@ -34,7 +34,7 @@ PHENOTYPES = {
         'genotypes': ['*1/*1'],
         'activity_score': 2.0,
         'prevalence_me': '35-40%',
-        'prevalence_ar': '36%',
+        'prevalence_ar': '55%',
         'color': '#22c55e',
     },
     'IM': {
@@ -43,7 +43,7 @@ PHENOTYPES = {
         'genotypes': ['*1/*2', '*1/*3', '*2/*17'],
         'activity_score': 1.0,
         'prevalence_me': '18-25%',
-        'prevalence_ar': '22%',
+        'prevalence_ar': '37%',
         'color': '#f59e0b',
     },
     'PM': {

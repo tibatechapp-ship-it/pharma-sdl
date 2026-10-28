@@ -10,11 +10,10 @@ Usage:
     python scripts/normalize_drug_names.py --dry-run
     python scripts/normalize_drug_names.py --apply
 """
-import re
-import json
 import argparse
+import json
+import re
 from pathlib import Path
-
 
 # ═══════════════════════════════════════════════════════════
 # قاعدة البيانات: INN ↔ Brand
@@ -129,7 +128,7 @@ def normalize_drug_mentions(content):
             seen.add(inn)
 
     # 3. تصحيح "INN (INN)" → "INN"
-    for inn in DRUG_PAIRS.keys():
+    for inn in DRUG_PAIRS:
         pattern = rf'\b{inn}\s*\(\s*{inn}\s*\)'
         content, n = re.subn(pattern, inn, content, flags=re.IGNORECASE)
         changes += n
@@ -260,7 +259,7 @@ def process_file(path, dry_run=True):
                 path.write_text(new_content, encoding='utf-8')
             return stats
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {'error': str(e)}
 
 
@@ -319,7 +318,7 @@ def main():
             changed_files.append(path)
 
     print("═" * 60)
-    print(f"📊 المجموع:")
+    print("📊 المجموع:")
     print(f"   توحيد الأدوية: {total_drugs}")
     print(f"   حذف الشركات: {total_companies}")
     print(f"   ملفات متغيرة: {len(changed_files)}")
