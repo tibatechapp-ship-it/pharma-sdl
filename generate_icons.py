@@ -20,19 +20,40 @@ def make_icon(size: int, output: Path) -> None:
     margin = size // 6
     draw.ellipse([margin, margin, size - margin, size - margin], fill="white")
 
-    try:
-        font = ImageFont.truetype(
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size // 2
-        )
-        draw.text(
-            (size // 2, size // 2),
-            "P",
-            fill="#667eea",
-            font=font,
-            anchor="mm",
-        )
-    except Exception:
-        pass
+    # Try emoji font first, fallback to "P"
+    emoji_paths = [
+        "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+        "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf",
+    ]
+    emoji_drawn = False
+    for ep in emoji_paths:
+        try:
+            emoji_font = ImageFont.truetype(ep, size // 2)
+            draw.text(
+                (size // 2, size // 2),
+                "🧬",
+                font=emoji_font,
+                anchor="mm",
+                embedded_color=True,
+            )
+            emoji_drawn = True
+            break
+        except Exception:
+            continue
+    if not emoji_drawn:
+        try:
+            font = ImageFont.truetype(
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size // 2
+            )
+            draw.text(
+                (size // 2, size // 2),
+                "P",
+                fill="#667eea",
+                font=font,
+                anchor="mm",
+            )
+        except Exception:
+            pass
 
     img.save(output, "PNG", optimize=True)
     print(f"✅ {output}")

@@ -11,6 +11,13 @@ from core.protac import VEPDEGESTRANT
 from core.mic_lab import render as render_mic_lab
 from core.protac_lab import render as render_protac_lab
 
+# Check RDKit availability (not available on Stlite/WASM)
+try:
+    from rdkit import Chem
+    HAS_RDKIT = True
+except ImportError:
+    HAS_RDKIT = False
+
 st.set_page_config(page_title="Pharma SDL", page_icon="🧬", layout="wide")
 
 # ═══════════════════════════════════════════════════════════
@@ -56,6 +63,15 @@ _pwa.html(
 
 st.title("🧬 Pharma SDL — مختبر الفارما الذاتي")
 st.markdown("> من الكتاب إلى الكود — من النظرية إلى الاكتشاف")
+
+def rdkit_warning():
+    if not HAS_RDKIT:
+        st.warning(
+            "⚠️ مختبر RDKit يحتاج متصفح — "
+            "على سطح المكتب، افتح النسخة على الويب: "
+            "https://tibatechapp-pharma-lab.streamlit.app"
+        )
+        st.stop()
 
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
     ["🏭 Make", "🔬 Test", "🧠 Analyze", "🧬 PROTAC", "🧪 MIC Lab", "🧬 PROTAC Lab", "🔌 PubChem"]
