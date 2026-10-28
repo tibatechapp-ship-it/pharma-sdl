@@ -36,7 +36,7 @@ jobs:
 
       - name: Integration tests
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: pytest -m integration -v
+        run: pytest -m integration -v --no-cov
 
       - name: Upload coverage HTML
         if: always()
