@@ -8,14 +8,16 @@ from core.agent import MultiObjectiveAgent
 from core.maker import MoleculeMaker
 from core.oracle import MultiObjectiveOracle
 from core.protac import VEPDEGESTRANT
+from core.mic_lab import render as render_mic_lab
+from core.protac_lab import render as render_protac_lab
 
 st.set_page_config(page_title="Pharma SDL", page_icon="🧬", layout="wide")
 
 st.title("🧬 Pharma SDL — مختبر الفارما الذاتي")
 st.markdown("> من الكتاب إلى الكود — من النظرية إلى الاكتشاف")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(
-    ["🏭 Make", "🔬 Test", "🧠 Analyze", "🧬 PROTAC", "🔌 PubChem"]
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
+    ["🏭 Make", "🔬 Test", "🧠 Analyze", "🧬 PROTAC", "🧪 MIC Lab", "🧬 PROTAC Lab", "🔌 PubChem"]
 )
 
 # --- Make Tab ---
@@ -80,6 +82,14 @@ with tab4:
                    labels={"x": "Time (h)", "y": "Target Protein (%)"},
                    title="PK/PD Simulation (7 days)")
     st.plotly_chart(fig2, use_container_width=True)
+
+# --- MIC Lab Tab ---
+with tab6:
+    render_mic_lab()
+
+# --- PROTAC Lab Tab ---
+with tab7:
+    render_protac_lab()
 
 # --- PubChem Tab ---
 with tab5:
