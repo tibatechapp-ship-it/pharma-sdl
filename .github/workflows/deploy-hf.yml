@@ -8,6 +8,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      HF_USERNAME: tibatechapp
+      HF_SPACE_NAME: pharma-lab
+
     steps:
       - uses: actions/checkout@v4
 
@@ -15,29 +19,48 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Check HF_TOKEN
+        run: |
+          if [ -z "${{ secrets.HF_TOKEN }}" ]; then
+            echo "::error::HF_TOKEN missing — add it at repo Settings → Secrets → Actions"
+            exit 1
+          fi
+          echo "HF_TOKEN present"
+          echo "HF_USERNAME=$HF_USERNAME"
+          echo "HF_SPACE_NAME=$HF_SPACE_NAME"
+
       - name: Install huggingface_hub
         run: pip install huggingface_hub
 
       - name: Push to HF Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_USERNAME: ${{ secrets.HF_USERNAME }}
-          HF_SPACE_NAME: ${{ secrets.HF_SPACE_NAME }}
         run: |
-          python << 'EOF'
-          import os
+          python << 'PYEOF'
+          import os, sys
           from huggingface_hub import HfApi
-          api = HfApi(token=os.environ["HF_TOKEN"])
-          repo_id = f"{os.environ['HF_USERNAME']}/{os.environ['HF_SPACE_NAME']}"
+
+          token = os.environ["HF_TOKEN"]
+          username = os.environ["HF_USERNAME"]
+          space = os.environ["HF_SPACE_NAME"]
+          repo_id = f"{username}/{space}"
+
+          api = HfApi(token=token)
+          try:
+              user = api.whoami()
+              print(f"Token OK: {user['name']}")
+          except Exception as e:
+              print(f"Token invalid: {e}")
+              sys.exit(1)
+
+          api.create_repo(repo_id=repo_id, repo_type="space", space_sdk="streamlit", exist_ok=True)
           api.upload_folder(
               repo_id=repo_id,
               repo_type="space",
               folder_path=".",
-              ignore_patterns=[
-                  "tests/*", ".github/*", "notebooks/*",
-                  "portfolio/*", "__pycache__/*", "*.pyc",
-              ],
-              commit_message="Auto-deploy from GitHub Actions",
+              ignore_patterns=["tests/*", ".github/*", "notebooks/*", "portfolio/*",
+                              "__pycache__/*", "*.pyc", ".git/*"],
+              commit_message="Auto-deploy from GitHub",
           )
-          print(f"✅ Deployed to {repo_id}")
-          EOF
+          print(f"Live: https://huggingface.co/spaces/{repo_id}")
+          PYEOF
