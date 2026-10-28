@@ -25,7 +25,7 @@ class PubChemClient:
 
     def get_compound(self, cid):
         """Fetch compound by CID."""
-        url = f"{self.BASE_URL}/compound/cid/{cid}/property/MolecularFormula,MolecularWeight,IUPACName/JSON"
+        url = f"{self.BASE_URL}/compound/cid/{cid}/property/MolecularFormula,MolecularWeight,IUPACName,ConnectivitySMILES,XLogP/JSON"
         try:
             with urllib.request.urlopen(url, timeout=self.timeout) as resp:
                 data = json.loads(resp.read())
@@ -58,7 +58,7 @@ def fetch_drug_data(name):
     return {
         "name": name,
         "cid": cid,
-        "smiles": props.get("CanonicalSMILES", ""),
+        "smiles": props.get("ConnectivitySMILES", ""),
         "mw": str(props.get("MolecularWeight", "")),
         "logp": props.get("XLogP", ""),
     }
