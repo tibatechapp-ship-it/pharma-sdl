@@ -1,7 +1,7 @@
 """اختبارات PROTAC."""
 import numpy as np
-import pytest
-from core.protac import PROTAC, VEPDEGESTRANT
+
+from core.protac import VEPDEGESTRANT
 
 
 def test_degradation_range():

@@ -1,6 +1,6 @@
 """اختبارات MultiObjectiveOracle."""
 import numpy as np
-import pytest
+
 from core.oracle import MultiObjectiveOracle
 
 

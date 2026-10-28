@@ -13,14 +13,14 @@ class MultiObjectiveOracle:
 
     def herg_toxicity(self, features):
         """Predict hERG IC50 (lower = more toxic)."""
-        mw, logp, hbd, hba, tpsa, rot = features
+        mw, logp, _hbd, _hba, tpsa, _rot = features
         base = 10.0 + 0.02 * mw + 0.5 * logp - 0.01 * tpsa
         noise = self.rng.normal(0, 0.5)
         return max(0.1, base + noise)
 
     def ldl_reduction(self, features):
         """Predict LDL-C reduction percentage."""
-        mw, logp, hbd, hba, tpsa, rot = features
+        mw, logp, _hbd, _hba, tpsa, _rot = features
         base = 20.0 + 0.05 * mw - 0.3 * logp + 0.1 * tpsa
         noise = self.rng.normal(0, 2.0)
         return max(0, min(80, base + noise))

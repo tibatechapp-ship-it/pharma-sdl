@@ -1,8 +1,8 @@
 """
 PubChem API client for fetching real compound data.
 """
-import urllib.request
 import json
+import urllib.request
 
 
 class PubChemClient:
@@ -31,7 +31,7 @@ class PubChemClient:
                 data = json.loads(resp.read())
             props = data["PropertyTable"]["Properties"][0]
             return props
-        except Exception:
+        except (OSError, ValueError, KeyError, json.JSONDecodeError):
             return None
 
     def search_by_name(self, name):
@@ -41,7 +41,7 @@ class PubChemClient:
             with urllib.request.urlopen(url, timeout=self.timeout) as resp:
                 data = json.loads(resp.read())
             return data["IdentifierList"]["CID"]
-        except Exception:
+        except (OSError, ValueError, KeyError, json.JSONDecodeError):
             return []
 
 

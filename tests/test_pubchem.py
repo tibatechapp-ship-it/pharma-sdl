@@ -2,6 +2,7 @@
 اختبارات PubChem (تُوسَم integration — تحتاج إنترنت).
 """
 import pytest
+
 from core.pubchem_client import PubChemClient, fetch_drug_data
 
 

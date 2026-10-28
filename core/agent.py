@@ -2,7 +2,6 @@
 MultiObjectiveAgent: Active learning with UCB + Pareto optimization.
 """
 import numpy as np
-from scipy.stats import norm
 
 
 class MultiObjectiveAgent:
@@ -22,7 +21,7 @@ class MultiObjectiveAgent:
         idx = np.random.choice(len(self.library), size=n_init, replace=False)
         self.pool_idx = list(idx)
         self.X_train = self.library[idx]
-        scores = self.oracle.batch_score(self.X_train)
+        self.oracle.batch_score(self.X_train)
         self.herg_train = np.array([self.oracle.herg_toxicity(x) for x in self.X_train])
         self.ldl_train = np.array([self.oracle.ldl_reduction(x) for x in self.X_train])
 

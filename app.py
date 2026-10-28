@@ -1,13 +1,13 @@
 """Pharma SDL — Streamlit Web Application."""
-import streamlit as st
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit as st
 
-from core.oracle import MultiObjectiveOracle
-from core.maker import MoleculeMaker
 from core.agent import MultiObjectiveAgent
-from core.protac import VEPDEGESTRANT, OMAVELOXOLONE
+from core.maker import MoleculeMaker
+from core.oracle import MultiObjectiveOracle
+from core.protac import VEPDEGESTRANT
 
 st.set_page_config(page_title="Pharma SDL", page_icon="🧬", layout="wide")
 
@@ -53,11 +53,11 @@ with tab3:
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=agent.herg_train, y=agent.ldl_train,
-        mode="markers", name="All", marker=dict(size=8, color="gray")
+        mode="markers", name="All", marker={"size": 8, "color": "gray"}
     ))
     fig.add_trace(go.Scatter(
         x=agent.herg_train[mask], y=agent.ldl_train[mask],
-        mode="markers", name="Pareto", marker=dict(size=12, color="red")
+        mode="markers", name="Pareto", marker={"size": 12, "color": "red"}
     ))
     fig.update_layout(xaxis_title="hERG (lower=better)",
                       yaxis_title="LDL-C reduction (higher=better)")

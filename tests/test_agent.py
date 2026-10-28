@@ -1,7 +1,5 @@
 """اختبارات MultiObjectiveAgent."""
 import numpy as np
-import pytest
-from core.agent import MultiObjectiveAgent
 
 
 def test_initialization(agent):

@@ -12,7 +12,6 @@ pytestmark = pytest.mark.skipif(
     reason="rdkit not installed (Termux) — will run on CI"
 )
 
-from core.maker import MoleculeMaker
 
 
 def test_valid_smiles(maker):
