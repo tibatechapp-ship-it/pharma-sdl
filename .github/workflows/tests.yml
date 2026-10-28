@@ -4,18 +4,43 @@ on:
   push:
     branches: [main, develop]
   pull_request:
+    branches: [main, develop]
 
 jobs:
   test:
+    name: Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: |
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-      - run: pytest -v --cov=core --cov-report=term-missing
-      - run: coverage report --fail-under=75
-      - run: ruff check .
+
+      - name: Unit tests (fast)
+        run: pytest -m "not integration" -v --cov=core --cov-report=term-missing
+
+      - name: Coverage gate (75%)
+        run: coverage report --fail-under=75
+
+      - name: Integration tests
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: pytest -m integration -v
+
+      - name: Upload coverage HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/

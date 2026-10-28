@@ -1,64 +1,106 @@
 """
-PubChem API client for fetching real compound data.
+عميل PubChem PUG REST API.
+يجلب بيانات حقيقية عن المركبات من قاعدة NCBI.
+يتعامل بمرونة مع تغيّرات أسماء حقول PubChem عبر الإصدارات.
 """
-import json
-import urllib.request
+import time
+
+import requests
 
 
 class PubChemClient:
-    """Client for PubChem REST API."""
+    BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
-    BASE_URL = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
+    PROPERTIES = "MolecularFormula,MolecularWeight,SMILES,CanonicalSMILES,ConnectivitySMILES,IsomericSMILES,XLogP,HBondDonorCount,HBondAcceptorCount,TPSA,RotatableBondCount,HeavyAtomCount,Complexity"
 
-    def __init__(self, timeout=10):
-        self.timeout = timeout
-        self._cache = {}
+    def __init__(self, delay: float = 0.25):
+        self.session = requests.Session()
+        self.delay = delay
+        self.cache: dict[int, dict] = {}
 
-    def get_cid(self, name):
-        """Get CID by name (cached)."""
-        if name in self._cache:
-            return self._cache[name]
-        cids = self.search_by_name(name)
-        cid = cids[0] if cids else None
-        self._cache[name] = cid
-        return cid
-
-    def get_compound(self, cid):
-        """Fetch compound by CID."""
-        url = f"{self.BASE_URL}/compound/cid/{cid}/property/MolecularFormula,MolecularWeight,IUPACName,ConnectivitySMILES,XLogP/JSON"
+    def _get(self, url: str, timeout: int = 15) -> requests.Response | None:
         try:
-            with urllib.request.urlopen(url, timeout=self.timeout) as resp:
-                data = json.loads(resp.read())
-            props = data["PropertyTable"]["Properties"][0]
-            return props
-        except (OSError, ValueError, KeyError, json.JSONDecodeError):
+            time.sleep(self.delay)
+            r = self.session.get(url, timeout=timeout)
+            if r.status_code == 404:
+                return None
+            r.raise_for_status()
+            return r
+        except requests.RequestException:
             return None
 
-    def search_by_name(self, name):
-        """Search compound by name."""
-        url = f"{self.BASE_URL}/compound/name/{name}/cids/JSON"
+    def get_cid(self, name: str) -> int | None:
+        url = f"{self.BASE}/compound/name/{name}/cids/JSON"
+        r = self._get(url)
+        if r is None:
+            return None
         try:
-            with urllib.request.urlopen(url, timeout=self.timeout) as resp:
-                data = json.loads(resp.read())
-            return data["IdentifierList"]["CID"]
-        except (OSError, ValueError, KeyError, json.JSONDecodeError):
-            return []
+            return r.json()["IdentifierList"]["CID"][0]
+        except (KeyError, IndexError):
+            return None
+
+    def get_cid_from_smiles(self, smiles: str) -> int | None:
+        url = f"{self.BASE}/compound/smiles/{smiles}/cids/JSON"
+        r = self._get(url)
+        if r is None:
+            return None
+        try:
+            return r.json()["IdentifierList"]["CID"][0]
+        except (KeyError, IndexError):
+            return None
+
+    def get_properties(self, cid: int) -> dict | None:
+        if cid in self.cache:
+            return self.cache[cid]
+        url = f"{self.BASE}/compound/cid/{cid}/property/{self.PROPERTIES}/JSON"
+        r = self._get(url)
+        if r is None:
+            return None
+        try:
+            data = r.json()["PropertyTable"]["Properties"][0]
+            self.cache[cid] = data
+            return data
+        except (KeyError, IndexError):
+            return None
+
+    @staticmethod
+    def _extract_smiles(props: dict) -> str | None:
+        for key in (
+            "SMILES",
+            "CanonicalSMILES",
+            "ConnectivitySMILES",
+            "IsomericSMILES",
+        ):
+            val = props.get(key)
+            if val and str(val).strip():
+                return str(val).strip()
+        return None
+
+    def fetch_drug(self, name: str) -> dict | None:
+        cid = self.get_cid(name)
+        if cid is None:
+            return None
+        props = self.get_properties(cid)
+        if props is None:
+            return None
+        return {
+            "name": name,
+            "cid": cid,
+            "smiles": self._extract_smiles(props),
+            "mw": props.get("MolecularWeight"),
+            "formula": props.get("MolecularFormula"),
+            "logp": props.get("XLogP"),
+            "hbd": props.get("HBondDonorCount"),
+            "hba": props.get("HBondAcceptorCount"),
+            "tpsa": props.get("TPSA"),
+        }
 
 
-def fetch_drug_data(name):
-    """Fetch drug data by name, returns dict or None."""
-    client = PubChemClient()
-    cids = client.search_by_name(name)
-    if not cids:
-        return None
-    cid = cids[0]
-    props = client.get_compound(cid)
-    if not props:
-        return None
-    return {
-        "name": name,
-        "cid": cid,
-        "smiles": props.get("ConnectivitySMILES", ""),
-        "mw": str(props.get("MolecularWeight", "")),
-        "logp": props.get("XLogP", ""),
-    }
+_default_client: PubChemClient | None = None
+
+
+def fetch_drug_data(name: str) -> dict | None:
+    global _default_client
+    if _default_client is None:
+        _default_client = PubChemClient()
+    return _default_client.fetch_drug(name)
