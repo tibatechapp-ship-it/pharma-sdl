@@ -13,6 +13,47 @@ from core.protac_lab import render as render_protac_lab
 
 st.set_page_config(page_title="Pharma SDL", page_icon="🧬", layout="wide")
 
+# ═══════════════════════════════════════════════════════════
+# PWA Setup
+# ═══════════════════════════════════════════════════════════
+import streamlit.components.v1 as _pwa
+
+_pwa.html(
+    """
+<script>
+(function() {
+  if (!document.querySelector('link[rel="manifest"]')) {
+    const l = document.createElement('link');
+    l.rel = 'manifest';
+    l.href = '/app/static/manifest.json';
+    document.head.appendChild(l);
+  }
+  if (!document.querySelector('meta[name="theme-color"]')) {
+    const m = document.createElement('meta');
+    m.name = 'theme-color'; m.content = '#667eea';
+    document.head.appendChild(m);
+  }
+  ['apple-mobile-web-app-capable|yes',
+   'apple-mobile-web-app-status-bar-style|black-translucent',
+   'apple-mobile-web-app-title|Pharma Lab'].forEach(pair => {
+    const [n, c] = pair.split('|');
+    if (!document.querySelector(`meta[name="${n}"]`)) {
+      const m = document.createElement('meta');
+      m.name = n; m.content = c;
+      document.head.appendChild(m);
+    }
+  });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/app/static/service-worker.js')
+      .then(r => console.log('PWA SW registered:', r.scope))
+      .catch(e => console.warn('PWA SW failed:', e));
+  }
+})();
+</script>
+    """,
+    height=0,
+)
+
 st.title("🧬 Pharma SDL — مختبر الفارما الذاتي")
 st.markdown("> من الكتاب إلى الكود — من النظرية إلى الاكتشاف")
 

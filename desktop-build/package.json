@@ -1,0 +1,25 @@
+{
+  "name": "pharma-lab-desktop",
+  "version": "1.0.0",
+  "description": "Pharma Lab — تطبيق سطح المكتب",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64",
+    "build:linux": "electron-builder --linux --x64",
+    "build:mac": "electron-builder --mac --x64"
+  },
+  "build": {
+    "appId": "com.tibatechapp.pharmalab",
+    "productName": "Pharma Lab",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "index.html", "app/**/*", "core/**/*", "static/**/*"],
+    "win": { "target": ["nsis", "portable"], "icon": "static/icon-512.png" },
+    "linux": { "target": ["AppImage", "deb"], "icon": "static/icon-512.png", "category": "Education" },
+    "mac": { "target": ["dmg"], "icon": "static/icon-512.png" }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  }
+}
