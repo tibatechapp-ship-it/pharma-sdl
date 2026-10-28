@@ -1,12 +1,43 @@
 name: Deploy to Hugging Face
+
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: huggingface/huggingface_hub@main
+
+      - uses: actions/setup-python@v5
         with:
-          hf_token: ${{ secrets.HF_TOKEN }}
+          python-version: '3.11'
+
+      - name: Install huggingface_hub
+        run: pip install huggingface_hub
+
+      - name: Push to HF Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USERNAME: ${{ secrets.HF_USERNAME }}
+          HF_SPACE_NAME: ${{ secrets.HF_SPACE_NAME }}
+        run: |
+          python << 'EOF'
+          import os
+          from huggingface_hub import HfApi
+          api = HfApi(token=os.environ["HF_TOKEN"])
+          repo_id = f"{os.environ['HF_USERNAME']}/{os.environ['HF_SPACE_NAME']}"
+          api.upload_folder(
+              repo_id=repo_id,
+              repo_type="space",
+              folder_path=".",
+              ignore_patterns=[
+                  "tests/*", ".github/*", "notebooks/*",
+                  "portfolio/*", "__pycache__/*", "*.pyc",
+              ],
+              commit_message="Auto-deploy from GitHub Actions",
+          )
+          print(f"✅ Deployed to {repo_id}")
+          EOF
