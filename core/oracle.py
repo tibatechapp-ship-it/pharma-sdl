@@ -1,6 +1,19 @@
 """
 Multi-Objective Oracle: hERG toxicity + LDL-C efficacy scoring.
+
+⚠️ تنبيه علمي (Scientific Disclaimer):
+    =========================================
+    المعادلات في هذا الملف هي تبسيطات تعليمية (educational toy models)
+    وليست نماذج تنبؤية حقيقية. لا تستخدم هذه القيم لأي قرار سريري.
+
+    علاقات مثل hERG ~ f(MW, logP) و LDL-C ~ f(MW, logP, TPSA)
+    هي محاكاة للسلوك النوعي فقط، وليست مبنية على دراسات كمية محددة.
+
+    للنماذج الحقيقية:
+    - hERG: ML models مدربة على ChEMBL hERG dataset
+    - LDL-C: مراجعة الدراسات السريرية (clinical trials)
 """
+
 import numpy as np
 
 

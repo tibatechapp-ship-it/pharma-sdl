@@ -68,8 +68,14 @@ def compute_metrics(t, c, mic, interval=24, index='cmax_mic', target=10):
 
     above = c > mic
     if above.any():
-        t_above = t[above]
-        ft_h = float(t_above.max() - t_above.min())
+        transitions = np.diff(above.astype(int))
+        starts = np.where(transitions == 1)[0] + 1
+        ends = np.where(transitions == -1)[0] + 1
+        if above[0]:
+            starts = np.concatenate([[0], starts])
+        if above[-1]:
+            ends = np.concatenate([ends, [len(above)]])
+        ft_h = float(sum(t[e-1] - t[s] for s, e in zip(starts, ends)))
     else:
         ft_h = 0.0
     ft_pct = (ft_h / interval) * 100
