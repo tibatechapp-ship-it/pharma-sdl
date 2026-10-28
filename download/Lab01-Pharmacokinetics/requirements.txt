@@ -1,0 +1,7 @@
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+scipy>=1.10
+jupyter>=1.0
+arabic-reshaper>=3.0
+python-bidi>=0.4
