@@ -6,3 +6,6 @@ scipy>=1.11.0
 plotly>=5.18.0
 rdkit>=2023.9.1
 requests>=2.31.0
+reportlab>=4.0
+arabic-reshaper>=3.0
+python-bidi>=0.4

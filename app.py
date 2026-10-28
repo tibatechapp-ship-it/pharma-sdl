@@ -1,6 +1,7 @@
 """Pharma SDL — Streamlit Web Application."""
 import importlib.util
 
+import pandas as pd
 import streamlit as st
 
 # Check RDKit availability (not available on Stlite/WASM)
@@ -93,6 +94,7 @@ tabs = st.tabs([
     "🔌 PubChem",
     "🧫 CYP2C19",
     "🤖 Predict",
+    "🎓 Capstone",
 ])
 
 # ═══ Tab 0: Make ═══
@@ -295,3 +297,167 @@ with tabs[8]:
                 st.error(f"⚠️ {ve}")
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في Predict: {e}")
+
+# ═══ Tab 9: Capstone — من الهدف إلى القرار ═══
+with tabs[9]:
+    st.subheader("🎓 خط الاكتشاف الكامل: هدف ← مكتبة ← ADME ← ML ← PK/PD ← تقرير")
+    st.caption(
+        "الهدف المعروض: **SARS-CoV-2 Mpro**. يبدأ الخط من مكتبة جزيئات، يفلترها "
+        "بقواعد Lipinski+Veber، يتنبأ بالفعالية بنموذج ML، يحسب الجرعة اللازمة "
+        "لتحقق 90% من الاحتلال (C90 من Hill مقابل Cmax فموي)، ثم يُصدر تقريراً."
+    )
+    try:
+        import plotly.express as px
+        import plotly.graph_objects as go
+
+        from core.capstone import (
+            build_markdown_report,
+            build_pdf_report,
+            c90_nm,
+            fetch_analog_library,
+            offline_library,
+            run_pipeline,
+        )
+        from core.ml_potency import train_default_model
+
+        @st.cache_data(ttl=3600, show_spinner="بحث التشابه في PubChem — يُخزَّن ساعة…")
+        def _analog_cached(seed: str, max_cids: int) -> pd.DataFrame:
+            return fetch_analog_library(seed, max_cids=max_cids)
+
+        @st.cache_resource(show_spinner="تجهيز نموذج الفعالية…")
+        def _capstone_model():
+            return train_default_model()
+
+        src = st.radio(
+            "مصدر المكتبة",
+            ["📚 محلية فورية (بلا شبكة)", "🌐 PubChem حي — مشابهات نيرماتريلڤير"],
+            key="cap_src",
+            horizontal=True,
+        )
+        c1, c2 = st.columns(2)
+        n_lib = c1.slider(
+            "حجم المكتبة", 30, 150, 80, step=10, key="cap_n",
+            disabled=src.startswith("🌐"),
+        )
+        dose = c2.slider("الجرعة المرجعية (mg/12h)", 100, 600, 300, step=50, key="cap_dose")
+
+        if st.button("🚀 تشغيل خط الاكتشاف", key="cap_btn", type="primary"):
+            with st.status("⏳ ينفَّذ الخط — خمس مراحل…", expanded=True) as status:
+                st.write("**1/5** تجميع المكتبة…")
+                if src.startswith("🌐"):
+                    NIRMATRELVIR = (
+                        "CC1([C@@H]2[C@H]1[C@H](N(C2)C(=O)[C@H](C(C)(C)C)NC(=O)C(F)(F)F)"
+                        "C(=O)N[C@@H](C[C@@H]3CCNC3=O)C#N)C"
+                    )
+                    lib = _analog_cached(NIRMATRELVIR, 120)
+                    if lib.empty:
+                        st.write("⚠️ الشبكة فشلت — التحويل إلى المكتبة المحلية")
+                        lib = offline_library(n=n_lib)
+                        source = "محلية (احتياط بعد فشل الشبكة)"
+                    else:
+                        source = f"PubChem تشابه (nirmatrelvir) — {len(lib)} جزيء"
+                else:
+                    lib = offline_library(n=n_lib)
+                    source = "محلية (mpro_sample)"
+                st.write(f"&nbsp;&nbsp;&nbsp;↳ {len(lib)} جزيء ({source})")
+
+                st.write("**2/5** فلترة ADME (Lipinski + Veber)…")
+                st.write("**3/5** تنبؤ الفعالية بنموذج ML…")
+                st.write("**4/5** تحليل PK/PD والقرار…")
+                res = run_pipeline(lib, dose_mg=dose, source=source, model=_capstone_model())
+                st.write("**5/5** تجهيز التقارير…")
+                status.update(label="✅ اكتمل الخط", state="complete", expanded=False)
+
+            st.session_state["cap_res"] = res
+
+        res = st.session_state.get("cap_res")
+        if res is not None:
+            # ── القمع ──
+            st.markdown("#### 🫗 قمع الفلترة")
+            fig_funnel = px.bar(
+                x=list(res.funnel.values()), y=list(res.funnel.keys()),
+                orientation="h", text=list(res.funnel.values()),
+                color=list(res.funnel.values()),
+                color_continuous_scale=["#c7d2fe", "#667eea"],
+            )
+            fig_funnel.update_layout(
+                height=260, margin={"l": 0, "r": 0, "t": 10, "b": 0},
+                xaxis_title="الجزيئات", yaxis={"autorange": "reversed"},
+                showlegend=False, coloraxis_showscale=False,
+            )
+            st.plotly_chart(fig_funnel, width="stretch")
+
+            # ── مقاييس القرار ──
+            valid = res.top.dropna(subset=["pic50"])
+            if not valid.empty:
+                best = valid.iloc[0]
+                m1, m2, m3, m4 = st.columns(4)
+                m1.metric("أقوى تنبؤ pIC50", f"{best.pic50:.2f}")
+                m2.metric("IC50 المكافئ", f"{best.ic50_nm:,.0f} nM")
+                m3.metric("C90 (احتلال 90%)", f"{c90_nm(best.pic50):,.0f} nM")
+                m4.metric("الجرعة اللازمة", f"{best.dose_needed_mg} mg" if best.dose_needed_mg else "—")
+
+            # ── جدول القرار ──
+            st.markdown("#### 🏆 أعلى المرشحين — تنبؤ + قرار")
+            show = valid[["pic50", "ci_lo", "ci_hi", "ic50_nm", "dose_needed_mg", "pkpd_icon", "pkpd_verdict", "smiles"]].head(10)
+            show = show.copy()
+            show.insert(0, "الترتيب", range(1, len(show) + 1))
+            st.dataframe(
+                show,
+                hide_index=True,
+                width="stretch",
+                column_config={
+                    "pic50": st.column_config.NumberColumn("pIC50", format="%.2f"),
+                    "ci_lo": st.column_config.NumberColumn("CI−", format="%.2f"),
+                    "ci_hi": st.column_config.NumberColumn("CI+", format="%.2f"),
+                    "ic50_nm": st.column_config.NumberColumn("IC50 (nM)", format="%.0f"),
+                    "dose_needed_mg": st.column_config.NumberColumn("الجرعة (mg)", format="%.0f"),
+                    "pkpd_icon": st.column_config.TextColumn(""),
+                    "pkpd_verdict": st.column_config.TextColumn("القرار PK/PD"),
+                    "smiles": st.column_config.TextColumn("SMILES", width="medium"),
+                },
+            )
+            st.caption(
+                "الجرعة اللازمة تقارن C90 (Hill، احتلال 90%) مع Cmax الفموي المنمذج "
+                f"(F=0.45، Vd=104.7L، t½=6.05h) عند {dose:.0f} mg/12h — ✅ ≤ 300mg، 🟡 ≤ 750mg، 🔴 بعيد."
+            )
+
+            # ── تنبؤ مقابل CI ──
+            fig_ci = go.Figure()
+            for i, r in enumerate(valid.head(10).itertuples(), 1):
+                fig_ci.add_scatter(
+                    x=[r.pic50, r.pic50], y=[i - 0.15, i + 0.15],
+                    mode="lines", line={"color": "#667eea", "width": 3},
+                    showlegend=False, hoverinfo="skip",
+                )
+                fig_ci.add_scatter(
+                    x=[r.ci_lo, r.ci_hi], y=[i, i], mode="lines",
+                    line={"color": "#2dd4a7", "width": 6}, showlegend=False,
+                    name=f"#{i}",
+                )
+            fig_ci.update_layout(
+                height=320, margin={"l": 0, "r": 0, "t": 10, "b": 0},
+                xaxis_title="pIC50 (خط أخضر = فترة ثقة 95%)",
+                yaxis={"tickvals": list(range(1, min(10, len(valid)) + 1)),
+                       "ticktext": [f"#{i}" for i in range(1, min(10, len(valid)) + 1)]},
+            )
+            st.plotly_chart(fig_ci, width="stretch")
+
+            # ── التقارير ──
+            st.markdown("#### 📄 التقارير")
+            d1, d2 = st.columns(2)
+            md = build_markdown_report(res)
+            d1.download_button(
+                "⬇️ تقرير Markdown", md, file_name="capstone_report.md",
+                mime="text/markdown", key="cap_md", width="stretch",
+            )
+            pdf = build_pdf_report(res)
+            if pdf:
+                d2.download_button(
+                    "⬇️ تقرير PDF (عربي)", pdf, file_name="capstone_report.pdf",
+                    mime="application/pdf", key="cap_pdf", width="stretch",
+                )
+            else:
+                d2.info("PDF غير متاح في هذه البيئة — استخدم Markdown.")
+    except Exception as e:  # noqa: BLE001
+        st.error(f"خطأ في Capstone: {e}")

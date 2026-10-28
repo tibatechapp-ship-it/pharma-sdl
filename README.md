@@ -24,6 +24,7 @@ _قيد النشر_
 - 🧬 **PROTAC Lab**: Vepdegestrant (Hook Effect, ternary complex)
 - 🧫 **CYP2C19**: طب شخصي (4 أنماط، CPIC 2022، بيانات قطر)
 - 🤖 **Predict**: تنبؤ pIC50 بتعلم آلي حقيقي — RandomForest على بصمات Morgan مدرّب على قياسات Mpro من ChEMBL (900 جزيء) مع فترة ثقة من تباين الأشجار
+- 🎓 **Capstone**: خط الاكتشاف الكامل «من الهدف إلى القرار» — مكتبة (PubChem حي أو محلية) → فلترة ADME (Lipinski+Veber) → تنبؤ ML → قرار PK/PD (C90 من Hill مقابل Cmax فموي) → تقرير PDF عربي جاهز للتنزيل
 
 ### 🤖 Model Card (Predict)
 | البند | القيمة |
@@ -50,7 +51,7 @@ pytest --cov=core --cov-report=html
 ```
 
 ## 📚 Tech Stack
-Python 3.11 | Streamlit | RDKit | scikit-learn | Plotly | PubChem API
+Python 3.11 | Streamlit | RDKit | scikit-learn | Plotly | PubChem API | ReportLab
 
 ## 📄 License
 MIT © 2026
@@ -66,5 +67,5 @@ MIT © 2026
 | 05 | CYP2C19 (قطر) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab05-CYP2C19/Lab05_CYP2C19.ipynb) | 45 دقيقة |
 | 06 | التنبؤ بالفعالية (ML) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab06-ML-Potency/Lab06_ML_Potency.ipynb) | 60 دقيقة |
 
-### 🧠 خط التعلم الكامل (6 مختبرات)
-PK → RDKit Discovery → PK/PD المضادات → PROTAC → CYP2C19 → **ML التنبؤ** → Capstone (قريباً)
+### 🧠 خط التعلم الكامل (7 مختبرات)
+PK → RDKit Discovery → PK/PD المضادات → PROTAC → CYP2C19 → **ML التنبؤ** → **Capstone: من الهدف إلى القرار**
