@@ -1,46 +1,58 @@
 """
-MoleculeMaker: RDKit-based molecule generation and feature extraction.
+MoleculeMaker — توليد SMILES حقيقية + حساب الأوصاف بـ RDKit.
 """
 import numpy as np
+from rdkit import Chem
+from rdkit.Chem import Descriptors, Lipinski, rdMolDescriptors
 
 
 class MoleculeMaker:
-    """Generate molecules and extract features."""
+    """توليد مكتبة جزيئات صالحة كيميائيًا مع أوصاف RDKit حقيقية."""
 
-    def __init__(self, n=20, seed=42):
+    CORES = [
+        'c1ccccc1',
+        'c1ccncc1',
+        'c1ccc2ccccc2c1',
+        'C1CCCCC1',
+        'c1cnc2ccccc2n1',
+        'c1ccc2[nH]ccc2c1',
+    ]
+    LINKERS = ['C', 'CC', 'OC', 'NC', 'C(=O)', 'S(=O)(=O)']
+    SUBSTITUENTS = ['F', 'Cl', 'Br', 'C', 'OC', 'N(C)C', 'C(=O)O', 'C#N', 'CF3']
+
+    def __init__(self, n=100, seed=42):
         self.n = n
-        self.rng = np.random.default_rng(seed)
-        self.smiles_list = self._generate_smiles()
-        self.mols = list(range(len(self.smiles_list)))
+        self.smiles_list = []
+        self.mols = []
 
-    def _generate_smiles(self):
-        """Generate a list of plausible SMILES strings."""
-        templates = [
-            "CC(=O)Oc1ccccc1C(=O)O",
-            "CC(C)Cc1ccc(cc1)C(C)C(=O)O",
-            "CN1C=NC2=C1C(=O)N(C(=O)N2C)C",
-            "CC1=CC=C(C=C1)C2=CC(=NN2C3=CC=C(C=C3)S(=O)(=O)N)C(F)(F)F",
-            "CC(C)(C)NCC(O)COc1ccc(cc1)CC(=O)N",
-            "O=C(O)CC(O)(CC(=O)O)C(=O)O",
-            "CC(=O)NC1=CC=C(C=C1)O",
-            "C1=CC=C(C=C1)C2=CC=CC=C2",
-            "CC1=CC=CC=C1O",
-            "COC1=CC=C(C=C1)CCN",
-        ]
-        result = []
-        for i in range(self.n):
-            result.append(templates[i % len(templates)])
-        return result
+        rng = np.random.default_rng(seed)
+        attempts = 0
+        max_attempts = n * 50
+
+        while len(self.mols) < n and attempts < max_attempts:
+            attempts += 1
+            core = self.CORES[rng.integers(len(self.CORES))]
+            linker = self.LINKERS[rng.integers(len(self.LINKERS))]
+            sub = self.SUBSTITUENTS[rng.integers(len(self.SUBSTITUENTS))]
+            smi = f"{core}{linker}{sub}"
+
+            mol = Chem.MolFromSmiles(smi)
+            if mol is None or mol.GetNumAtoms() < 5:
+                continue
+
+            self.smiles_list.append(smi)
+            self.mols.append(mol)
 
     def to_features(self):
-        """Convert molecules to 6-feature arrays: [MW, LogP, HBD, HBA, TPSA, RotBonds]."""
+        """6 أوصاف حقيقية محسوبة من SMILES بواسطة RDKit."""
         feats = []
-        for _ in range(len(self.smiles_list)):
-            mw = self.rng.normal(450, 100)
-            logp = self.rng.normal(3, 1.5)
-            hbd = self.rng.integers(0, 6)
-            hba = self.rng.integers(0, 12)
-            tpsa = self.rng.normal(80, 30)
-            rot = self.rng.integers(0, 8)
-            feats.append([max(0, mw), max(0, logp), hbd, hba, max(0, tpsa), rot])
+        for mol in self.mols:
+            feats.append([
+                Descriptors.MolWt(mol),
+                Descriptors.MolLogP(mol),
+                Lipinski.NumHDonors(mol),
+                Lipinski.NumHAcceptors(mol),
+                rdMolDescriptors.CalcTPSA(mol),
+                Lipinski.NumRotatableBonds(mol),
+            ])
         return np.array(feats)
