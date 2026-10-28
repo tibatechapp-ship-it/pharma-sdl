@@ -10,7 +10,7 @@
 
 ## 🌐 Live Demo
 
-**[▶️ جرّب التطبيق مباشرة](https://tibatechapp-pharma-lab.streamlit.app)**
+_قيد النشر_
 
 > إذا لم يكن الرابط يعمل، شغّل محليًا: `streamlit run app.py`
 
