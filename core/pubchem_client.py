@@ -12,6 +12,16 @@ class PubChemClient:
 
     def __init__(self, timeout=10):
         self.timeout = timeout
+        self._cache = {}
+
+    def get_cid(self, name):
+        """Get CID by name (cached)."""
+        if name in self._cache:
+            return self._cache[name]
+        cids = self.search_by_name(name)
+        cid = cids[0] if cids else None
+        self._cache[name] = cid
+        return cid
 
     def get_compound(self, cid):
         """Fetch compound by CID."""
@@ -33,3 +43,22 @@ class PubChemClient:
             return data["IdentifierList"]["CID"]
         except Exception:
             return []
+
+
+def fetch_drug_data(name):
+    """Fetch drug data by name, returns dict or None."""
+    client = PubChemClient()
+    cids = client.search_by_name(name)
+    if not cids:
+        return None
+    cid = cids[0]
+    props = client.get_compound(cid)
+    if not props:
+        return None
+    return {
+        "name": name,
+        "cid": cid,
+        "smiles": props.get("CanonicalSMILES", ""),
+        "mw": str(props.get("MolecularWeight", "")),
+        "logp": props.get("XLogP", ""),
+    }

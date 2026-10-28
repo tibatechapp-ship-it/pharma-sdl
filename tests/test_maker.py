@@ -1,15 +1,21 @@
 """اختبارات MoleculeMaker."""
 import pytest
+
 try:
     from rdkit import Chem
-    HAS_RDKIT = True
+    RDKIT_AVAILABLE = True
 except ImportError:
-    HAS_RDKIT = False
+    RDKIT_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(
+    not RDKIT_AVAILABLE,
+    reason="rdkit not installed (Termux) — will run on CI"
+)
+
 from core.maker import MoleculeMaker
 
+
 def test_valid_smiles(maker):
-    if not HAS_RDKIT:
-        pytest.skip('rdkit not installed')
     for smi in maker.smiles_list:
         assert Chem.MolFromSmiles(smi) is not None
 
