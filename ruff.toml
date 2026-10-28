@@ -1,0 +1,17 @@
+# إعدادات ruff — Pharma SDL
+# الدفاتر التعليمية (notebooks/, download/) مستبعدة: ترتيب الاستيراد فيها
+# تعليمي مقصود، وفحص EXE002 لا ينطبق على ملفات .ipynb.
+exclude = [
+    "download",
+    "notebooks",
+    "desktop-build",
+    "portfolio",
+]
+
+[lint]
+ignore = [
+    "EXE002", # ملفات بلا shebang — تُشغَّل عبر streamlit/pytest وليست سكربتات
+]
+
+[lint.isort]
+known-first-party = ["core"]
