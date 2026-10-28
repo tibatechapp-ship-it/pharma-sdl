@@ -74,7 +74,7 @@ def render():  # pragma: no cover
         yaxis2={"title": "المعقد الثلاثي (%)", "overlaying": 'y', "side": 'right', "range": [-5, 105]},
         template="plotly_white", height=500,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     st.subheader("📊 المؤشرات")
     col1, col2, col3, col4 = st.columns(4)
@@ -89,7 +89,7 @@ def render():  # pragma: no cover
         'Fulvestrant': ['سد الموقع', '10 nM', '60%', 'لا'],
         'Vepdegestrant': ['تدمير البروتين', f'{dc50} nM', f'{dmax}%',
                           f'نعم ({peak_conc:.0f} nM)'],
-    }, use_container_width=True, hide_index=True)
+    }, width="stretch", hide_index=True)
 
     with st.expander("💡 ما هو Hook Effect؟"):
         st.markdown(f"""

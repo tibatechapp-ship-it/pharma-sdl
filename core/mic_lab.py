@@ -157,7 +157,7 @@ def render():  # pragma: no cover
         xaxis_title="الزمن (ساعة)", yaxis_title="التركيز (mg/L)",
         template="plotly_white", height=450,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     st.subheader("📊 المؤشرات")
     col1, col2, col3, col4 = st.columns(4)
@@ -183,7 +183,7 @@ def render():  # pragma: no cover
         'الحاكم': ['✅' if drug['index'] == 'cmax_mic' else '',
                     '✅' if drug['index'] == 'ft_mic' else '',
                     '✅' if drug['index'] == 'auc_mic' else ''],
-    }, use_container_width=True, hide_index=True)
+    }, width="stretch", hide_index=True)
 
     with st.expander("💡 لماذا هذا المؤشر الحاكم؟"):
         explanations = {

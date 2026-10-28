@@ -165,7 +165,7 @@ def render():  # pragma: no cover
                 'النشاط': p['activity_score'],
                 'الانتشار': p['prevalence_ar'],
             })
-        st.dataframe(rows, use_container_width=True, hide_index=True)
+        st.dataframe(rows, width="stretch", hide_index=True)
 
     st.subheader("2️⃣ معاملات المريض")
     col1, col2 = st.columns(2)
@@ -201,7 +201,7 @@ def render():  # pragma: no cover
         height=400,
         yaxis={'range': [0, 100]},
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     st.subheader("4️⃣ المؤشرات")
     col1, col2, col3 = st.columns(3)
