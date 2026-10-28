@@ -18,35 +18,35 @@ _pwa.html(
 <script>
 (function() {
   if (!document.querySelector('link[rel="manifest"]')) {
-    const link = document.createElement('link');
+    var link = document.createElement('link');
     link.rel = 'manifest';
     link.href = '/app/static/manifest.json';
     document.head.appendChild(link);
   }
   if (!document.querySelector('meta[name="theme-color"]')) {
-    const meta = document.createElement('meta');
+    var meta = document.createElement('meta');
     meta.name = 'theme-color';
     meta.content = '#667eea';
     document.head.appendChild(meta);
   }
-  ['apple-mobile-web-app-capable|yes',
-   'apple-mobile-web-app-status-bar-style|black-translucent',
-   'apple-mobile-web-app-title|Pharma Lab'].forEach(function(pair) {
-    var parts = pair.split('|');
-    var name = parts[0], val = parts[1];
-    if (!document.querySelector('meta[name="' + name + '"]')) {
+  var appleMetas = [
+    ['apple-mobile-web-app-capable', 'yes'],
+    ['apple-mobile-web-app-status-bar-style', 'black-translucent'],
+    ['apple-mobile-web-app-title', 'Pharma Lab']
+  ];
+  appleMetas.forEach(function(pair) {
+    if (!document.querySelector('meta[name="' + pair[0] + '"]')) {
       var m = document.createElement('meta');
-      m.name = name;
-      m.content = val;
+      m.name = pair[0];
+      m.content = pair[1];
       document.head.appendChild(m);
     }
   });
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/app/static/service-worker.js')
-      .then(function(r) { console.log('PWA SW registered:', r.scope); })
+      .then(function(r) { console.log('PWA SW:', r.scope); })
       .catch(function(e) { console.warn('PWA SW failed:', e); });
   }
-  console.log('PWA initialized');
 })();
 </script>
     """,
