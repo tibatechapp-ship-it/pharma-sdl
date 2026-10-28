@@ -4,7 +4,7 @@
 
 منصة عربية تفاعلية لتعليم واكتشاف الأدوية بالذكاء الاصطناعي.
 
-[![Tests](https://github.com/USER/pharma-sdl/actions/workflows/tests.yml/badge.svg)](https://github.com/USER/pharma-sdl/actions)
+[![Tests](https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/tests.yml/badge.svg)](https://github.com/tibatechapp-ship-it/pharma-sdl/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## ✨ Features
@@ -16,7 +16,7 @@
 
 ## 🚀 Quick Start
 ```bash
-git clone https://github.com/USER/pharma-sdl.git
+git clone https://github.com/tibatechapp-ship-it/pharma-sdl.git
 cd pharma-sdl
 pip install -r requirements.txt
 streamlit run app.py
