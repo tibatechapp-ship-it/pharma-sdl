@@ -1,6 +1,7 @@
 """generate_icons.py — توليد أيقونات PWA برمجياً."""
-from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
 
 OUT = Path(__file__).parent / "static"
 OUT.mkdir(exist_ok=True)
@@ -38,7 +39,7 @@ def make_icon(size: int, output: Path) -> None:
             )
             emoji_drawn = True
             break
-        except Exception:
+        except Exception:  # noqa: BLE001, S112
             continue
     if not emoji_drawn:
         try:
@@ -52,7 +53,7 @@ def make_icon(size: int, output: Path) -> None:
                 font=font,
                 anchor="mm",
             )
-        except Exception:
+        except Exception:  # noqa: BLE001, S110
             pass
 
     img.save(output, "PNG", optimize=True)

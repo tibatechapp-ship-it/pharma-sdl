@@ -58,20 +58,20 @@ def render():  # pragma: no cover
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=conc, y=deg_vep, mode='lines',
                              name='Vepdegestrant (PROTAC)',
-                             line=dict(color='#3b82f6', width=3)))
+                             line={"color": '#3b82f6', "width": 3}))
     fig.add_trace(go.Scatter(x=conc, y=deg_fulv, mode='lines',
                              name='Fulvestrant (مثبط)',
-                             line=dict(color='#ef4444', width=2, dash='dash')))
+                             line={"color": '#ef4444', "width": 2, "dash": 'dash'}))
     fig.add_trace(go.Scatter(x=conc, y=tern, mode='lines',
                              name='المعقد الثلاثي (%)',
-                             line=dict(color='#a855f7', width=2),
+                             line={"color": '#a855f7', "width": 2},
                              yaxis='y2'))
     fig.add_vline(x=dc50, line_dash="dot", line_color="#3b82f6", opacity=0.5)
     fig.add_vline(x=peak_conc, line_dash="dot", line_color="#a855f7", opacity=0.5)
     fig.update_layout(
-        xaxis=dict(title="التركيز (nM)", type="log"),
-        yaxis=dict(title="نسبة التحلل (%)", range=[-5, 105]),
-        yaxis2=dict(title="المعقد الثلاثي (%)", overlaying='y', side='right', range=[-5, 105]),
+        xaxis={"title": "التركيز (nM)", "type": "log"},
+        yaxis={"title": "نسبة التحلل (%)", "range": [-5, 105]},
+        yaxis2={"title": "المعقد الثلاثي (%)", "overlaying": 'y', "side": 'right', "range": [-5, 105]},
         template="plotly_white", height=500,
     )
     st.plotly_chart(fig, use_container_width=True)

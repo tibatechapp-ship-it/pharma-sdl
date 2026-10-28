@@ -139,11 +139,11 @@ def render():  # pragma: no cover
     fig.add_trace(go.Scatter(
         x=t[above_mask], y=c[above_mask],
         fill='tozeroy', fillcolor='rgba(34, 197, 94, 0.25)',
-        line=dict(width=0), name='fT>MIC',
+        line={'width': 0}, name='fT>MIC',
     ))
     fig.add_trace(go.Scatter(
         x=t, y=c, mode='lines', name='التركيز',
-        line=dict(color=drug['color'], width=3),
+        line={'color': drug['color'], 'width': 3},
     ))
     fig.add_hline(y=mic, line_dash="dash", line_color="red",
                   annotation_text=f"MIC = {mic} mg/L")

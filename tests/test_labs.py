@@ -1,8 +1,12 @@
 """Tests for MIC Lab and PROTAC Lab modules (pure math functions)."""
 import numpy as np
 
-from core.mic_lab import DRUGS, compute_pk, compute_metrics
-from core.protac_lab import degradation_fraction, ternary_fraction, traditional_inhibition
+from core.mic_lab import DRUGS, compute_metrics, compute_pk
+from core.protac_lab import (
+    degradation_fraction,
+    ternary_fraction,
+    traditional_inhibition,
+)
 
 
 class TestComputePK:
@@ -13,7 +17,7 @@ class TestComputePK:
         assert (c >= 0).all()
 
     def test_cmax_positive(self):
-        t, c = compute_pk(350, 17.5, 5.25)
+        _t, c = compute_pk(350, 17.5, 5.25)
         assert c.max() > 0
 
     def test_decay_after_infusion(self):
@@ -23,7 +27,7 @@ class TestComputePK:
         assert c[post_mask].max() > c[post_mask].min()
 
     def test_zero_dose(self):
-        t, c = compute_pk(0, 17.5, 5.25)
+        _t, c = compute_pk(0, 17.5, 5.25)
         assert np.allclose(c, 0)
 
 
@@ -57,7 +61,7 @@ class TestDRUGS:
         assert 'vancomycin' in DRUGS
 
     def test_drug_structure(self):
-        for key, drug in DRUGS.items():
+        for drug in DRUGS.values():
             assert 'name' in drug
             assert 'index' in drug
             assert 'dose' in drug

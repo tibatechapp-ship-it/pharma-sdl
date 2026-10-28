@@ -1,5 +1,4 @@
 """Tests for CYP2C19 pharmacogenomics lab."""
-import pytest
 import numpy as np
 
 from core.cyp2c19_lab import (
@@ -21,13 +20,13 @@ class TestPhenotypes:
         assert PHENOTYPES['PM']['activity_score'] == 0.0
 
     def test_each_has_genotypes(self):
-        for key, p in PHENOTYPES.items():
+        for p in PHENOTYPES.values():
             assert len(p['genotypes']) >= 1
             assert 'name_ar' in p
             assert 'color' in p
 
     def test_prevalence_strings(self):
-        for key, p in PHENOTYPES.items():
+        for p in PHENOTYPES.values():
             assert '%' in p['prevalence_me']
             assert '%' in p['prevalence_ar']
 

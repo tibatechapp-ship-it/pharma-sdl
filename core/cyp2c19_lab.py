@@ -172,7 +172,7 @@ def render():  # pragma: no cover
     with col1:
         dose = st.slider("جرعة clopidogrel (mg)", 75, 300, 75, 25)
     with col2:
-        indication = st.selectbox(
+        _indication = st.selectbox(
             "الاستطباب",
             ["PCI بعد ACS", "PCI مستقر", "السكتة الدماغية"],
         )
@@ -185,7 +185,7 @@ def render():  # pragma: no cover
         x=t, y=response,
         mode='lines',
         name=pheno['name_ar'],
-        line=dict(color=pheno['color'], width=3),
+        line={'color': pheno['color'], 'width': 3},
         fill='tozeroy',
     ))
 
@@ -199,7 +199,7 @@ def render():  # pragma: no cover
         yaxis_title="تثبيط الصفيحات (%)",
         template="plotly_white",
         height=400,
-        yaxis=dict(range=[0, 100]),
+        yaxis={'range': [0, 100]},
     )
     st.plotly_chart(fig, use_container_width=True)
 

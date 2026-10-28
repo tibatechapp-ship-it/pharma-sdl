@@ -3,11 +3,11 @@ Unit tests for PubChemClient with mocked HTTP.
 لا تحتاج إنترنت — تعمل بسرعة < 0.1s.
 تُغطي جميع فروع الكود (نجاح، فشل، cache، fallback).
 """
-import pytest
 from unittest.mock import patch
+
 import requests
 
-from core.pubchem_client import PubChemClient, fetch_drug_data
+from core.pubchem_client import PubChemClient
 
 
 class MockResponse:

@@ -1,23 +1,21 @@
 """Pharma SDL — Streamlit Web Application."""
+import importlib.util
+
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
 from core.agent import MultiObjectiveAgent
+from core.cyp2c19_lab import render as render_cyp2c19_lab
 from core.maker import MoleculeMaker
+from core.mic_lab import render as render_mic_lab
 from core.oracle import MultiObjectiveOracle
 from core.protac import VEPDEGESTRANT
-from core.mic_lab import render as render_mic_lab
 from core.protac_lab import render as render_protac_lab
-from core.cyp2c19_lab import render as render_cyp2c19_lab
 
 # Check RDKit availability (not available on Stlite/WASM)
-try:
-    from rdkit import Chem
-    HAS_RDKIT = True
-except ImportError:
-    HAS_RDKIT = False
+HAS_RDKIT = importlib.util.find_spec("rdkit") is not None
 
 st.set_page_config(page_title="Pharma SDL", page_icon="🧬", layout="wide")
 
