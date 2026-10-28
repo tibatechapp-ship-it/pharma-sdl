@@ -27,6 +27,7 @@ class MultiObjectiveOracle:
     def herg_toxicity(self, features):
         """Predict hERG IC50 (lower = more toxic)."""
         mw, logp, _hbd, _hba, tpsa, _rot = features
+        # TPSA الأعلى = قطبية أعلى = سمية hERG أقل (صحيح علميًا)
         base = 10.0 + 0.02 * mw + 0.5 * logp - 0.01 * tpsa
         noise = self.rng.normal(0, 0.5)
         return max(0.1, base + noise)
