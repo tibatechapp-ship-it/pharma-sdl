@@ -19,10 +19,21 @@ _قيد النشر_
 - 🔬 **Test**: محاكاة hERG + LDL-C
 - 🧠 **Analyze**: تعلم نشط (UCB + Pareto)
 - 🧬 **PROTAC**: Vepdegestrant (أول PROTAC معتمد)
-- 🔌 **PubChem**: جلب بيانات حقيقية
+- 🔌 **PubChem**: جلب بيانات حقيقية (مخزّنة ساعة — أداء أعلى)
 - 🧪 **MIC Lab**: PK/PD للمضادات الحيوية (3 مضادات، 3 مؤشرات)
 - 🧬 **PROTAC Lab**: Vepdegestrant (Hook Effect, ternary complex)
-- 🧬 **CYP2C19**: طب شخصي (4 أنماط، CPIC 2022، بيانات قطر)
+- 🧫 **CYP2C19**: طب شخصي (4 أنماط، CPIC 2022، بيانات قطر)
+- 🤖 **Predict**: تنبؤ pIC50 بتعلم آلي حقيقي — RandomForest على بصمات Morgan مدرّب على قياسات Mpro من ChEMBL (900 جزيء) مع فترة ثقة من تباين الأشجار
+
+### 🤖 Model Card (Predict)
+| البند | القيمة |
+|---|---|
+| البيانات | قياسات IC50 حقيقية لـ SARS-CoV-2 Mpro (CHEMBL4523582) — وسيط pchembl لكل جزيء، نظيفة من قياسات data_validity_comment |
+| الميزات | بصمات Morgan (radius=2، 2048 بت) |
+| النموذج | RandomForestRegressor (300 شجرة، random_state=42) |
+| الأداء | R² ≈ 0.44 ، RMSE ≈ 0.78 على 180 جزيء اختبار |
+| عدم اليقين | تباين تنبؤات الأشجار (إبيستيمي عملي) — فترات عريضة = جزيء غريب عن التدريب |
+| الحدود | ميزات ثنائية الأبعاد فقط، بيانات فحص واحد (Mpro) — لا يستخدم لقرارات سريرية |
 
 ## 🚀 Quick Start
 ```bash
@@ -50,3 +61,7 @@ MIT © 2026
 |---|---|---|---|
 | 01 | الحرائك الدوائية (PK) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/notebooks/01_PK.ipynb) | 45 دقيقة |
 | 05 | CYP2C19 (قطر) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab05-CYP2C19/Lab05_CYP2C19.ipynb) | 45 دقيقة |
+| 06 | التنبؤ بالفعالية (ML) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/notebooks/Lab06_ML_Potency.ipynb) | 60 دقيقة |
+
+### 🧠 خط التعلم الكامل (6 مختبرات)
+PK → RDKit Discovery → PK/PD المضادات → PROTAC → CYP2C19 → **ML التنبؤ** → Capstone (قريباً)
