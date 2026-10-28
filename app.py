@@ -10,6 +10,7 @@ from core.oracle import MultiObjectiveOracle
 from core.protac import VEPDEGESTRANT
 from core.mic_lab import render as render_mic_lab
 from core.protac_lab import render as render_protac_lab
+from core.cyp2c19_lab import render as render_cyp2c19_lab
 
 # Check RDKit availability (not available on Stlite/WASM)
 try:
@@ -73,8 +74,8 @@ def rdkit_warning():
         )
         st.stop()
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
-    ["🏭 Make", "🔬 Test", "🧠 Analyze", "🧬 PROTAC", "🧪 MIC Lab", "🧬 PROTAC Lab", "🔌 PubChem"]
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(
+    ["🏭 Make", "🔬 Test", "🧠 Analyze", "🧬 PROTAC", "🧪 MIC Lab", "🧬 PROTAC Lab", "🔌 PubChem", "🧬 CYP2C19"]
 )
 
 # --- Make Tab ---
@@ -147,6 +148,10 @@ with tab6:
 # --- PROTAC Lab Tab ---
 with tab7:
     render_protac_lab()
+
+# --- CYP2C19 Lab Tab ---
+with tab8:
+    render_cyp2c19_lab()
 
 # --- PubChem Tab ---
 with tab5:
