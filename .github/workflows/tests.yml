@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Tests
+    name: Tests & Coverage
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -28,11 +28,11 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: Unit tests (fast)
-        run: pytest -m "not integration" -v --cov=core --cov-report=term-missing
+      - name: Unit tests
+        run: pytest -m "not integration" -v
 
       - name: Coverage gate (75%)
-        run: coverage report --fail-under=70
+        run: coverage report --fail-under=75
 
       - name: Integration tests
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -44,3 +44,4 @@ jobs:
         with:
           name: coverage-report
           path: htmlcov/
+          retention-days: 7

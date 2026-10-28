@@ -33,3 +33,9 @@ Python 3.11 | Streamlit | RDKit | scikit-learn | Plotly | PubChem API
 
 ## 📄 License
 MIT © 2026
+
+## 📓 Notebooks
+
+| # | المختبر | Colab | الوقت |
+|---|---|---|---|
+| 01 | الحرائك الدوائية (PK) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/notebooks/01_PK.ipynb) | 45 دقيقة |

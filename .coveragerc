@@ -1,0 +1,21 @@
+[run]
+source = core
+omit =
+    core/__init__.py
+    tests/*
+    setup.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    pass
+    \.\.\.
+
+[html]
+directory = htmlcov
+title = Pharma Lab Coverage Report

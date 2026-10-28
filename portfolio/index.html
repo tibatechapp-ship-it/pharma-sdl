@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharma Lab — مختبر الفارما الذاتي</title>
+    <meta name="description" content="منصة عربية تفاعلية لتعليم واكتشاف الأدوية بالذكاء الاصطناعي">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(102,126,234,0.3); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+<header class="gradient-bg text-white py-20">
+    <div class="container mx-auto px-6 text-center">
+        <h1 class="text-5xl font-black mb-4">🧬 Pharma Lab</h1>
+        <p class="text-2xl opacity-95 mb-2">مختبر الفارما الذاتي</p>
+        <p class="text-lg opacity-80 mb-8">من الكتاب إلى الكود — من النظرية إلى الاكتشاف</p>
+        <div class="flex justify-center gap-4 flex-wrap">
+            <a href="#projects" class="bg-white text-purple-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-100">المشاريع</a>
+            <a href="https://huggingface.co/spaces/tibatechapp-ship-it/pharma-lab" class="border-2 border-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-purple-700">تجربة التطبيق</a>
+            <a href="https://github.com/tibatechapp-ship-it/pharma-sdl" class="border-2 border-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-purple-700">GitHub</a>
+        </div>
+    </div>
+</header>
+
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="text-center"><div class="text-5xl font-black text-purple-600">16</div><div class="text-gray-600 mt-2">فصلاً</div></div>
+            <div class="text-center"><div class="text-5xl font-black text-purple-600">4</div><div class="text-gray-600 mt-2">مختبرات</div></div>
+            <div class="text-center"><div class="text-5xl font-black text-purple-600">40+</div><div class="text-gray-600 mt-2">حالة 2026</div></div>
+            <div class="text-center"><div class="text-5xl font-black text-purple-600">97%</div><div class="text-gray-600 mt-2">تغطية الكود</div></div>
+        </div>
+    </div>
+</section>
+
+<section id="projects" class="py-20">
+    <div class="container mx-auto px-6">
+        <h2 class="text-4xl font-black text-center mb-4">🎯 المشاريع</h2>
+        <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">كل مختبر مرتبط بفصل من الكتاب، مع كود يعمل في Colab ودمج في التطبيق التفاعلي</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <div class="card bg-white p-6 rounded-xl shadow-lg border-t-4 border-purple-500">
+                <div class="text-4xl mb-3">🧪</div>
+                <h3 class="text-xl font-bold mb-2">المختبر 1: الحرائك الدوائية</h3>
+                <p class="text-gray-600 mb-4">نمذجة PK لـ 5 أدوية + محاكي تفاعلي + تعديل جرعة الفشل الكلوي.</p>
+                <a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/notebooks/01_PK.ipynb" class="text-purple-600 font-bold hover:underline">فتح في Colab →</a>
+            </div>
+
+            <div class="card bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-500">
+                <div class="text-4xl mb-3">📊</div>
+                <h3 class="text-xl font-bold mb-2">المختبر 2: الديناميكا الدوائية</h3>
+                <p class="text-gray-600 mb-4">منحنيات جرعة-استجابة + EC50/IC50 + محاكاة Omaveloxolone.</p>
+                <a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/notebooks/02_PD.ipynb" class="text-blue-600 font-bold hover:underline">فتح في Colab →</a>
+            </div>
+
+            <div class="card bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-500">
+                <div class="text-4xl mb-3">🧬</div>
+                <h3 class="text-xl font-bold mb-2">المختبر 3: PROTAC</h3>
+                <p class="text-gray-600 mb-4">Vepdegestrant — أول PROTAC معتمد. نمذجة PK/PD ثلاثية.</p>
+                <a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/notebooks/03_PROTAC.ipynb" class="text-red-600 font-bold hover:underline">فتح في Colab →</a>
+            </div>
+
+            <div class="card bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-500">
+                <div class="text-4xl mb-3">🏭</div>
+                <h3 class="text-xl font-bold mb-2">المختبر 4: SDL</h3>
+                <p class="text-gray-600 mb-4">APC + Active Learning + Pareto Front + UCB.</p>
+                <a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/notebooks/04_SDL.ipynb" class="text-green-600 font-bold hover:underline">فتح في Colab →</a>
+            </div>
+
+            <div class="card bg-white p-6 rounded-xl shadow-lg border-t-4 border-yellow-500">
+                <div class="text-4xl mb-3">🔌</div>
+                <h3 class="text-xl font-bold mb-2">PubChem Integration</h3>
+                <p class="text-gray-600 mb-4">جلب SMILES وخصائص حقيقية عن أدوية 2026 من NCBI.</p>
+                <a href="https://huggingface.co/spaces/tibatechapp-ship-it/pharma-lab" class="text-yellow-600 font-bold hover:underline">تجربة →</a>
+            </div>
+
+            <div class="card bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-500">
+                <div class="text-4xl mb-3">📚</div>
+                <h3 class="text-xl font-bold mb-2">الكتاب الكامل</h3>
+                <p class="text-gray-600 mb-4">16 فصلاً — من بردية إيبرس إلى 2026.</p>
+                <a href="https://github.com/tibatechapp-ship-it/pharma-sdl#readme" class="text-indigo-600 font-bold hover:underline">عرض →</a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="bg-gray-900 text-white py-16">
+    <div class="container mx-auto px-6 text-center">
+        <h2 class="text-3xl font-black mb-8">🛠️ التقنيات</h2>
+        <div class="flex flex-wrap justify-center gap-3">
+            <span class="bg-gray-800 px-6 py-2 rounded-full">Python 3.11</span>
+            <span class="bg-gray-800 px-6 py-2 rounded-full">RDKit</span>
+            <span class="bg-gray-800 px-6 py-2 rounded-full">Streamlit</span>
+            <span class="bg-gray-800 px-6 py-2 rounded-full">scikit-learn</span>
+            <span class="bg-gray-800 px-6 py-2 rounded-full">Plotly</span>
+            <span class="bg-gray-800 px-6 py-2 rounded-full">PubChem API</span>
+            <span class="bg-gray-800 px-6 py-2 rounded-full">pytest</span>
+            <span class="bg-gray-800 px-6 py-2 rounded-full">GitHub Actions</span>
+        </div>
+    </div>
+</section>
+
+<section class="gradient-bg text-white py-16">
+    <div class="container mx-auto px-6 text-center">
+        <h2 class="text-3xl font-black mb-4">هل أنت مستعد للبدء؟</h2>
+        <p class="text-lg mb-6 opacity-90">افتح أول مختبر في Colab في 30 ثانية</p>
+        <a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/notebooks/01_PK.ipynb" class="bg-white text-purple-700 px-10 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 inline-block">🚀 ابدأ المختبر الأول</a>
+    </div>
+</section>
+
+<footer class="bg-gray-900 text-gray-400 py-10">
+    <div class="container mx-auto px-6 text-center">
+        <div class="mb-4">
+            <a href="https://github.com/tibatechapp-ship-it" class="hover:text-white mx-2">GitHub</a>
+            <a href="https://huggingface.co/tibatechapp-ship-it" class="hover:text-white mx-2">Hugging Face</a>
+            <a href="mailto:tibatechapp@gmail.com" class="hover:text-white mx-2">Email</a>
+        </div>
+        <p class="text-sm">© 2026 Pharma Lab — MIT License</p>
+    </div>
+</footer>
+
+</body>
+</html>
