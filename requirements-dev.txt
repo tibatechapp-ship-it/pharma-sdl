@@ -1,3 +1,5 @@
-pytest>=7.4.0
-pytest-cov>=4.1.0
-ruff>=0.1.0
+# أدوات التطوير — مثبَّتة بدقة (Hardening P1-1).
+# ملاحظة: pytest-cov 7 يجلب coverage>=7.10 — .coveragerc يعتمد صيغها.
+pytest==9.0.2
+pytest-cov==7.0.0
+ruff==0.17.3
