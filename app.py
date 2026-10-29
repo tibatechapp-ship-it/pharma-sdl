@@ -108,7 +108,7 @@ if is_stlite():
 
 
 # ═══════════════════════════════════════════════════════════
-# التبويبات — ربط الوحدات (8 تبويبات)
+# التبويبات — ربط الوحدات (13 تبويباً)
 # ═══════════════════════════════════════════════════════════
 
 st.header(t(LANG, "lab_header"))
@@ -126,6 +126,7 @@ tabs = st.tabs([
     "🎓 Capstone",
     t(LANG, "tab_docking"),
     t(LANG, "tab_pgx"),
+    t(LANG, "tab_admet"),
 ])
 
 # ═══ Tab 0: Make ═══
@@ -759,3 +760,116 @@ with tabs[11]:
         st.warning(DISCLAIMER_AR if LANG == "ar" else DISCLAIMER_EN)
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في PGx: {e}")
+
+
+def _ersilia_cached(smiles_tuple: tuple[str, ...], model_id: str) -> list:
+    """كاش جلسة صريح — النجاحات فقط تُخزَّن، والفشل يُعاد نداؤه لاحقاً
+    (حتى لا يبقى المستخدم عالقاً في الاحتياطي بعد تشغيل الخادم)."""
+    from core.clients.ersilia_client import predict_admet_batch
+
+    cache: dict = st.session_state.setdefault("admet_cache", {})
+    key = (model_id, smiles_tuple)
+    if key in cache:
+        return cache[key]
+    rows = predict_admet_batch(list(smiles_tuple), model_id)
+    if rows:
+        cache[key] = rows
+    return rows
+
+
+# ═══ Tab 12: ADMET Hub — Ersilia Model Hub ═══
+with tabs[12]:
+    st.subheader(t(LANG, "admet_title"))
+    st.caption(t(LANG, "admet_caption"))
+    try:
+        from core.clients import ersilia_client as ers
+
+        with st.expander(t(LANG, "admet_lesson_title"), expanded=False):
+            st.markdown(
+                ers.ADMET_LESSON.get(LANG, ers.ADMET_LESSON["ar"]).format(
+                    hlow="0.1", hhigh="0.3", sgood="-2", sbad="-4"
+                )
+            )
+
+        model_opts = {
+            (m.name_ar if LANG == "ar" else m.name_en): mid
+            for mid, m in ers.MODELS.items()
+        }
+        model_label = st.selectbox(t(LANG, "admet_model"), list(model_opts), key="admet_model")
+        model_id = model_opts[model_label]
+
+        presets = {
+            "أسبرين — مرجعية تاريخية": "CC(=O)OC1=CC=CC=C1C(=O)O",
+            "باراسيتامول — ذوبان جيد": "CC(=O)NC1=CC=C(C=C1)O",
+            "تيرفينادين — سُحب بسبب hERG": (
+                "CC(C)(C)C1=CC=C(C=C1)C(CCCN2CCC(CC2)C(C3=CC=CC=C3)"
+                "(C4=CC=CC=C4)O)O"
+            ),
+            "إيتراكونازول — ضعيف الذوبان": (
+                "CCC(C)N1C(=O)N(C=N1)C2=CC=C(C=C2)N3CCN(CC3)C4=CC=C(C=C4)"
+                "OCC5COC(O5)(CN6C=NC=N6)C7=C(C=C(C=C7)Cl)Cl"
+            ),
+        }
+        if "admet_input" not in st.session_state:
+            st.session_state["admet_input"] = "\n".join(presets.values())
+        if st.button(t(LANG, "admet_preset"), key="admet_fill"):
+            st.session_state["admet_input"] = "\n".join(presets.values())
+        smi_text = st.text_area(
+            t(LANG, "admet_input"), key="admet_input", height=140
+        )
+
+        if st.button(t(LANG, "admet_btn"), type="primary", key="admet_btn"):
+            raw = [s.strip() for s in smi_text.splitlines() if s.strip()]
+            valid: list[str] = []
+            invalid: list[str] = []
+            if HAS_RDKIT:
+                from rdkit import Chem
+
+                for s in raw:
+                    if Chem.MolFromSmiles(s) is not None:
+                        valid.append(s)
+                    else:
+                        invalid.append(s)
+            else:
+                valid = raw
+            if invalid:
+                st.warning(
+                    t(LANG, "admet_invalid").format(bad=", ".join(invalid[:3]))
+                )
+            if not valid:
+                st.info(t(LANG, "admet_empty"))
+            else:
+                rows = _ersilia_cached(tuple(valid), model_id)
+                if rows:
+                    st.markdown(f"#### {t(LANG, 'admet_table_title')}")
+                    df = pd.DataFrame(
+                        [
+                            {
+                                "SMILES": r.smiles,
+                                t(LANG, "admet_col_value"): round(r.value, 3),
+                                t(LANG, "admet_col_verdict"): (
+                                    r.verdict_ar if LANG == "ar" else r.verdict_en
+                                ),
+                            }
+                            for r in rows
+                        ]
+                    )
+                    st.dataframe(df, hide_index=True, width="stretch")
+                else:
+                    st.info(t(LANG, "admet_no_server"))
+                    with st.expander(t(LANG, "admet_server_hint"), expanded=False):
+                        st.markdown(
+                            ers.SERVER_HINT_AR if LANG == "ar" else ers.SERVER_HINT_EN
+                        )
+                    st.markdown(f"#### {t(LANG, 'admet_ref_title')}")
+                    st.dataframe(
+                        pd.DataFrame(ers.fallback_reference_df(model_id, LANG)),
+                        hide_index=True,
+                        width="stretch",
+                    )
+
+        st.warning(
+            ers.DISCLAIMER_AR if LANG == "ar" else ers.DISCLAIMER_EN
+        )
+    except Exception as e:  # noqa: BLE001
+        st.error(f"خطأ في ADMET: {e}")

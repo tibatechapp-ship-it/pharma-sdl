@@ -63,6 +63,35 @@ STRINGS: dict[str, dict[str, str]] = {
         "dock_compare_title": "⚖️ مقارنة فيزياء ↔ تعلّم آلي",
         "kcal": "kcal/mol",
         "nM": "nM",
+        # ── ADMET (Ersilia) ──
+        "tab_admet": "🧪 مركز ADMET",
+        "admet_title": "🧪 مركز ADMET — نماذج Ersilia المفتوحة",
+        "admet_caption": (
+            "نموذجان مُتحقَّق منهما من Ersilia Model Hub يعملان محلياً (ersilia serve): "
+            "سمية القلب hERG (CardioToxNet) والذوبانية المائية (SolTranNet) — "
+            "وهما من أشهر عقبات التطوير قبل السريري."
+        ),
+        "admet_lesson_title": "📖 وضع الدرس — لماذا يقتل ADMET معظم المرشحات؟",
+        "admet_model": "النموذج",
+        "admet_input": "الجزيئات — SMILES واحد في كل سطر",
+        "admet_preset": "املأ بأمثلة جاهزة",
+        "admet_btn": "🧪 تنبؤ ADMET",
+        "admet_status": "⏳ نداء خادم Ersilia المحلي…",
+        "admet_no_server": (
+            "لم يصل ردّ من خادم Ersilia — تُعرض مرجعية تعليمية مدمجة موثّقة "
+            "بدل تنبؤات، ولا يُعاد تقدير قيم من خارج النموذج."
+        ),
+        "admet_server_hint": "كيف أشغّل الخادم؟",
+        "admet_table_title": "🧾 النتائج — 🌐 Ersilia حي",
+        "admet_ref_title": "📚 مرجعية مدمجة — أمثلة دوائية موثّقة",
+        "admet_empty": "أدخل SMILES صالحاً واحداً على الأقل.",
+        "admet_invalid": "أجزاء غير صالحة استُبعدت: {bad}",
+        "admet_disclaimer": (
+            "⚠️ محتوى تعليمي فقط — تنبؤات نماذج بحثية بحدود تعميم معروفة، "
+            "والأحكام إرشادية وليست قراراً علاجياً أو تنظيمياً."
+        ),
+        "admet_col_value": "القيمة",
+        "admet_col_verdict": "الحكم",
         # ── PGx ──
         "pgx_title": "💊 الجينوم الدوائي — توصيات CPIC",
         "pgx_caption": (
@@ -144,6 +173,35 @@ STRINGS: dict[str, dict[str, str]] = {
         "dock_compare_title": "⚖️ Physics ↔ Machine-learning comparison",
         "kcal": "kcal/mol",
         "nM": "nM",
+        # ── ADMET (Ersilia) ──
+        "tab_admet": "🧪 ADMET Hub",
+        "admet_title": "🧪 ADMET Hub — open Ersilia models",
+        "admet_caption": (
+            "Two verified models from the Ersilia Model Hub running locally "
+            "(ersilia serve): hERG cardiotoxicity (CardioToxNet) and aqueous "
+            "solubility (SolTranNet) — two of the biggest preclinical killers."
+        ),
+        "admet_lesson_title": "📖 Lesson mode — why does ADMET kill most candidates?",
+        "admet_model": "Model",
+        "admet_input": "Molecules — one SMILES per line",
+        "admet_preset": "Fill with ready examples",
+        "admet_btn": "🧪 Predict ADMET",
+        "admet_status": "⏳ Calling the local Ersilia server…",
+        "admet_no_server": (
+            "No response from the Ersilia server — a documented built-in "
+            "educational reference is shown instead; no out-of-model estimates."
+        ),
+        "admet_server_hint": "How to run the server?",
+        "admet_table_title": "🧾 Results — 🌐 live Ersilia",
+        "admet_ref_title": "📚 Built-in reference — documented drug examples",
+        "admet_empty": "Enter at least one valid SMILES.",
+        "admet_invalid": "Invalid parts excluded: {bad}",
+        "admet_disclaimer": (
+            "⚠️ Educational content only — research-model predictions with known "
+            "generalization limits; verdicts are indicative, never clinical advice."
+        ),
+        "admet_col_value": "Value",
+        "admet_col_verdict": "Verdict",
         # ── PGx ──
         "pgx_title": "💊 Pharmacogenomics — CPIC recommendations",
         "pgx_caption": (
