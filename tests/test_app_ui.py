@@ -32,8 +32,8 @@ def test_boot_without_exception(at):
     assert not at.exception, f"boot exception: {at.exception}"
 
 
-def test_thirteen_tabs(at):
-    assert len(at.tabs) == 13
+def test_fourteen_tabs(at):
+    assert len(at.tabs) == 14
 
 
 def test_sidebar_language_switcher_defaults_to_arabic(at):
@@ -139,6 +139,22 @@ def test_goal_section_renders_in_make_tab(at):
     # أسبرين + هدف افتراضي → نجاح فيه عدد الناجين (محرك حتمي offline)
     successes = [w.value for w in at.success]
     assert any("اجتاز" in v for v in successes)
+
+
+def test_classification_tab_classifies_and_browses(at):
+    """S10: تبويب التصنيف — صنّف أموكسيسيلين (عضو موثّق) ثم استعرض المجموعات.
+    نداء ATC الحي لا يُنقر في الاختبار (شبكة خارجية — موسوم في وحدة العميل)."""
+    btn = at.button(key="cls_btn")
+    assert btn is not None
+    btn.click().run()
+    assert not at.exception
+    successes = [w.value for w in at.success]
+    assert any("التصنيف المحلي" in v for v in successes)
+    # نمط الاستعراض: المجموعات الموثّقة تظهر كقوائم موسّعة برموز ATC
+    at.radio(key="cls_mode").set_value("browse").run()
+    assert not at.exception
+    expanders = [e.label for e in at.expander]
+    assert any("J01C" in (lbl or "") for lbl in expanders)
 
 
 @pytest.mark.slow
