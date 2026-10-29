@@ -16,6 +16,14 @@ STRINGS: dict[str, dict[str, str]] = {
         "lang_label": "🌐 اللغة / Language",
         "tab_docking": "🧲 الربط الجزيئي",
         "tab_pgx": "💊 الجينوم الدوائي",
+        "stlite_title": "⚠️ أنت تعمل في بيئة stlite (المتصفح/WASM) — بعض المختبرات معطلة",
+        "stlite_body": (
+            "بيئة المتصفح لا توفّر عجلات WASM لـ **RDKit** و**Vina**، لذا ستظهر أخطاء في "
+            "المختبرات التي تعتمدهما (Make، Test، Predict، Capstone، Docking).\n\n"
+            "**المتاح هنا:** الجينوم الدوائي PGx (البيانات المدمجة)، PubChem (عبر الشبكة).\n\n"
+            "**لتشغيل كل المختبرات كاملة على جهازك:**\n"
+            "```bash\npip install -r requirements.txt\nstreamlit run app.py\n```"
+        ),
         # ── Docking ──
         "dock_title": "🧲 الربط الجزيئي — AutoDock Vina + Meeko",
         "dock_caption": (
@@ -87,6 +95,15 @@ STRINGS: dict[str, dict[str, str]] = {
         "lang_label": "🌐 Language / اللغة",
         "tab_docking": "🧲 Docking",
         "tab_pgx": "💊 PGx",
+        "stlite_title": "⚠️ You are running in stlite (browser/WASM) — some labs are disabled",
+        "stlite_body": (
+            "The browser environment has no WASM wheels for **RDKit** or **Vina**, "
+            "so labs that depend on them (Make, Test, Predict, Capstone, Docking) "
+            "will error out.\n\n"
+            "**Available here:** PGx (bundled data) and PubChem (via network).\n\n"
+            "**To run every lab locally:**\n"
+            "```bash\npip install -r requirements.txt\nstreamlit run app.py\n```"
+        ),
         # ── Docking ──
         "dock_title": "🧲 Molecular Docking — AutoDock Vina + Meeko",
         "dock_caption": (

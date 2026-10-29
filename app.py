@@ -97,6 +97,15 @@ LANG = "ar" if LANG_LABEL == "العربية" else "en"
 st.title(t(LANG, "app_title"))
 st.markdown(t(LANG, "app_tagline"))
 
+# ═══════════════════════════════════════════════════════════
+# توجيه بيئة stlite (متصفح/WASM) — رسالة صريحة بدل أخطاء استيراد غامضة
+# ═══════════════════════════════════════════════════════════
+from core.runtime import is_stlite  # استيراد موضعي بعد إعداد الصفحة
+
+if is_stlite():
+    st.warning(t(LANG, "stlite_title"))
+    st.markdown(t(LANG, "stlite_body"))
+
 
 # ═══════════════════════════════════════════════════════════
 # التبويبات — ربط الوحدات (8 تبويبات)
@@ -317,6 +326,78 @@ with tabs[8]:
                 )
             except ValueError as ve:
                 st.error(f"⚠️ {ve}")
+
+        # ═══ مقارنة النماذج — RandomForest مقابل Gradient Boosting ═══
+        st.markdown("---")
+        st.markdown("#### ⚖️ مقارنة النماذج — RandomForest مقابل Gradient Boosting")
+        st.caption(
+            "نفس البيانات ونفس بصمات Morgan لكل النماذج، تحقق متقاطع 5 طيّات — "
+            "الأرقام محسوبة من تنبؤات خارج الطية (جزيئات لم يرها النموذج أثناء "
+            "التدريب). **R² الأعلى أفضل، RMSE الأقل أفضل** — والدرس هنا: المقارنة "
+            "العادلة تتطلب توحيد البيانات والطيّات لا تغيير عدة أشياء معاً."
+        )
+
+        @st.cache_resource(show_spinner=False)
+        def _compare_models_cached():
+            from core.ml_compare import compare_models
+
+            return compare_models()
+
+        if st.button("شغّل المقارنة", key="mlcmp_btn"):
+            with st.spinner("تحقق متقاطع على 900 جزيء — قد يستغرق دقيقة…"):
+                st.session_state["mlcmp"] = _compare_models_cached()
+
+        cmp_reports = st.session_state.get("mlcmp")
+        if cmp_reports:
+            from plotly.subplots import make_subplots
+
+            df_cmp = pd.DataFrame(
+                [
+                    {
+                        "النموذج": r.name_ar,
+                        "R² (أعلى أفضل)": r.r2,
+                        "RMSE (أقل أفضل)": r.rmse,
+                        "MAE": r.mae,
+                        "زمن التدريب (ث)": r.fit_seconds,
+                        "طيّات": r.n_folds,
+                    }
+                    for r in cmp_reports
+                ]
+            )
+            st.dataframe(df_cmp, hide_index=True, width="stretch")
+
+            fig_cmp = make_subplots(
+                rows=1,
+                cols=2,
+                subplot_titles=("R² (أعلى أفضل)", "RMSE (أقل أفضل)"),
+            )
+            model_colors = {
+                "RandomForest": "#667eea",
+                "GradientBoosting": "#2dd4a7",
+            }
+            for r in cmp_reports:
+                fig_cmp.add_bar(
+                    x=[r.name], y=[r.r2], marker_color=model_colors[r.name],
+                    showlegend=False, row=1, col=1,
+                )
+                fig_cmp.add_bar(
+                    x=[r.name], y=[r.rmse], marker_color=model_colors[r.name],
+                    showlegend=False, row=1, col=2,
+                )
+            fig_cmp.update_layout(
+                height=340, margin={"l": 0, "r": 0, "t": 40, "b": 0}
+            )
+            st.plotly_chart(fig_cmp, width="stretch")
+
+            best_r2 = max(cmp_reports, key=lambda r: r.r2)
+            best_rmse = min(cmp_reports, key=lambda r: r.rmse)
+            st.success(
+                f"🏆 على هذه البيانات: **{best_r2.name_ar}** الأعلى في R² "
+                f"({best_r2.r2:.3f}) — والأفضل في RMSE: **{best_rmse.name_ar}** "
+                f"({best_rmse.rmse:.3f}). لا يوجد نموذج «أفضل دائماً»: bagging "
+                "يقاوم التوزيع العشوائي، وboosting يلتقط الأنماط غير الخطية — "
+                "والقرار من الأرقام لا من المشاعر."
+            )
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في Predict: {e}")
 
