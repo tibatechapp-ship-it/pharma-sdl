@@ -10,7 +10,7 @@ from core.i18n import t
 # Check RDKit availability (not available on Stlite/WASM)
 HAS_RDKIT = importlib.util.find_spec("rdkit") is not None
 
-st.set_page_config(page_title="Pharma SDL", page_icon="🧬", layout="wide")
+st.set_page_config(page_title="Pharma SDL — مختبر الفارما الذاتي", page_icon="🧬", layout="wide")
 
 # ═══════════════════════════════════════════════════════════
 # PWA Setup — st.html (بديل st.components.v1.html المهمل بعد 2026-06)
@@ -93,6 +93,21 @@ LANG_LABEL = st.sidebar.selectbox(
     t("ar", "lang_label"), ["العربية", "English"], index=0, key="lang"
 )
 LANG = "ar" if LANG_LABEL == "العربية" else "en"
+
+# ── RTL للوضع العربي (تدقيق UX — P-1): مواءمة الويب مع manifest.json وتقارير PDF ──
+if LANG == "ar":
+    st.markdown(
+        """
+<style>
+  html, body, [data-testid='stApp'] { direction: rtl; text-align: right; }
+  [data-testid='stCode'], [data-testid='stMarkdownContainer'] code,
+  [data-testid='stMarkdownContainer'] pre { direction: ltr; text-align: left; }
+  [data-testid='stMetric'] { text-align: right; }
+  [data-testid='stMetricLabel'] p { text-align: right; }
+</style>
+""",
+        unsafe_allow_html=True,
+    )
 
 st.title(t(LANG, "app_title"))
 st.markdown(t(LANG, "app_tagline"))
@@ -238,17 +253,24 @@ with tabs[6]:
         query = st.text_input("اسم الدواء", value="aspirin", key="pubchem_q")
         if st.button("بحث", key="pubchem_btn"):
             with st.spinner("جاري البحث..."):
-                data = fetch_drug_cached(query)
-            if data:
-                st.success(f"✅ {data['name']} (CID: {data['cid']})")
-                col1, col2, col3 = st.columns(3)
-                col1.metric("MW", data.get("mw", "—"))
-                col2.metric("LogP", data.get("logp", "—"))
-                col3.metric("TPSA", data.get("tpsa", "—"))
-                if data.get("smiles"):
-                    st.code(data["smiles"])
-            else:
-                st.warning("لم يُعثر على الدواء")
+                # تدقيق UX (P-2): تُخزَّن النتيجة فتبقى بعد إعادة الرسم وتبديل اللغة/التبويب
+                st.session_state["pubchem_res"] = fetch_drug_cached(query)
+                st.session_state["pubchem_q_done"] = query
+
+        data = st.session_state.get("pubchem_res", "__unset__")
+        if data == "__unset__":
+            st.info("ابحث عن دواء لعرض خصائصه — النتائج تبقى ظاهرة أثناء تنقلك بين التبويبات.")
+        elif data:
+            st.caption(f"نتائج البحث عن: `{st.session_state.get('pubchem_q_done', '')}`")
+            st.success(f"✅ {data['name']} (CID: {data['cid']})")
+            col1, col2, col3 = st.columns(3)
+            col1.metric("MW", data.get("mw", "—"))
+            col2.metric("LogP", data.get("logp", "—"))
+            col3.metric("TPSA", data.get("tpsa", "—"))
+            if data.get("smiles"):
+                st.code(data["smiles"])
+        else:
+            st.warning("لم يُعثر على الدواء")
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ: {e}")
 
@@ -301,7 +323,17 @@ with tabs[8]:
 
         if st.button("تنبؤ", key="pred_btn", type="primary"):
             try:
-                res = model.predict(smi)
+                # تدقيق UX (P-2): النتيجة تُخزَّن فلا تُمسح عند أي إعادة رسم
+                st.session_state["pred_res"] = model.predict(smi)
+                st.session_state["pred_smi_done"] = smi
+            except ValueError as ve:
+                st.session_state.pop("pred_res", None)
+                st.error(f"⚠️ {ve}")
+
+        res = st.session_state.get("pred_res")
+        if res is not None:
+            st.caption(f"نتيجة التنبؤ لـ: `{st.session_state.get('pred_smi_done', '')}`")
+            try:
                 colA, colB = st.columns(2)
                 colA.metric("pIC50 المتنبأ", f"{res['pic50']:.2f}")
                 colB.metric("IC50 المكافئ", f"{res['ic50_nm']:,.0f} nM")
@@ -490,10 +522,10 @@ with tabs[9]:
                     source = "محلية (mpro_sample)"
                 st.write(f"&nbsp;&nbsp;&nbsp;↳ {len(lib)} جزيء ({source})")
 
-                st.write("**2/5** فلترة ADME (Lipinski + Veber)…")
-                st.write("**3/5** تنبؤ الفعالية بنموذج ML…")
-                st.write("**4/5** تحليل PK/PD والقرار…")
+                live = st.empty()
+                live.write("**2/5–4/5** ⏳ فلترة ADME + تنبؤ الفعالية + تحليل PK/PD — قيد التنفيذ…")
                 res = run_pipeline(lib, dose_mg=dose, source=source, model=_capstone_model())
+                live.write("**2/5–4/5** ✅ اكتملت الفلترة والتنبؤ وتحليل PK/PD")
                 st.write("**5/5** تجهيز التقارير…")
                 status.update(label="✅ اكتمل الخط", state="complete", expanded=False)
 
@@ -541,7 +573,7 @@ with tabs[9]:
                     "ci_hi": st.column_config.NumberColumn("CI+", format="%.2f"),
                     "ic50_nm": st.column_config.NumberColumn("IC50 (nM)", format="%.0f"),
                     "dose_needed_mg": st.column_config.NumberColumn("الجرعة (mg)", format="%.0f"),
-                    "pkpd_icon": st.column_config.TextColumn(""),
+                    "pkpd_icon": st.column_config.TextColumn("الرمز"),
                     "pkpd_verdict": st.column_config.TextColumn("القرار PK/PD"),
                     "smiles": st.column_config.TextColumn("SMILES", width="medium"),
                 },
@@ -747,9 +779,10 @@ with tabs[10]:
                 t(LANG, "dock_exh"), options=[4, 8, 16, 32], value=8, key="dock_exh"
             )
 
-            if st.button(t(LANG, "dock_btn"), type="primary", key="dock_btn"):
-                if not (HAS_VINA and HAS_MEEKO):
-                    st.warning(t(LANG, "dock_no_engine"))
+            dock_run = st.button(t(LANG, "dock_btn"), type="primary", key="dock_btn")
+            if dock_run and not (HAS_VINA and HAS_MEEKO):
+                st.warning(t(LANG, "dock_no_engine"))
+            if dock_run and (HAS_VINA and HAS_MEEKO):
                 with st.status(t(LANG, "dock_status_title"), expanded=True) as status:
                     st.write(t(LANG, "dock_phase1"))
                     prepare_ligand(smi)
@@ -1029,34 +1062,38 @@ with tabs[12]:
             if not valid:
                 st.info(t(LANG, "admet_empty"))
             else:
-                rows = _ersilia_cached(tuple(valid), model_id)
-                if rows:
-                    st.markdown(f"#### {t(LANG, 'admet_table_title')}")
-                    df = pd.DataFrame(
-                        [
-                            {
-                                "SMILES": r.smiles,
-                                t(LANG, "admet_col_value"): round(r.value, 3),
-                                t(LANG, "admet_col_verdict"): (
-                                    r.verdict_ar if LANG == "ar" else r.verdict_en
-                                ),
-                            }
-                            for r in rows
-                        ]
+                # تدقيق UX (P-2): النتائج تبقى بعد أي إعادة رسم
+                st.session_state["admet_rows"] = _ersilia_cached(tuple(valid), model_id)
+
+        if "admet_rows" in st.session_state:
+            rows = st.session_state["admet_rows"]
+            if rows:
+                st.markdown(f"#### {t(LANG, 'admet_table_title')}")
+                df = pd.DataFrame(
+                    [
+                        {
+                            "SMILES": r.smiles,
+                            t(LANG, "admet_col_value"): round(r.value, 3),
+                            t(LANG, "admet_col_verdict"): (
+                                r.verdict_ar if LANG == "ar" else r.verdict_en
+                            ),
+                        }
+                        for r in rows
+                    ]
+                )
+                st.dataframe(df, hide_index=True, width="stretch")
+            else:
+                st.info(t(LANG, "admet_no_server"))
+                with st.expander(t(LANG, "admet_server_hint"), expanded=False):
+                    st.markdown(
+                        ers.SERVER_HINT_AR if LANG == "ar" else ers.SERVER_HINT_EN
                     )
-                    st.dataframe(df, hide_index=True, width="stretch")
-                else:
-                    st.info(t(LANG, "admet_no_server"))
-                    with st.expander(t(LANG, "admet_server_hint"), expanded=False):
-                        st.markdown(
-                            ers.SERVER_HINT_AR if LANG == "ar" else ers.SERVER_HINT_EN
-                        )
-                    st.markdown(f"#### {t(LANG, 'admet_ref_title')}")
-                    st.dataframe(
-                        pd.DataFrame(ers.fallback_reference_df(model_id, LANG)),
-                        hide_index=True,
-                        width="stretch",
-                    )
+                st.markdown(f"#### {t(LANG, 'admet_ref_title')}")
+                st.dataframe(
+                    pd.DataFrame(ers.fallback_reference_df(model_id, LANG)),
+                    hide_index=True,
+                    width="stretch",
+                )
 
         st.warning(
             ers.DISCLAIMER_AR if LANG == "ar" else ers.DISCLAIMER_EN

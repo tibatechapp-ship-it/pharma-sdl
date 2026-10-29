@@ -26,29 +26,61 @@
       margin-top: 2rem;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
   </style>
 </head>
 <body>
   <div id="splash">
     <h1>🧬 Pharma Lab</h1>
     <p>مختبر الفارما الذاتي</p>
-    <p style="font-size: 0.9rem; opacity: 0.7;">جاري التحميل... (قد يستغرق 30-60 ثانية في المرة الأولى)</p>
+    <p id="splash-note" style="font-size: 0.9rem; opacity: 0.7;">جاري التحميل... (قد يستغرق 30-60 ثانية في المرة الأولى)</p>
     <div class="spinner"></div>
   </div>
   <div id="root"></div>
   <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.50.0/build/stlite.js"></script>
   <script>
+    // All core modules app.py imports (directly or lazily) — the desktop build
+    // previously omitted core/i18n.py and core/runtime.py and could not boot.
     const files = {
       "app.py": { url: "./app/app.py" },
-      "core/oracle.py": { url: "./core/oracle.py" },
+      "core/__init__.py": { url: "./core/__init__.py" },
+      "core/i18n.py": { url: "./core/i18n.py" },
+      "core/runtime.py": { url: "./core/runtime.py" },
       "core/agent.py": { url: "./core/agent.py" },
+      "core/auto_pipeline.py": { url: "./core/auto_pipeline.py" },
+      "core/capstone.py": { url: "./core/capstone.py" },
+      "core/clients/__init__.py": { url: "./core/clients/__init__.py" },
+      "core/clients/ersilia_client.py": { url: "./core/clients/ersilia_client.py" },
+      "core/clients/japanfold.py": { url: "./core/clients/japanfold.py" },
+      "core/contacts.py": { url: "./core/contacts.py" },
+      "core/cyp2c19_lab.py": { url: "./core/cyp2c19_lab.py" },
+      "core/docking.py": { url: "./core/docking.py" },
+      "core/expander.py": { url: "./core/expander.py" },
       "core/maker.py": { url: "./core/maker.py" },
-      "core/protac.py": { url: "./core/protac.py" },
-      "core/pubchem_client.py": { url: "./core/pubchem_client.py" },
       "core/mic_lab.py": { url: "./core/mic_lab.py" },
+      "core/ml_compare.py": { url: "./core/ml_compare.py" },
+      "core/ml_potency.py": { url: "./core/ml_potency.py" },
+      "core/oracle.py": { url: "./core/oracle.py" },
+      "core/pgx.py": { url: "./core/pgx.py" },
+      "core/protac.py": { url: "./core/protac.py" },
       "core/protac_lab.py": { url: "./core/protac_lab.py" },
+      "core/pubchem_client.py": { url: "./core/pubchem_client.py" },
+      "data/mpro_sample.csv": { url: "./data/mpro_sample.csv" },
     };
-    stlite.mount(
+
+    let splashGone = false;
+    function hideSplash() {
+      if (splashGone) return;
+      splashGone = true;
+      const splash = document.getElementById('splash');
+      if (splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => splash.remove(), 500);
+      }
+    }
+
+    // Hide the splash when the app is actually ready — not on a fixed timer.
+    const mountResult = stlite.mount(
       {
         requirements: ["numpy", "scipy", "pandas", "plotly", "scikit-learn", "requests"],
         entrypoint: "app.py",
@@ -56,19 +88,33 @@
         streamlitConfig: {
           "theme.primaryColor": "#667eea",
           "theme.backgroundColor": "#ffffff",
+          "theme.secondaryBackgroundColor": "#f0f2f6",
+          "theme.textColor": "#262730",
           "theme.font": "sans serif",
           "server.enableStaticServing": true,
         },
       },
       document.getElementById("root")
     );
-    setTimeout(() => {
-      const splash = document.getElementById('splash');
-      if (splash) {
-        splash.style.opacity = '0';
-        setTimeout(() => splash.remove(), 500);
-      }
-    }, 3000);
+
+    if (mountResult && typeof mountResult.then === "function") {
+      mountResult.then(hideSplash).catch((err) => {
+        console.error("stlite mount failed:", err);
+        const note = document.getElementById('splash-note');
+        if (note) note.textContent = "تعذر تشغيل التطبيق — أعد المحاولة.";
+      });
+    } else {
+      // Fallback: watch for the app DOM, with a generous hard timeout.
+      const obs = setInterval(() => {
+        if (document.querySelector('#root iframe, [data-testid="stApp"]')) {
+          clearInterval(obs);
+          hideSplash();
+        }
+      }, 500);
+      setTimeout(hideSplash, 90000);
+    }
+    // Hard safety net in all cases.
+    setTimeout(hideSplash, 90000);
   </script>
 </body>
 </html>
