@@ -107,6 +107,34 @@ STRINGS: dict[str, dict[str, str]] = {
         "expand_src_live": "🌐 نتائج تشابه PubChem الحيّة — {n} جزيئاً:",
         "expand_src_offline": "🧱 توسيع BRICS المحلي (بلا شبكة) — {n} جزيئاً:",
         "expand_none": "لم يُنتج أي توسيع — تحقق من صلاحية SMILES للبذرة.",
+        # ── التوليد الموجّه بالهدف (S9) ──
+        "goal_title": "🎯 التوليد الموجّه بالهدف — صنعناه محلياً",
+        "goal_caption": (
+            "مكافئ ChatChemTS/ChemTSv2 بلا مفتاح ولا TensorFlow: حلقات توسيع BRICS "
+            "حول أفضل الناجين + قيود هدف صريحة تحددها أنت + دالة مكافأة شفافة "
+            "(تشابه بالبذرة + QED). كل مرشح يعرض وصفاته — لا صندوق أسود."
+        ),
+        "goal_mw": "نطاق الوزن الجزيئي (دالتون)",
+        "goal_logp": "أعلى LogP مقبول",
+        "goal_sim": "أدنى تشابه بالبذرة (تانيموتو)",
+        "goal_n": "عدد الناجين المطلوب",
+        "goal_btn": "🎯 ولّد نحو الهدف",
+        "goal_empty": "أدخل SMILES للبذرة أولاً (الحقل أعلاه).",
+        "goal_running": "⏳ حلقات توسيع BRICS حول أفضل الناجين…",
+        "goal_done": "✅ {n} جزيئاً اجتاز كل قيود الهدف عبر {r} جولة/جولات (قُيّم {p} مرشحاً فريداً):",
+        "goal_none": "لم يجتز أي مرشح القيود بعد {r} جولة/جولات — خفّف الهدف أو جرّب بذرة أخرى.",
+        "goal_invalid": "بذرة غير صالحة — تحقق من صيغة SMILES.",
+        "goal_engine": "المحرك: BRICS موجّه محلي بالكامل — بلا مفتاح، بلا شبكة، بلا TensorFlow",
+        "goal_props": "MW {mw:.0f} · LogP {logp:.1f} · TPSA {tpsa:.0f} · QED {qed:.2f} · تشابه {sim:.2f}",
+        "goal_lesson": "📖 لماذا التوليد الموجّه مهم؟",
+        "goal_lesson_text": (
+            "التوليد العشوائي يُنتج مكتبات ضخمة يُرمى معظمها. التوليد الموجّه يقلب "
+            "المعادلة: تحدد الهدف أولاً (نطاق MW قابل للفم، LogP غير كارثي، تشابه "
+            "كافٍ بالبذرة لحفظ الفعالية المحتملة) ثم يُولّد ما يجتازه فقط — هذه فكرة "
+            "ChemTS وREINVENT التجارية، ونفّذناها هنا محلياً بالكامل لتتعلم المبدأ "
+            "بلا مفتاح ولا اشتراك. الدرس العملي: دالة المكافأة هي قرارك العلمي — "
+            "قيود أضيق تعني فضاءً أصغر أنقى، وقيود فضفاضة تعني مكتبة أوسع أضعف."
+        ),
         # ── المحلل الداخلي للبوزات (S7-a) ──
         "dock_contacts_title": "🔬 المحلل الداخلي للبوزات — صنعناه محلياً",
         "dock_contacts_caption": (
@@ -293,6 +321,38 @@ STRINGS: dict[str, dict[str, str]] = {
         "expand_src_live": "🌐 Live PubChem similarity — {n} molecules:",
         "expand_src_offline": "🧱 Local BRICS expansion (offline) — {n} molecules:",
         "expand_none": "No expansion produced — check the seed SMILES validity.",
+        # ── Goal-directed generation (S9) ──
+        "goal_title": "🎯 Goal-directed generation — built locally",
+        "goal_caption": (
+            "A ChatChemTS/ChemTSv2 equivalent with no key and no TensorFlow: "
+            "iterative BRICS expansion around the best survivors + explicit goal "
+            "constraints you set + a transparent reward function (seed similarity "
+            "+ QED). Every candidate shows its descriptors — no black box."
+        ),
+        "goal_mw": "Molecular weight range (Da)",
+        "goal_logp": "Maximum acceptable LogP",
+        "goal_sim": "Minimum seed similarity (Tanimoto)",
+        "goal_n": "Number of survivors wanted",
+        "goal_btn": "🎯 Generate toward goal",
+        "goal_empty": "Enter the seed SMILES first (field above).",
+        "goal_running": "⏳ BRICS expansion rounds around the best survivors…",
+        "goal_done": "✅ {n} molecule(s) passed every goal constraint in {r} round(s) ({p} unique candidates evaluated):",
+        "goal_none": "No candidate survived after {r} round(s) — relax the goal or try another seed.",
+        "goal_invalid": "Invalid seed — check the SMILES syntax.",
+        "goal_engine": "Engine: fully local directed BRICS — no key, no network, no TensorFlow",
+        "goal_props": "MW {mw:.0f} · LogP {logp:.1f} · TPSA {tpsa:.0f} · QED {qed:.2f} · similarity {sim:.2f}",
+        "goal_lesson": "📖 Why does goal-directed generation matter?",
+        "goal_lesson_text": (
+            "Random generation produces huge libraries, most of which get thrown "
+            "away. Goal-directed generation flips the equation: you define the goal "
+            "first (oral-friendly MW range, non-disastrous LogP, enough seed "
+            "similarity to preserve plausible activity), then only what passes it "
+            "is generated — the same idea behind commercial ChemTS and REINVENT, "
+            "implemented here fully locally so you learn the principle with no key "
+            "and no subscription. Practical lesson: the reward function is your "
+            "scientific decision — tighter constraints mean a smaller purer space, "
+            "looser ones mean a broader weaker library."
+        ),
         # ── In-house pose analyzer (S7-a) ──
         "dock_contacts_title": "🔬 In-house pose analyzer — built locally",
         "dock_contacts_caption": (

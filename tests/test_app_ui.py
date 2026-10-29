@@ -127,6 +127,20 @@ def test_admet_tab_widgets_and_fallback(at):
 # ── تفاعلات ثقيلة (موسومة) ──────────────────────────────────
 
 
+def test_goal_section_renders_in_make_tab(at):
+    """S9: قسم التوليد الموجّه موجود في تبويب Make ويعمل بلا استثناء —
+    زر الهدف ببذرة الأسبرين الافتراضية ينتج ناجين مخزنين في الواجهة."""
+    md = " ".join(m.value for m in at.markdown)
+    assert "التوليد الموجّه" in md
+    btn = at.button(key="goal_btn")
+    assert btn is not None
+    btn.click().run()
+    assert not at.exception
+    # أسبرين + هدف افتراضي → نجاح فيه عدد الناجين (محرك حتمي offline)
+    successes = [w.value for w in at.success]
+    assert any("اجتاز" in v for v in successes)
+
+
 @pytest.mark.slow
 def test_docking_real_vina_interaction(at):
     at.select_slider(key="dock_exh").set_value(4).run()

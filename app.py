@@ -168,6 +168,54 @@ with tabs[0]:
                     st.info(t(LANG, "expand_none"))
                 for smi in exp_smiles:
                     st.code(smi)
+
+        # ── التوليد الموجّه بالهدف (S9): مكافئ ChatChemTS محلي بلا مفتاح ──
+        st.divider()
+        st.markdown(f"### {t(LANG, 'goal_title')}")
+        st.caption(t(LANG, "goal_caption"))
+        from core.goalgen import GoalSpec, generate_toward_goal
+
+        g_mw = st.slider(t(LANG, "goal_mw"), 150, 700, (250, 500), step=10, key="goal_mw")
+        g_logp = st.slider(t(LANG, "goal_logp"), 0.0, 7.0, 5.0, 0.5, key="goal_logp")
+        g_sim = st.slider(t(LANG, "goal_sim"), 0.0, 1.0, 0.30, 0.05, key="goal_sim")
+        g_n = st.slider(t(LANG, "goal_n"), 3, 10, 5, key="goal_n")
+        if st.button(t(LANG, "goal_btn"), type="secondary", key="goal_btn"):
+            if not seed.strip():
+                st.info(t(LANG, "goal_empty"))
+            else:
+                with st.spinner(t(LANG, "goal_running")):
+                    report = generate_toward_goal(
+                        seed.strip(),
+                        goal=GoalSpec(
+                            mw_min=float(g_mw[0]),
+                            mw_max=float(g_mw[1]),
+                            logp_max=float(g_logp),
+                            sim_floor=float(g_sim),
+                        ),
+                        top_keep=int(g_n),
+                    )
+                if report.reason == "invalid_seed":
+                    st.info(t(LANG, "goal_invalid"))
+                elif not report.survivors:
+                    st.info(t(LANG, "goal_none").format(r=report.rounds_run))
+                else:
+                    st.success(
+                        t(LANG, "goal_done").format(
+                            n=len(report.survivors), r=report.rounds_run,
+                            p=report.pool_size,
+                        )
+                    )
+                    for cand in report.survivors:
+                        st.code(cand.smiles)
+                        st.caption(
+                            t(LANG, "goal_props").format(
+                                mw=cand.mw, logp=cand.logp, tpsa=cand.tpsa,
+                                qed=cand.qed, sim=cand.sim,
+                            )
+                        )
+                st.caption(t(LANG, "goal_engine"))
+                with st.expander(t(LANG, "goal_lesson")):
+                    st.write(t(LANG, "goal_lesson_text"))
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ: {e}")
 
