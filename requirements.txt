@@ -3,7 +3,7 @@
 # لإعادة التوليد بعد ترقية مدروسة:  pip freeze | grep -E "^(streamlit|numpy|...)"
 streamlit==1.66.1
 numpy==2.1.3
-pandas==2.2.3
+pandas==3.1.0
 scikit-learn==1.5.2
 scipy==1.14.1
 plotly==6.5.2
