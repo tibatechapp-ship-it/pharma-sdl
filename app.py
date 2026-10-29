@@ -160,11 +160,11 @@ g_reports = st.tabs([
     t(LANG, "tab_classes"),
 ])
 
-# خريطة مواضع محتوى التبويبات القديمة (tabs[0..12]) إلى المجموعات الجديدة:
+# خريطة مواضع محتوى التبويبات القديمة (tabs[0..13]) إلى المجموعات الجديدة:
 #   0 Make→pipeline[0] · 1 Test→pipeline[1] · 2 Analyze→pipeline[2] · 3 PROTAC→pipeline[3]
 #   4 MIC→labs[0] · 5 PROTAC Lab→labs[1] · 6 PubChem→tools[0] · 7 CYP→labs[2]
 #   8 Predict→tools[1] · 9 Capstone→reports[0] · 10 Docking→tools[2]
-#  11 PGx→labs[3] · 12 ADMET→reports[1]
+#  11 PGx→labs[3] · 12 ADMET→reports[1] · 13 Classes (ATC/S10)→reports[2]
 
 # ═══ Tab 0: Make ═══
 with g_pipeline[0]:
@@ -1176,7 +1176,7 @@ with g_reports[1]:
         st.error(f"خطأ في ADMET: {e}")
 
 # ═══ Tab 13: التصنيف الدوائي — المعيار العالمي ATC (S10) ═══
-with tabs[13]:
+with g_reports[2]:
     st.subheader(t(LANG, "cls_title"))
     try:
         from core.drug_classes import CATALOG, atc_live, classify
