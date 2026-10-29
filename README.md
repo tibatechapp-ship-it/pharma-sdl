@@ -1,11 +1,20 @@
+<p align="center">
+  <img src=".github/assets/banner.svg" alt="Pharma SDL — مختبر الفارما الذاتي" width="100%">
+</p>
+
 # 🧬 Pharma SDL — مختبر الفارما الذاتي
 
 > **"من الكتاب إلى الكود — من النظرية إلى الاكتشاف"**
 
 منصة عربية تفاعلية لتعليم واكتشاف الأدوية بالذكاء الاصطناعي.
 
-[![Tests](https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/tests.yml/badge.svg)](https://github.com/tibatechapp-ship-it/pharma-sdl/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/tests.yml"><img src="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white" alt="Python 3.11 | 3.12">
+  <img src="https://img.shields.io/badge/Streamlit-UI-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit">
+  <img src="https://img.shields.io/badge/%D8%A7%D8%AE%D8%AA%D8%A8%D8%A7%D8%B1%D8%A7%D8%AA-170%2B-brightgreen" alt="170+ tests">
+</p>
 
 
 ## 🌐 Live Demo
@@ -63,6 +72,17 @@ pytest --cov=core --cov-report=html
 
 ## 📚 Tech Stack
 Python 3.11 | Streamlit | RDKit | AutoDock Vina 1.2 | Meeko | 3Dmol.js | scikit-learn | Plotly | PubChem API | CPIC API | Ersilia Model Hub | JapanFold API | ReportLab
+
+## 🤝 المساهمة والتوثيق
+
+| الملف | المحتوى |
+|---|---|
+| [CONTRIBUTING.md](CONTRIBUTING.md) | بيئة التطوير، سير العمل، معايير القبول |
+| [SECURITY.md](SECURITY.md) | سياسة الإبلاغ عن الثغرات وسياسة المفاتيح |
+| [CHANGELOG.md](CHANGELOG.md) | سجل التغييرات الإصداري |
+| [docs/ROADMAP-2026.md](docs/ROADMAP-2026.md) | خارطة السبرنت 9+ |
+
+الـIssues والـPRs لهما قوالب جاهزة: [تقرير علة](.github/ISSUE_TEMPLATE/bug_report.yml) · [اقتراح ميزة](.github/ISSUE_TEMPLATE/feature_request.yml) · [قالب PR](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## 🗺️ سجل السبرنتات
 
