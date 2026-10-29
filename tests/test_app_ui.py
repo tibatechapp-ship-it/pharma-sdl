@@ -74,6 +74,18 @@ def test_make_button_interaction(at):
     assert not at.exception
 
 
+def test_library_expansion_interaction(at):
+    """قسم S6: زر التوسيع يعمل بلا استثناء — حياً (PubChem) أو محلياً (BRICS).
+
+    لا نعتمد على الشبكة في التأكيد: يكفي عدم الانهيار وظهور تغذية راجعة
+    (نجاح أو معلومة) بعد النقر.
+    """
+    at.text_input(key="expand_seed").set_value("CC(=O)OC1=CC=CC=C1C(=O)O").run()
+    at.button(key="expand_btn").click().run()
+    assert not at.exception
+    assert len(at.success) + len(at.info) >= 1, "no feedback after expansion click"
+
+
 def test_predict_button_interaction(at):
     at.button(key="pred_btn").click().run()
     assert not at.exception

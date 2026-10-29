@@ -4,7 +4,7 @@
 Verifies the full app boots and works end-to-end without exceptions:
   1. 13 tabs rendered (10 legacy + Docking + PGx + ADMET/Ersilia)
   2. Sidebar language switcher (العربية / English) — both directions
-  3. 6 live interactions: Make → Predict → Capstone (offline) → Docking (Vina) → PGx (live CPIC) → ADMET (Ersilia fallback)
+  3. 7 live interactions: Make → Library expansion → Predict → Capstone (offline) → Docking (Vina) → PGx (live CPIC) → ADMET (Ersilia fallback)
   4. Docking results persisted (energies sane) + pose download buttons present
 
 Run:  python scripts/apptest_pharma_sdl.py 2>/dev/null
@@ -58,15 +58,23 @@ def main() -> int:
     at.button(key="make_btn").click().run()
     assert not at.exception, f"Make tab raised: {at.exception}"
 
-    # ── 4. Interaction 2: Predict (ML potency) ──────────────
+    # ── 4. Interaction 2: Library expansion (S6, live or BRICS) ─
+    at.text_input(key="expand_seed").set_value(
+        "CC(=O)OC1=CC=CC=C1C(=O)O"
+    ).run()
+    at.button(key="expand_btn").click().run()
+    assert not at.exception, f"Library expansion raised: {at.exception}"
+    assert len(at.success) + len(at.info) >= 1, "expansion gave no feedback"
+
+    # ── 5. Interaction 3: Predict (ML potency) ──────────────
     at.button(key="pred_btn").click().run()
     assert not at.exception, f"Predict tab raised: {at.exception}"
 
-    # ── 5. Interaction 3: Capstone (offline library) ────────
+    # ── 6. Interaction 4: Capstone (offline library) ────────
     at.button(key="cap_btn").click().run()
     assert not at.exception, f"Capstone tab raised: {at.exception}"
 
-    # ── 6. Interaction 4: Docking (real Vina, fast preset) ──
+    # ── 7. Interaction 5: Docking (real Vina, fast preset) ──
     at.select_slider(key="dock_exh").set_value(4).run()
     at.button(key="dock_btn").click().run()
     assert not at.exception, f"Docking tab raised: {at.exception}"
@@ -77,19 +85,19 @@ def main() -> int:
     dl = at.get("download_button")
     assert len(dl) >= 4, f"expected >=4 download buttons (cap+pdf+poses), got {len(dl)}"
 
-    # ── 7. Interaction 5: PGx live CPIC (network, defensive) ─
+    # ── 8. Interaction 6: PGx live CPIC (network, defensive) ─
     at.radio(key="pgx_src").set_value(PGX_LIVE_LABEL).run()
     assert not at.exception, f"PGx live raised: {at.exception}"
     at.radio(key="pgx_src").set_value(PGX_OFFLINE_LABEL).run()
     assert not at.exception, f"PGx offline raised: {at.exception}"
 
-    # ── 8. Interaction 6: ADMET tab (no Ersilia server → fallback) ─
+    # ── 9. Interaction 7: ADMET tab (no Ersilia server → fallback) ─
     at.button(key="admet_btn").click().run()
     assert not at.exception, f"ADMET tab raised: {at.exception}"
     assert any("Ersilia" in w.value for w in at.info), "ADMET fallback banner missing"
 
     dt = time.time() - t0
-    print(f"OK: 13 tabs | i18n ar<->en | 6 interactions | dock ΔG={best:.2f} kcal/mol"
+    print(f"OK: 13 tabs | i18n ar<->en | 7 interactions | dock ΔG={best:.2f} kcal/mol"
           f" | downloads={len(dl)} | {dt:.1f}s")
     return 0
 

@@ -92,6 +92,21 @@ STRINGS: dict[str, dict[str, str]] = {
         ),
         "admet_col_value": "القيمة",
         "admet_col_verdict": "الحكم",
+        # ── توسيع المكتبة (Make/S6) ──
+        "expand_title": "🌱 توسيع المكتبة حول بذرة",
+        "expand_caption": (
+            "جيران تشابه حقيقيون من PubChem (شبكة) أو إعادة تركيب BRICS كيميائية "
+            "محلية بـ RDKit (بلا شبكة) — **مصدر النتائج معلَن دائماً**. "
+            "هذا توسيع كيميائي منهجي، وليس نموذج توليد ذكاء اصطناعي."
+        ),
+        "expand_seed": "البذرة (SMILES)",
+        "expand_n": "عدد الجزيئات المطلوب",
+        "expand_btn": "🌱 وسّع المكتبة",
+        "expand_empty": "أدخل SMILES للبذرة أولاً.",
+        "expand_status": "⏳ تشابه PubChem أولاً، ثم BRICS محلي عند غياب الشبكة…",
+        "expand_src_live": "🌐 نتائج تشابه PubChem الحيّة — {n} جزيئاً:",
+        "expand_src_offline": "🧱 توسيع BRICS المحلي (بلا شبكة) — {n} جزيئاً:",
+        "expand_none": "لم يُنتج أي توسيع — تحقق من صلاحية SMILES للبذرة.",
         # ── PGx ──
         "pgx_title": "💊 الجينوم الدوائي — توصيات CPIC",
         "pgx_caption": (
@@ -202,6 +217,21 @@ STRINGS: dict[str, dict[str, str]] = {
         ),
         "admet_col_value": "Value",
         "admet_col_verdict": "Verdict",
+        # ── Library expansion (Make/S6) ──
+        "expand_title": "🌱 Expand the library around a seed",
+        "expand_caption": (
+            "Real similarity neighbours from PubChem (network) or local BRICS "
+            "recombination via RDKit (offline) — **the source is always stated**. "
+            "This is systematic chemistry expansion, not an AI generative model."
+        ),
+        "expand_seed": "Seed (SMILES)",
+        "expand_n": "Number of molecules",
+        "expand_btn": "🌱 Expand library",
+        "expand_empty": "Enter a seed SMILES first.",
+        "expand_status": "⏳ PubChem similarity first, then local BRICS when offline…",
+        "expand_src_live": "🌐 Live PubChem similarity — {n} molecules:",
+        "expand_src_offline": "🧱 Local BRICS expansion (offline) — {n} molecules:",
+        "expand_none": "No expansion produced — check the seed SMILES validity.",
         # ── PGx ──
         "pgx_title": "💊 Pharmacogenomics — CPIC recommendations",
         "pgx_caption": (

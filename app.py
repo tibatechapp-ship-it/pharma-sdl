@@ -143,6 +143,31 @@ with tabs[0]:
                 st.write("أول 5 SMILES:")
                 for smi in maker.smiles_list[:5]:
                     st.code(smi)
+
+        # ── توسيع المكتبة حول بذرة (S6): PubChem حي أو BRICS محلي ──
+        st.divider()
+        st.markdown(f"### {t(LANG, 'expand_title')}")
+        st.caption(t(LANG, "expand_caption"))
+        from core.expander import SRC_BRICS, SRC_PUBCHEM, expand_library
+
+        seed = st.text_input(
+            t(LANG, "expand_seed"), value="CC(=O)OC1=CC=CC=C1C(=O)O", key="expand_seed"
+        )
+        n_exp = st.slider(t(LANG, "expand_n"), 4, 20, 8, key="expand_n")
+        if st.button(t(LANG, "expand_btn"), type="secondary", key="expand_btn"):
+            if not seed.strip():
+                st.info(t(LANG, "expand_empty"))
+            else:
+                with st.spinner(t(LANG, "expand_status")):
+                    exp_smiles, src = expand_library(seed.strip(), n=n_exp)
+                if src == SRC_PUBCHEM and exp_smiles:
+                    st.success(t(LANG, "expand_src_live").format(n=len(exp_smiles)))
+                elif src == SRC_BRICS and exp_smiles:
+                    st.success(t(LANG, "expand_src_offline").format(n=len(exp_smiles)))
+                else:
+                    st.info(t(LANG, "expand_none"))
+                for smi in exp_smiles:
+                    st.code(smi)
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ: {e}")
 
