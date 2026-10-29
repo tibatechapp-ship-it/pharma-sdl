@@ -9,7 +9,7 @@ scipy==1.14.1
 plotly==6.5.2
 rdkit==2026.9.1
 requests==2.33.0  # bump أمني 2026-10-30: PYSEC-2026-2275 (الإصلاح: 2.33.0)
-reportlab==4.4.9
+reportlab==5.1.0
 arabic-reshaper==3.0.1
 python-bidi==0.6.12
 vina==1.2.7
