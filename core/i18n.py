@@ -92,6 +92,44 @@ STRINGS: dict[str, dict[str, str]] = {
         ),
         "admet_col_value": "القيمة",
         "admet_col_verdict": "الحكم",
+        # ── التصنيف الدوائي (S10) ──
+        "tab_classes": "🗂️ التصنيف الدوائي",
+        "cls_title": "🗂️ دليل المجموعات الدوائية — المعيار العالمي ATC",
+        "cls_caption": (
+            "الأدوية تُدرس عبر مجموعاتها لا كجزر معزولة: نظام ATC لمنظمة الصحة "
+            "العالمية هو المعيار العالمي، ودليلنا المحلي يوثّق {n} مجموعة برمزها "
+            "وآليتها وأعضائها — والتصنيف يعمل بلا شبكة، مع خيار ATC حي من RxNorm "
+            "(مجاني بلا مفتاح)."
+        ),
+        "cls_input": "اسم الدواء (عربي/إنجليزي) أو SMILES",
+        "cls_btn": "🗂️ صنّف الدواء",
+        "cls_empty": "أدخل اسم دواء أو SMILES أولاً.",
+        "cls_found": "✅ التصنيف المحلي — الأساس: {basis}",
+        "cls_basis_member": "عضو موثّق في المجموعة",
+        "cls_basis_suffix": "قاعدة لاحقة الاسم (علمية مُجرّبة)",
+        "cls_basis_prefix": "قاعدة بادئة الاسم",
+        "cls_basis_smiles": "مطابقة بالبنية الكيميائية",
+        "cls_mech": "آلية العمل:",
+        "cls_members": "أعضاء موثّقون:",
+        "cls_atc": "رمز ATC للمجموعة:",
+        "cls_none": "غير مصنّف في الدليل المحلي — جرّب ATC الحي من RxNorm أدناه (الدليل يعمل بلا شبكة دائماً).",
+        "cls_live_btn": "🌐 ATC حي من RxNorm (بلا مفتاح)",
+        "cls_live_done": "🌐 رموز ATC الحية من RxNorm لـ{drug}:",
+        "cls_live_none": "لم يستجب RxNorm (شبكة/اسم) — الدليل المحلي يظل يعمل كالمعتاد.",
+        "cls_browse": "استعرض المجموعات ({n} مجموعة موثّقة):",
+        "cls_lesson": "📖 ما المتبع عالمياً في تصنيف الأدوية؟",
+        "cls_lesson_text": (
+            "المعيار العالمي المتّبع هو نظام ATC من مركز WHO التعاوني (أوسلو): حرف "
+            "للجهاز (J مضادات عامة) + رقمان للمجموعة العلاجية (J01) + حرف "
+            "للمجموعة الدوائية (J01C بنسلينات) + حرف للمجموعة الكيميائية (J01CA "
+            "أمينوبنسلينات) + رقم للمادة (J01CA04 أموكسيسيلين). لماذا المجموعة "
+            "أهم من الدواء الفردي؟ لأن آثارها وأخطارها مشتركة: التحسس المتقاطع "
+            "بين البنسلينات والسيفالوسبورينات، سمية الكلى والأذن لكل الأمينوغليكوزيدات، "
+            "وإطالة QT لكل الماكروليدات والفلوروكينولونات — تعلّم المجموعة فتوقّع "
+            "أعضاءها الجدد قبل أن تدرسهم. وهناك أنظمة مساندة: التصنيف العلاجي "
+            "(مثل BNF)، والتصنيف الكيميائي (لاوحات الاسم: -cillin، -floxacin، "
+            "-statin...) وهو ما يحكيه دليلنا المحلي حرفياً."
+        ),
         # ── توسيع المكتبة (Make/S6) ──
         "expand_title": "🌱 توسيع المكتبة حول بذرة",
         "expand_caption": (
@@ -306,6 +344,48 @@ STRINGS: dict[str, dict[str, str]] = {
         ),
         "admet_col_value": "Value",
         "admet_col_verdict": "Verdict",
+        # ── Drug classification (S10) ──
+        "tab_classes": "🗂️ Drug Classes",
+        "cls_title": "🗂️ Drug class guide — the global ATC standard",
+        "cls_caption": (
+            "Drugs are studied through their classes, not as isolated islands: the "
+            "WHO ATC system is the global standard. Our local guide documents {n} "
+            "classes with codes, mechanisms and members — classification works "
+            "offline, with a live ATC option from RxNorm (free, no key)."
+        ),
+        "cls_input": "Drug name (Arabic/English) or SMILES",
+        "cls_btn": "🗂️ Classify drug",
+        "cls_empty": "Enter a drug name or SMILES first.",
+        "cls_found": "✅ Local classification — basis: {basis}",
+        "cls_basis_member": "documented member of the class",
+        "cls_basis_suffix": "name-suffix rule (chemically grounded)",
+        "cls_basis_prefix": "name-prefix rule",
+        "cls_basis_smiles": "matched by chemical structure",
+        "cls_mech": "Mechanism:",
+        "cls_members": "Documented members:",
+        "cls_atc": "Class ATC code:",
+        "cls_none": "Not in the local guide — try live ATC from RxNorm below (the guide always works offline).",
+        "cls_live_btn": "🌐 Live ATC from RxNorm (no key)",
+        "cls_live_done": "🌐 Live ATC codes from RxNorm for {drug}:",
+        "cls_live_none": "RxNorm did not respond (network/name) — the local guide keeps working as usual.",
+        "cls_browse": "Browse the classes ({n} documented classes):",
+        "cls_lesson": "📖 What is the global standard for drug classification?",
+        "cls_lesson_text": (
+            "The global standard is the WHO ATC system (WHO Collaborating Centre, "
+            "Oslo): a letter for the anatomical group (J general antiinfectives) "
+            "+ two digits for the therapeutic subgroup (J01) + a letter for the "
+            "pharmacological subgroup (J01C penicillins) + a letter for the "
+            "chemical subgroup (J01CA aminopenicillins) + a digit for the substance "
+            "(J01CA04 amoxicillin). Why is the class more important than the "
+            "individual drug? Because its effects and risks are shared: cross-"
+            "sensitivity between penicillins and cephalosporins, renal/ototoxicity "
+            "for every aminoglycoside, QT prolongation for macrolides and "
+            "fluoroquinolones — learn the class and you predict its new members "
+            "before studying them. Supporting systems exist: therapeutic "
+            "classifications (e.g., BNF) and chemical classifications via naming "
+            "stems (-cillin, -floxacin, -statin…) — exactly what our local guide "
+            "documents."
+        ),
         # ── Library expansion (Make/S6) ──
         "expand_title": "🌱 Expand the library around a seed",
         "expand_caption": (

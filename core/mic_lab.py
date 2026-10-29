@@ -21,18 +21,21 @@ except ImportError:
 DRUGS = {
     'gentamicin': {
         'name': 'الجنتامايسين', 'icon': '🔷',
+        'class_ar': 'الأمينوغليكوزيدات', 'class_atc': 'J01G',
         'index': 'cmax_mic', 'index_label': 'Cmax/MIC', 'index_target': 10,
         'color': '#3b82f6',
         'dose': 350, 'vd': 17.5, 'cl': 5.25, 'mic': 2.0,
     },
     'ceftriaxone': {
         'name': 'السيفترياكسون', 'icon': '🔶',
+        'class_ar': 'السيفالوسبورينات (بيتا لاكتام)', 'class_atc': 'J01D',
         'index': 'ft_mic', 'index_label': 'fT>MIC', 'index_target': 50,
         'color': '#f97316',
         'dose': 2000, 'vd': 10, 'cl': 1.0, 'mic': 1.0,
     },
     'vancomycin': {
         'name': 'الفانكومايسين', 'icon': '🟣',
+        'class_ar': 'الغليكوببتيدات', 'class_atc': 'J01XA',
         'index': 'auc_mic', 'index_label': 'AUC/MIC', 'index_target': 400,
         'color': '#a855f7',
         'dose': 1500, 'vd': 50, 'cl': 4.5, 'mic': 1.0,
@@ -124,6 +127,10 @@ def render():  # pragma: no cover
         format_func=lambda k: f"{DRUGS[k]['icon']} {DRUGS[k]['name']} — {DRUGS[k]['index_label']}",
     )
     drug = DRUGS[selected]
+    st.caption(
+        f"🗂️ المجموعة: {drug.get('class_ar', '—')} — ATC {drug.get('class_atc', '—')} "
+        "(المعيار العالمي، التفاصيل في تبويب التصنيف الدوائي)"
+    )
 
     st.subheader("⚙️ المعاملات")
     col1, col2, col3, col4 = st.columns(4)

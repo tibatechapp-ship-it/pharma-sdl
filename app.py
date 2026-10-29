@@ -127,6 +127,7 @@ tabs = st.tabs([
     t(LANG, "tab_docking"),
     t(LANG, "tab_pgx"),
     t(LANG, "tab_admet"),
+    t(LANG, "tab_classes"),
 ])
 
 # ═══ Tab 0: Make ═══
@@ -174,6 +175,7 @@ with tabs[0]:
         st.markdown(f"### {t(LANG, 'goal_title')}")
         st.caption(t(LANG, "goal_caption"))
         from core.goalgen import GoalSpec, generate_toward_goal
+        from core.viz import render_png
 
         g_mw = st.slider(t(LANG, "goal_mw"), 150, 700, (250, 500), step=10, key="goal_mw")
         g_logp = st.slider(t(LANG, "goal_logp"), 0.0, 7.0, 5.0, 0.5, key="goal_logp")
@@ -206,7 +208,11 @@ with tabs[0]:
                         )
                     )
                     for cand in report.survivors:
-                        st.code(cand.smiles)
+                        png = render_png(cand.smiles, size=240)
+                        if png is not None:
+                            st.image(png, caption=cand.smiles)
+                        else:  # بيئة بلا Cairo → النص بديلاً صادقاً
+                            st.code(cand.smiles)
                         st.caption(
                             t(LANG, "goal_props").format(
                                 mw=cand.mw, logp=cand.logp, tpsa=cand.tpsa,
@@ -1111,3 +1117,73 @@ with tabs[12]:
         )
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في ADMET: {e}")
+
+# ═══ Tab 13: التصنيف الدوائي — المعيار العالمي ATC (S10) ═══
+with tabs[13]:
+    st.subheader(t(LANG, "cls_title"))
+    try:
+        from core.drug_classes import CATALOG, atc_live, classify
+
+        st.caption(t(LANG, "cls_caption").format(n=len(CATALOG)))
+
+        cls_mode = st.radio(
+            t(LANG, "cls_title"),
+            options=["classify", "browse"],
+            format_func=lambda m: (
+                t(LANG, "cls_btn") if m == "classify" else t(LANG, "cls_browse").format(n=len(CATALOG))
+            ),
+            label_visibility="collapsed",
+            horizontal=True,
+            key="cls_mode",
+        )
+
+        if cls_mode == "classify":
+            cls_query = st.text_input(
+                t(LANG, "cls_input"), value="amoxicillin", key="cls_input"
+            )
+            if st.button(t(LANG, "cls_btn"), type="secondary", key="cls_btn"):
+                if not cls_query.strip():
+                    st.info(t(LANG, "cls_empty"))
+                else:
+                    hits = classify(cls_query.strip())
+                    if not hits:
+                        st.info(t(LANG, "cls_none"))
+                    else:
+                        hit = hits[0]
+                        basis_label = t(LANG, f"cls_basis_{hit.basis}")
+                        st.success(t(LANG, "cls_found").format(basis=basis_label))
+                        card = hit.card
+                        st.markdown(
+                            f"**{card.name_ar}** / {card.name_en} — "
+                            f"{t(LANG, 'cls_atc')} `{card.atc}`"
+                        )
+                        st.markdown(f"{t(LANG, 'cls_mech')} {card.mech_ar}")
+                        members_txt = " · ".join(f"{en} ({ar})" for en, ar in card.members)
+                        st.caption(f"{t(LANG, 'cls_members')} {members_txt}")
+                    # خيار ATC الحي — يعمل بلا مفتاح، والفشل لا يعطّل شيئاً
+                    if st.button(t(LANG, "cls_live_btn"), key="cls_live_btn"):
+                        with st.spinner("⏳ RxNorm…"):
+                            codes = atc_live(cls_query.strip())
+                        if codes:
+                            st.markdown(
+                                t(LANG, "cls_live_done").format(drug=cls_query.strip())
+                            )
+                            st.dataframe(
+                                pd.DataFrame(codes, columns=["ATC", "Class"]),
+                                hide_index=True,
+                                width="stretch",
+                            )
+                        else:
+                            st.info(t(LANG, "cls_live_none"))
+        else:
+            st.markdown(t(LANG, "cls_browse").format(n=len(CATALOG)))
+            for card in CATALOG:
+                with st.expander(f"{card.atc} — {card.name_ar} / {card.name_en}"):
+                    st.markdown(f"{t(LANG, 'cls_mech')} {card.mech_ar}")
+                    members_txt = " · ".join(f"{en} ({ar})" for en, ar in card.members)
+                    st.caption(f"{t(LANG, 'cls_members')} {members_txt}")
+
+        with st.expander(t(LANG, "cls_lesson"), expanded=False):
+            st.write(t(LANG, "cls_lesson_text"))
+    except Exception as e:  # noqa: BLE001
+        st.error(f"خطأ في التصنيف الدوائي: {e}")
