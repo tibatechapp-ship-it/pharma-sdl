@@ -53,7 +53,8 @@ def expand_brics(seed_smiles: str, n: int = 12, max_depth: int = 3) -> list[str]
         return []
     out: list[str] = []
     seen = {seed_canon}
-    built = BRICS.BRICSBuild(frag_mols, maxDepth=max_depth)
+    # scrambleReagents=False: الافتراضي يستدعي random.shuffle — نريدها حتمية
+    built = BRICS.BRICSBuild(frag_mols, maxDepth=max_depth, scrambleReagents=False)
     for m in built:
         if len(out) >= n:
             break
