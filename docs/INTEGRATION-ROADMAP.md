@@ -18,7 +18,8 @@
 
 | الطبقة | التقنية | طريقة الدمج | حالة التحقق | الوحدة المستهدفة |
 |---|---|---|---|---|
-| توليد الجزيئات | JapanFold (HTTP async) | عميل REST: submit→poll→fetch | ⚠️ يتطلب تحقق | `core/clients/japanfold.py` |
+| توليد الجزيئات | PubChem تشابه + BRICS (RDKit) | `core/expander.py` — ✅ منجز S6 (JapanFold بروتيني لا جزيئي — انظر القسم 3) | ✅ متحقق | `core/expander.py` |
+| التحقق الخارجي (بروتين+ليغاند) | JapanFold Boltz-2 (affinity) | عميل موثّق `core/clients/japanfold.py` — زر opt-in في S7-b | ✅ متحقق (يتطلب مفتاحاً) | `core/clients/japanfold.py` |
 | توليد محادثة | ChatChemTS (FastAPI) | microservice محلي + عميل HTTP | ⚠️ يتطلب تحقق | خدمة منفصلة + `core/clients/chatchemts.py` |
 | التحقام (سريع) | Matcha | API أو كود مفتوح | ⚠️ يتطلب تحقق | `core/clients/matcha.py` |
 | التحقام (كلاسيكي) | DockThor | `pip install dock-thor-client` | ⚠️ تحقق الحزمة | `core/clients/dockthor.py` |
@@ -56,7 +57,36 @@
 - اختبارات `tests/test_ersilia.py` — كلها mock بلا شبكة (14 اختباراً) + نداء حي موسوم `integration`.
 - بلا اعتماديات جديدة: العميل `requests` فقط؛ خادم Ersilia يُثبَّت في بيئة مستقلة.
 
-## 3) المسار الثاني: JapanFold للتوليد (بعد خطوة تحقق واحدة)
+## 3) المسار الثاني: JapanFold — ✅ تحقّق (S6) — عميل جاهز، الاستخدام صُحّح
+
+**نتائج خطوة التحقق (2026-10-29 — من الدليل الرسمي `japanfold.aiand.com/skill.md`
+و`api.japanfold.aiand.com/docs` و`/v1/openapi.json`):**
+
+JapanFold **حقيقي وموثّق** (أُطلق سبتمبر 2026 من ai& وTenstorrent — بنية حاكمة
+يابانية لأدوات اكتشاف الدواء المفتوحة)، لكن قراءة عقده الفعلي صحّحت دمجَه:
+
+| الحقيقة الموثّقة | الأثر على التخطيط السابق |
+|---|---|
+| نقطة واحدة `POST /v1/predictions` + `GET /v1/jobs/{id}?wait=60` (محتجَز، RFC 7240) + `/results` + `/archive` | ✅ النمط غير المتزامن كما خُطّط بالضبط |
+| **مفتاح Bearer مطلوب** في كل مسار (حساب جديد برصيد 100$، فوترة لكل ساعة معالج؛ 401/402 problem+json) | ❌ ليست «بلا مفتاح» — متغير بيئة `JAPANFOLD_API_KEY` إلزامي |
+| النماذج كلها **بروتينية**: boltz2 (MSA+ليغاندات+affinity)، esmfold2/-fast، openfold3، openbind، rf3، opendde/-abag، af2ig، boltzgen، rfd3، pxdesign، rfd4، esmc، saprot | ❌ **ليست توليد جزيئات صغيرة** — لا تناسب `expand_library(seed_smiles)` |
+| Boltz-2 يترافق بروتين+ليغاند (Boltz YAML: `sequences` + `properties.affinity.binder`) | ✅ الاستخدام الصحيح لمنصتنا: **تحقق خارجي مستقل لطاقة ربط Vina** |
+
+**ما نُفِّذ في S6 (فرع `feat/s6-japanfold-generation`):**
+- `core/clients/japanfold.py` — عميل بالعقد الموثّق: `submit_prediction` / `poll_job`
+  (انتظار محتجَز بلا sleep) / `get_results` / `build_boltz_yaml` / `boltz2_affinity`.
+  أسباب فشل قابلة للبرمجة (`no_api_key`, `401_sign_in_required`, `402_out_of_credit`,
+  `job_failed`, `deadline_exceeded`…) — لا مفتاح في الكود (بيئة فقط)، ولا شبكة بلا مفتاح.
+- «🌱 توسيع المكتبة» في تبويب Make — بمحركين موثّقين بدل JapanFold:
+  `core/expander.py`: **PubChem** fastsimilarity_2d حي (بلا مفتاح) ثم **BRICS**
+  محلي بـ RDKit (بلا شبكة، Degen 2008) — والمصدر يُعلن في الواجهة دائماً.
+- اختبارات mock: 19 لعميل JapanFold + 12 للتوسيع — بلا شبكة في CI.
+
+**مؤجَّل بعد قرار المستخدم (S7-b):** زر «تحقق خارجي عبر Boltz-2» في تبويب Docking
+يستدعي `boltz2_affinity` — يحتاج مفتاح المستخدم ورصيده ووظائف تستغرق دقائق،
+فهو ميزة opt-in لا افتراضية.
+
+## 3-سابق) خطوة التحقق الأصلية (للأرشيف)
 
 خطوة التحقق أولاً (توثيق النقطة الفعلية في هذا الملف قبل كتابة أي كود):
 
@@ -114,8 +144,8 @@ def run_auto_pipeline(target_pdb: str, n_library: int = 50,
 | السبرنت | المحتوى | المعيار الجاهزية |
 |---|---|---|
 | S5 | ✅ **منجز** — دمج `feat/pharma-hardening` في main + عميل Ersilia وتبويب ADMET | اختبارات mock خضراء + تحقق موثّق أعلاه (النداء الحي بانتظار `ersilia serve` محلياً) |
-| S6 | JapanFold: تحقق → عميل → «توسيع المكتبة» في Make | job حي موثق + fallback |
-| S7 | DockThor/Matcha كمحرك ثانٍ في Docking | نفس DockingResult يعمل بمحركين |
+| S6 | ✅ **منجز** — تحقق JapanFold الكامل + عميل بالعقد الموثّق + «توسيع المكتبة» في Make (PubChem/BRICS) | 31 اختبار mock أخضر + عقد موثّق في القسم 3 (الوظيفة الحية تحتاج مفتاح المستخدم) |
+| S7 | DockThor/Matcha كمحرك ثانٍ في Docking · **S7-b**: زر Boltz-2 الخارجي (opt-in بمفتاح) | نفس DockingResult يعمل بمحركين |
 | S8 | `auto_pipeline.py` + زر «قراءة تلقائية» في Capstone | تقرير PDF كامل من نقرة واحدة |
 
 ## 7) قواعد ثابتة أيا كان السبرنت
