@@ -32,48 +32,29 @@
 **قاعدة الخندق التعليمي**: أي عميل جديد يعرض نتائجه **بجانب** محركنا المحلي (Vina/RF)
 كما فعلنا مع Vina↔ML — الطالب يقارن، ولا تعتمد المنصة على خدمة خارجية ليعمل شيء أساسي.
 
-## 2) أوامر البدء — المسار الأول: Ersilia (الأنضج والأقرب لبيئتنا)
+## 2) المسار الأول: Ersilia — ✅ تحقّق ودمج (S5)
 
-```bash
-# 1. التثبيت في بيئة مخصصة (لا نلمس requirements.txt المثبَّت بدقة قبل التحقق)
-python -m venv .venv-ersilia && source .venv-ersilia/bin/activate
-pip install ersilia
+**نتائج خطوة التحقق (2026-10-29 — من مستودعات ersilia-os مباشرة):**
 
-# 2. اختر نموذجاً من https://hub.ersilia.io (سمية hERG، CYP مثبطة، ذوبان…)
-ersilia fetch <model-id>
-ersilia serve <model-id>          # يفتح API محلي على المنفذ الافتراضي
+| النموذج | الوصف | المخرجات | الحالة |
+|---|---|---|---|
+| `eos2ta5` | CardioToxNet — حجب قناة hERG (12,620 مركباً، الحاجب < 10 µM) | `Score` — احتمالية 0–1 | Ready · Local ✅ |
+| `eos6oli` | SolTranNet — الذوبانية المائية logS (AqSolDB، RMSE 1.46) | `Value` — logS (mol/L) | Ready · Local ✅ |
 
-# 3. نداء تجريبي بأسبرين
-curl -X POST http://localhost:7860/run \
-  -H "Content-Type: application/json" \
-  -d '{"inputs":[{"input":"CC(=O)Oc1ccccc1C(=O)O"}]}'
-```
+**عقد النداء الموثّق من `ersilia/serve/standard_api.py` (فرع master):**
+`POST {base}/run` بجسم قائمة صفوف `[{"input": "<smiles>"}, ...]`،
+والاستجابة `[{"input": ..., "<output_col>": value}, ...]` — اسم عمود
+المخرجات يختلف بين النماذج (score/value) فيُفسَّر بمرونة.
 
-هيكل العميل المستهدف (`core/clients/ersilia_client.py`) — يتبع النمط المعتمد:
-
-```python
-ERSILIA_BASE = os.environ.get("ERSILIA_BASE", "http://localhost:7860")
-
-@dataclass(frozen=True)
-class AdmetRow:
-    model_id: str
-    smiles: str
-    endpoint: str          # مثل "hERG_inhibition"
-    value: float
-    verdict_ar: str        # حكم تعليمي عربي
-
-def predict_admet(smiles: str, model_id: str, timeout: float = 15.0) -> AdmetRow | None:
-    """نداء واحد — يرجع None عند أي فشل شبكة (نمط fetch_analog_library)."""
-    try:
-        resp = requests.post(f"{ERSILIA_BASE}/run", json=..., timeout=timeout)
-        resp.raise_for_status()
-        return _parse(resp.json())
-    except (requests.RequestException, KeyError, ValueError):
-        return None
-```
-
-ثم تبويب أو قسم ADMET في Capstone: مرّر أفضل 5 جزيئات من خط Capstone على
-نموذج سمية واحد، وقارن الترتيب قبل/بعد فلتر ADMET — درس قوي جداً.
+**ما نُفِّذ في S5 (فرع `feat/s5-ersilia-integration`):**
+- `core/clients/ersilia_client.py` — عميل رقيق: `predict_admet` / `predict_admet_batch`،
+  تفسير مرن للأشكال، فشل الشبكة → None/[] (نمط `fetch_analog_library`)،
+  كتالوج `MODELS` + أحكام تعليمية `verdict` + مرجعية مدمجة `FALLBACK_REFERENCE`
+  (أمثلة دوائية موثّقة: تيرفينادين/سيزابريد/هالوبيريدول/أسبرين، وإيتراكونازول/غريسيوفولفين/إيبوبروفين/باراسيتامول) — بلا أرقام مزيفة.
+- تبويب «🧪 مركز ADMET» (13 تبويباً الآن): دُفعة SMILES → تنبؤ حي مخزَّن بالجلسة
+  (النجاحات فقط)، وعند غياب الخادم: مرجعية تعليمية + أوامر التشغيل.
+- اختبارات `tests/test_ersilia.py` — كلها mock بلا شبكة (14 اختباراً) + نداء حي موسوم `integration`.
+- بلا اعتماديات جديدة: العميل `requests` فقط؛ خادم Ersilia يُثبَّت في بيئة مستقلة.
 
 ## 3) المسار الثاني: JapanFold للتوليد (بعد خطوة تحقق واحدة)
 
@@ -132,7 +113,7 @@ def run_auto_pipeline(target_pdb: str, n_library: int = 50,
 
 | السبرنت | المحتوى | المعيار الجاهزية |
 |---|---|---|
-| S5 (الآن) | دمج `feat/pharma-hardening` ثم Ersilia ADMET عميل+تبويب | اختبارات mock خضراء + نداء حي موثق |
+| S5 | ✅ **منجز** — دمج `feat/pharma-hardening` في main + عميل Ersilia وتبويب ADMET | اختبارات mock خضراء + تحقق موثّق أعلاه (النداء الحي بانتظار `ersilia serve` محلياً) |
 | S6 | JapanFold: تحقق → عميل → «توسيع المكتبة» في Make | job حي موثق + fallback |
 | S7 | DockThor/Matcha كمحرك ثانٍ في Docking | نفس DockingResult يعمل بمحركين |
 | S8 | `auto_pipeline.py` + زر «قراءة تلقائية» في Capstone | تقرير PDF كامل من نقرة واحدة |
