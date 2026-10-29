@@ -1,8 +1,11 @@
 """Pharma SDL — Streamlit Web Application."""
 import importlib.util
+import uuid
 
 import pandas as pd
 import streamlit as st
+
+from core.i18n import t
 
 # Check RDKit availability (not available on Stlite/WASM)
 HAS_RDKIT = importlib.util.find_spec("rdkit") is not None
@@ -52,9 +55,6 @@ st.html(
     """
 )
 
-st.title("🧬 Pharma SDL — مختبر الفارما الذاتي")
-st.markdown("> من الكتاب إلى الكود — من النظرية إلى الاكتشاف")
-
 def rdkit_warning() -> bool:
     """
     Show warning if RDKit is unavailable.
@@ -77,12 +77,32 @@ def fetch_drug_cached(name: str) -> dict | None:
     return fetch_drug_data(name)
 
 
+@st.cache_data(ttl=86400, show_spinner=False)
+def fetch_cpic_cached(gene: str) -> list[dict]:
+    """نداء CPIC مخزَّن (24 ساعة) — توصيات PGx حية مع احتياطي مدمج."""
+    from core.pgx import fetch_cpic
+
+    return fetch_cpic(gene)
+
+
+# ═════════════════════════════════════════════════════
+# مبدّل اللغة + العنوان
+# ═════════════════════════════════════════════════════
+
+LANG_LABEL = st.sidebar.selectbox(
+    t("ar", "lang_label"), ["العربية", "English"], index=0, key="lang"
+)
+LANG = "ar" if LANG_LABEL == "العربية" else "en"
+
+st.title(t(LANG, "app_title"))
+st.markdown(t(LANG, "app_tagline"))
+
 
 # ═══════════════════════════════════════════════════════════
 # التبويبات — ربط الوحدات (8 تبويبات)
 # ═══════════════════════════════════════════════════════════
 
-st.header("🧬 مختبرات Pharma SDL")
+st.header(t(LANG, "lab_header"))
 
 tabs = st.tabs([
     "🏭 Make",
@@ -95,6 +115,8 @@ tabs = st.tabs([
     "🧫 CYP2C19",
     "🤖 Predict",
     "🎓 Capstone",
+    t(LANG, "tab_docking"),
+    t(LANG, "tab_pgx"),
 ])
 
 # ═══ Tab 0: Make ═══
@@ -461,3 +483,198 @@ with tabs[9]:
                 d2.info("PDF غير متاح في هذه البيئة — استخدم Markdown.")
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في Capstone: {e}")
+
+# ═══ Tab 10: Docking — فيزياء ثلاثية الأبعاد ═══
+with tabs[10]:
+    st.subheader(t(LANG, "dock_title"))
+    st.caption(t(LANG, "dock_caption"))
+    try:
+        from core.docking import (
+            HAS_MEEKO,
+            HAS_VINA,
+            LESSON,
+            build_3d_html,
+            dock_ligand,
+            load_receptors,
+            pic50_to_dg_kcal,
+            prepare_ligand,
+        )
+
+        receptors = load_receptors()
+        if not receptors:
+            st.error("لا توجد مستقبلات مُجهَّزة — شغّل scripts/prepare_receptors.py")
+        else:
+            with st.expander(t(LANG, "dock_lesson_title"), expanded=False):
+                st.markdown(LESSON.get(LANG, LESSON["ar"]))
+
+            rec_opts = {
+                (r.label_ar if LANG == "ar" else r.label_en): r for r in receptors
+            }
+            rec_sel = st.selectbox(t(LANG, "dock_target"), list(rec_opts), key="dock_rec")
+            receptor = rec_opts[rec_sel]
+            st.info(receptor.note_ar if LANG == "ar" else receptor.note_en)
+
+            preset_labels = {
+                receptor.demo_name_ar if LANG == "ar" else receptor.demo_name_en: (
+                    receptor.demo_smiles
+                ),
+                "نيرماتريلڤير — مثبط Mpro المعتمد" if LANG == "ar" else (
+                    "Nirmatrelvir — approved Mpro inhibitor"
+                ): (
+                    "CC1([C@@H]2[C@H]1[C@H](N(C2)C(=O)[C@H](C(C)(C)C)NC(=O)C(F)(F)F)"
+                    "C(=O)N[C@@H](C[C@@H]3CCNC3=O)C#N)C"
+                ),
+                "أسبرين — مزخرف" if LANG == "ar" else "Aspirin — decoy": (
+                    "CC(=O)OC1=CC=CC=C1C(=O)O"
+                ),
+            }
+            preset = st.selectbox(
+                t(LANG, "dock_preset"), list(preset_labels), key="dock_preset_sel"
+            )
+            smi = st.text_input(
+                t(LANG, "dock_custom"), value=preset_labels[preset], key="dock_smi"
+            )
+            d1, d2 = st.columns(2)
+            n_poses = d1.slider(t(LANG, "dock_nposes"), 3, 10, 5, key="dock_nposes")
+            exh = d2.select_slider(
+                t(LANG, "dock_exh"), options=[4, 8, 16, 32], value=8, key="dock_exh"
+            )
+
+            if st.button(t(LANG, "dock_btn"), type="primary", key="dock_btn"):
+                if not (HAS_VINA and HAS_MEEKO):
+                    st.warning(t(LANG, "dock_no_engine"))
+                with st.status(t(LANG, "dock_status_title"), expanded=True) as status:
+                    st.write(t(LANG, "dock_phase1"))
+                    prepare_ligand(smi)
+                    st.write(t(LANG, "dock_phase2"))
+                    st.write(t(LANG, "dock_phase3"))
+                    result = dock_ligand(
+                        smi, receptor, n_poses=n_poses, exhaustiveness=exh
+                    )
+                    st.write(t(LANG, "dock_phase4"))
+                    status.update(
+                        label=t(LANG, "dock_done"), state="complete", expanded=False
+                    )
+                st.session_state["dock_res"] = result
+                st.session_state["dock_meta"] = {"smiles": smi, "rec_id": receptor.id}
+
+            res = st.session_state.get("dock_res")
+            meta = st.session_state.get("dock_meta")
+            if res is not None and meta is not None:
+                ml_pic50 = None
+                if meta["rec_id"].startswith("7VH8"):
+                    try:
+                        from core.ml_potency import train_default_model
+
+                        @st.cache_resource(show_spinner=False)
+                        def _dock_model():
+                            return train_default_model()
+
+                        ml_pic50 = _dock_model().predict(meta["smiles"])["pic50"]
+                    except Exception:  # noqa: BLE001 — المقارنة إضافية لا تعطّل العرض
+                        ml_pic50 = None
+
+                m1, m2, m3, m4 = st.columns(4)
+                m1.metric(
+                    t(LANG, "dock_best"),
+                    f"{res.best:.2f}" if res.best is not None else "—",
+                )
+                if ml_pic50 is not None:
+                    m2.metric(t(LANG, "dock_ml_pic50"), f"{ml_pic50:.2f}")
+                    m3.metric(t(LANG, "dock_dg_est"), f"{pic50_to_dg_kcal(ml_pic50):.2f}")
+                    gap = res.best - pic50_to_dg_kcal(ml_pic50)
+                    m4.metric(t(LANG, "dock_gap"), f"{gap:+.2f}")
+                    st.caption(t(LANG, "dock_compare_caption"))
+
+                st.markdown(f"#### {t(LANG, 'dock_table_title')}")
+                en_df = pd.DataFrame(
+                    res.energies,
+                    columns=["total", "inter", "intra", "torsions", "intra_best"],
+                )
+                en_df.insert(0, "#", range(1, len(en_df) + 1))
+                st.dataframe(
+                    en_df,
+                    hide_index=True,
+                    width="stretch",
+                    column_config={
+                        c: st.column_config.NumberColumn(c, format="%.2f")
+                        for c in en_df.columns[1:]
+                    },
+                )
+
+                st.markdown(f"#### {t(LANG, 'dock_3d_title')}")
+                st.html(
+                    build_3d_html(
+                        receptor.receptor_file_path,
+                        res.best_pose_pdb(),
+                        div_id=f"dock3d-{uuid.uuid4().hex[:8]}",
+                    )
+                )
+
+                dl1, dl2 = st.columns(2)
+                dl1.download_button(
+                    t(LANG, "dock_dl_pdb"),
+                    res.best_pose_pdb(),
+                    file_name="best_pose.pdb",
+                    mime="chemical/x-pdb",
+                    key="dock_dl_pdb",
+                    width="stretch",
+                )
+                dl2.download_button(
+                    t(LANG, "dock_dl_pdbqt"),
+                    "\n".join(res.poses_pdbqt),
+                    file_name="all_poses.pdbqt",
+                    mime="chemical/x-pdbqt",
+                    key="dock_dl_pdbqt",
+                    width="stretch",
+                )
+    except Exception as e:  # noqa: BLE001
+        st.error(f"خطأ في Docking: {e}")
+
+# ═══ Tab 11: PGx — الجينوم الدوائي ═══
+with tabs[11]:
+    st.subheader(t(LANG, "pgx_title"))
+    st.caption(t(LANG, "pgx_caption"))
+    try:
+        from core.pgx import DISCLAIMER_AR, DISCLAIMER_EN, GENES, recommendations_df
+
+        gene_id = st.selectbox(t(LANG, "pgx_gene"), list(GENES), key="pgx_gene")
+        gene = GENES[gene_id]
+        dip = st.selectbox(
+            t(LANG, "pgx_diplotype"), list(gene.diplotypes), key="pgx_dip"
+        )
+        phen_en = gene.diplotypes[dip]
+
+        src = st.radio(
+            t(LANG, "pgx_source"),
+            [t(LANG, "pgx_src_offline"), t(LANG, "pgx_src_live")],
+            key="pgx_src",
+            horizontal=True,
+        )
+        live_rows: list[dict] | None = None
+        if src == t(LANG, "pgx_src_live"):
+            live_rows = fetch_cpic_cached(gene_id)
+            if not live_rows:
+                st.info(t(LANG, "pgx_live_empty"))
+
+        st.markdown(f"#### {t(LANG, 'pgx_function')}")
+        st.write(gene.function_ar if LANG == "ar" else gene.function_en)
+        st.markdown(
+            f"**{t(LANG, 'pgx_substrates')}:** {gene.substrates_ar}"
+        )
+        st.markdown(
+            f"**{t(LANG, 'pgx_phenotype_of')}:** `{dip}` → **{phen_en}**"
+        )
+
+        df_pgx = recommendations_df(
+            gene_id, dip, lang=LANG, live_rows=live_rows
+        )
+        st.markdown(
+            "#### "
+            + t(LANG, "pgx_table_title").format(gene=gene_id, diplotype=dip)
+        )
+        st.dataframe(df_pgx, hide_index=True, width="stretch")
+
+        st.warning(DISCLAIMER_AR if LANG == "ar" else DISCLAIMER_EN)
+    except Exception as e:  # noqa: BLE001
+        st.error(f"خطأ في PGx: {e}")

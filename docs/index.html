@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharma SDL — مختبر الفارما الذاتي</title>
+<meta name="description" content="منصة عربية تفاعلية مفتوحة المصدر لتعليم اكتشاف الأدوية بالذكاء الاصطناعي — 12 تبويباً تفاعلياً + 8 دفاتر Colab + Docking حقيقي بـVina + توصيات PGx من CPIC.">
+<style>
+  :root{
+    --bg:#0e1524; --bg2:#141d33; --card:#182238; --line:#24304d;
+    --txt:#e8edf7; --mut:#9aa8c7; --acc:#667eea; --acc2:#2dd4a7; --warn:#f4b860;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',Tahoma,system-ui,sans-serif;line-height:1.7}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  header{padding:28px 0 10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .logo{font-size:2.2rem}
+  h1{font-size:1.5rem}
+  .en{color:var(--mut);font-size:.85rem;font-weight:400}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 0}
+  .badge{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:.75rem;color:var(--mut)}
+  .badge b{color:var(--acc2)}
+  .hero{padding:36px 0 10px}
+  .hero h2{font-size:1.9rem;line-height:1.4}
+  .hero h2 span{color:var(--acc)}
+  .hero p{color:var(--mut);max-width:720px;margin-top:10px}
+  .cta{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+  .btn{display:inline-block;padding:11px 22px;border-radius:12px;font-weight:700;text-decoration:none;font-size:.95rem;transition:.2s}
+  .btn-p{background:linear-gradient(135deg,#667eea,#7c5ce0);color:#fff}
+  .btn-p:hover{transform:translateY(-2px)}
+  .btn-s{background:var(--bg2);color:var(--txt);border:1px solid var(--line)}
+  .btn-s:hover{border-color:var(--acc)}
+  section{padding:34px 0 6px}
+  .sec-t{font-size:1.25rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;transition:.2s}
+  .card:hover{border-color:var(--acc);transform:translateY(-2px)}
+  .card .ico{font-size:1.5rem}
+  .card h3{font-size:.98rem;margin:6px 0 4px}
+  .card p{color:var(--mut);font-size:.8rem}
+  .card .tag{display:inline-block;margin-top:8px;font-size:.68rem;color:var(--acc2);border:1px solid var(--acc2);border-radius:999px;padding:1px 9px}
+  .path{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+  .step{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:7px 13px;font-size:.8rem}
+  .arrow{color:var(--acc);font-weight:700}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.85rem}
+  th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right}
+  th{color:var(--acc);font-weight:700}
+  td a{color:var(--acc2);text-decoration:none}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:5px 14px;font-size:.78rem;color:var(--mut)}
+  .note{background:rgba(244,184,96,.08);border:1px solid rgba(244,184,96,.3);border-radius:12px;padding:12px 16px;color:var(--warn);font-size:.82rem;margin-top:14px}
+  footer{margin-top:44px;border-top:1px solid var(--line);padding:22px 0 34px;color:var(--mut);font-size:.8rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  footer a{color:var(--acc2);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">🧬</div>
+  <div>
+    <h1>Pharma SDL — مختبر الفارما الذاتي <span class="en">Self-Directed Pharmacology Lab</span></h1>
+    <div class="badges">
+      <span class="badge">✅ <b>130</b> اختبار</span>
+      <span class="badge">🧲 Docking بـ <b>Vina</b></span>
+      <span class="badge">💊 توصيات <b>CPIC</b></span>
+      <span class="badge">MIT License</span>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <h2>من الكتاب إلى الكود — <span>من النظرية إلى الاكتشاف</span></h2>
+  <p>منصة عربية مفتوحة المصدر لتعليم اكتشاف الأدوية بالذكاء الاصطناعي: 12 مختبراً تفاعلياً حياً في المتصفح، ودفاتر Colab جاهزة، وربط جزيئي حقيقي بـ AutoDock Vina، وتوصيات صيدلية جينية من CPIC — كل ذلك بلا تثبيت وبلا رسوم.</p>
+  <div class="cta">
+    <a class="btn btn-p" href="https://github.com/tibatechapp-ship-it/pharma-sdl">⭐ المستودع على GitHub</a>
+    <a class="btn btn-s" href="#notebooks">📓 دفاتر Colab</a>
+    <a class="btn btn-s" href="#tabs">🧪 المختبرات التفاعلية</a>
+  </div>
+</div>
+
+<section id="tabs">
+  <div class="sec-t">🧪 المختبرات التفاعلية — 12 تبويباً حياً</div>
+  <div class="grid">
+    <div class="card"><div class="ico">🏭</div><h3>Make</h3><p>توليد مكتبات SMILES بـ RDKit ببذرة قابلة للتكرار.</p></div>
+    <div class="card"><div class="ico">🔬</div><h3>Test</h3><p>محاكاة hERG وLDL-C على بصمة خصائص أولية.</p></div>
+    <div class="card"><div class="ico">🧠</div><h3>Analyze</h3><p>تعلم نشط: UCB + حدود Pareto لاختيار التجارب.</p></div>
+    <div class="card"><div class="ico">🧬</div><h3>PROTAC</h3><p>Vepdegestrant — أول PROTAC معتمد (2026).</p></div>
+    <div class="card"><div class="ico">💊</div><h3>MIC Lab</h3><p>PK/PD للمضادات الحيوية: 3 أدوية × 3 مؤشرات + TDM.</p></div>
+    <div class="card"><div class="ico">🎯</div><h3>PROTAC Lab</h3><p>المركّب الثلاثي وHook Effect تفاعلياً.</p></div>
+    <div class="card"><div class="ico">🔌</div><h3>PubChem</h3><p>بيانات حقيقية مخزّنة ساعة (MW/LogP/TPSA).</p></div>
+    <div class="card"><div class="ico">🧫</div><h3>CYP2C19</h3><p>طب شخصي: 4 أنماط جينية وتوصيات جرعية.</p></div>
+    <div class="card"><div class="ico">🤖</div><h3>Predict</h3><p>RandomForest على بصمات Morgan — pIC50 مع فترة ثقة.</p></div>
+    <div class="card"><div class="ico">🎓</div><h3>Capstone</h3><p>خط اكتشاف كامل: هدف ← مكتبة ← ADME ← ML ← PK/PD ← تقرير PDF عربي.</p><span class="tag">سبرنت 3</span></div>
+    <div class="card"><div class="ico">🧲</div><h3>Docking</h3><p>ربط جزيئي حقيقي بـ AutoDock Vina + Meeko على مستقبلات PDB مُجهَّزة، عرض 3Dmol، ومقارنة Vina ↔ ML عبر جسر Cheng-Prusoff.</p><span class="tag">سبرنت 4</span></div>
+    <div class="card"><div class="ico">💊</div><h3>PGx</h3><p>توصيات CPIC الحية لـ CYP2D6/TPMT/UGT1A1/2C19/3A5 مع احتياطي مدمج — كيف يغيّر النمط الجيني قرار الجرعة.</p><span class="tag">سبرنت 4</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-t">🛤️ مسار التعلم الكامل</div>
+  <div class="path">
+    <span class="step">PK الأساس</span><span class="arrow">←</span>
+    <span class="step">RDKit Discovery</span><span class="arrow">←</span>
+    <span class="step">PK/PD المضادات</span><span class="arrow">←</span>
+    <span class="step">PROTAC</span><span class="arrow">←</span>
+    <span class="step">CYP2C19</span><span class="arrow">←</span>
+    <span class="step">ML التنبؤ</span><span class="arrow">←</span>
+    <span class="step">Capstone</span><span class="arrow">←</span>
+    <span class="step">Docking 3D</span><span class="arrow">←</span>
+    <span class="step">PGx السريري</span>
+  </div>
+</section>
+
+<section id="notebooks">
+  <div class="sec-t">📓 دفاتر Colab — 8 مختبرات جاهزة للتشغيل</div>
+  <table>
+    <tr><th>#</th><th>المختبر</th><th>الدفتر</th><th>الوقت</th></tr>
+    <tr><td>01</td><td>الحركية الدوائية (PK)</td><td><a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab01-Pharmacokinetics/Lab01_Pharmacokinetics.ipynb">افتح في Colab ↗</a></td><td>45د</td></tr>
+    <tr><td>02</td><td>اكتشاف الأدوية (RDKit)</td><td><a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab02-Drug-Discovery-RDKit/Lab02_Drug_Discovery_RDKit.ipynb">افتح في Colab ↗</a></td><td>60د</td></tr>
+    <tr><td>03</td><td>PK/PD المضادات</td><td><a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab03-PKPD-Antibiotics/Lab03_PKPD_Antibiotics.ipynb">افتح في Colab ↗</a></td><td>60د</td></tr>
+    <tr><td>04</td><td>PROTAC (Vepdegestrant)</td><td><a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab04-PROTAC/Lab04_PROTAC_Vepdegestrant.ipynb">افتح في Colab ↗</a></td><td>45د</td></tr>
+    <tr><td>05</td><td>CYP2C19 (قطر)</td><td><a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab05-CYP2C19/Lab05_CYP2C19.ipynb">افتح في Colab ↗</a></td><td>45د</td></tr>
+    <tr><td>06</td><td>التنبؤ بالفعالية (ML)</td><td><a href="https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab06-ML-Potency/Lab06_ML_Potency.ipynb">افتح في Colab ↗</a></td><td>60د</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="sec-t">🧰 التقنيات — كلها مفتوحة المصدر</div>
+  <div class="chips">
+    <span class="chip">Streamlit</span><span class="chip">RDKit</span><span class="chip">AutoDock Vina 1.2</span>
+    <span class="chip">Meeko</span><span class="chip">scikit-learn</span><span class="chip">Plotly</span>
+    <span class="chip">3Dmol.js</span><span class="chip">PubChem API</span><span class="chip">CPIC API</span>
+    <span class="chip">ReportLab + Tajawal</span><span class="chip">GitHub Actions CI</span>
+  </div>
+  <div class="note">⚠️ كل المحتوى تعليمي — تُقارَن درجات Vina بجسر Cheng-Prusoff ولا تُستخدم توصيات PGx لأي قرار سريري.</div>
+</section>
+
+<footer>
+  <div>MIT © 2026 — Pharma SDL</div>
+  <div>مبني بـ <a href="https://streamlit.io">Streamlit</a> · <a href="https://www.rdkit.org">RDKit</a> · <a href="https://github.com/ccsb-scripps/AutoDock-Vina">Vina</a> · بيانات <a href="https://cpicpgx.org">CPIC</a></div>
+</footer>
+
+</div>
+</body>
+</html>
