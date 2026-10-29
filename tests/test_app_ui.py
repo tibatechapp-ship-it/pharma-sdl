@@ -1,6 +1,6 @@
-"""اختبارات واجهة المستخدم عبر streamlit.testing (Hardening P1-3).
+"""اختبارات واجهة المستخدم عبر streamlit.testing (Hardening P1-3 + S5).
 
-الفلسفة: الواجهة جزء من العقد — 12 تبويباً تعمل بلا استثناء، مبدّل اللغة
+الفلسفة: الواجهة جزء من العقد — 13 تبويباً تعمل بلا استثناء، مبدّل اللغة
 يبدّل فعلاً، والأزرار الحية تستجيب. الاختبارات سريعة افتراضياً؛ الربط
 الحقيقي بـVina موسوم slow، وCPIC الحي موسوم integration (نفس أمر الجناح:
 pytest -m "not integration and not slow").
@@ -32,8 +32,8 @@ def test_boot_without_exception(at):
     assert not at.exception, f"boot exception: {at.exception}"
 
 
-def test_twelve_tabs(at):
-    assert len(at.tabs) == 12
+def test_thirteen_tabs(at):
+    assert len(at.tabs) == 13
 
 
 def test_sidebar_language_switcher_defaults_to_arabic(at):
@@ -60,6 +60,7 @@ def test_language_switch_roundtrip(at):
     tabs_en = [tb.label for tb in at.tabs]
     assert any("Docking" in lb for lb in tabs_en)
     assert any("PGx" in lb for lb in tabs_en)
+    assert any("ADMET" in lb for lb in tabs_en)
     at.selectbox(key="lang").set_value("العربية").run()
     assert not at.exception
     assert at.title[0].value == title_ar
@@ -94,6 +95,21 @@ def test_ml_comparison_button(at):
     assert reports is not None and len(reports) == 2
     names = {r.name for r in reports}
     assert names == {"RandomForest", "GradientBoosting"}
+
+
+def test_admet_tab_widgets_and_fallback(at):
+    """تبويب ADMET: قائمة النموذجين موجودة، وزر التنبؤ بلا خادم يعرض
+    المرجعية التعليمية المدمجة ولا يرمي استثناءً (فشل شبكة ≠ انهيار)."""
+    sel = at.selectbox(key="admet_model")
+    assert sel is not None
+    assert "CardioToxNet" in sel.value
+    ta = at.text_area(key="admet_input")
+    assert "CC(=O)OC1=CC=CC=C1C(=O)O" in ta.value  # أسبرين في الأمثلة
+    at.button(key="admet_btn").click().run()
+    assert not at.exception
+    # بلا خادم Ersilia → لافتة «لا ردّ من الخادم» والمرجعية المدمجة
+    infos = [w.value for w in at.info]
+    assert any("Ersilia" in v for v in infos)
 
 
 # ── تفاعلات ثقيلة (موسومة) ──────────────────────────────────

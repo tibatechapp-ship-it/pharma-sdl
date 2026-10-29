@@ -2,9 +2,9 @@
 """Streamlit AppTest harness for pharma-sdl.
 
 Verifies the full app boots and works end-to-end without exceptions:
-  1. 12 tabs rendered (10 legacy + Docking + PGx)
+  1. 13 tabs rendered (10 legacy + Docking + PGx + ADMET/Ersilia)
   2. Sidebar language switcher (العربية / English) — both directions
-  3. 5 live interactions: Make → Predict → Capstone (offline) → Docking (Vina) → PGx (live CPIC)
+  3. 6 live interactions: Make → Predict → Capstone (offline) → Docking (Vina) → PGx (live CPIC) → ADMET (Ersilia fallback)
   4. Docking results persisted (energies sane) + pose download buttons present
 
 Run:  python scripts/apptest_pharma_sdl.py 2>/dev/null
@@ -35,7 +35,7 @@ def main() -> int:
 
     # ── 2. Tabs + language switcher ─────────────────────────
     tabs = at.tabs
-    assert len(tabs) == 12, f"expected 12 tabs, got {len(tabs)}"
+    assert len(tabs) == 13, f"expected 13 tabs, got {len(tabs)}"
     lang_sel = at.selectbox(key="lang")
     assert lang_sel is not None, "sidebar language switcher missing"
 
@@ -49,6 +49,7 @@ def main() -> int:
     tabs_en = [tb.label for tb in at.tabs]
     assert any("Docking" in lb for lb in tabs_en), f"EN docking tab missing: {tabs_en}"
     assert any("PGx" in lb for lb in tabs_en), f"EN pgx tab missing: {tabs_en}"
+    assert any("ADMET" in lb for lb in tabs_en), f"EN admet tab missing: {tabs_en}"
 
     at.selectbox(key="lang").set_value("العربية").run()
     assert not at.exception, f"exception after AR switch: {at.exception}"
@@ -82,8 +83,13 @@ def main() -> int:
     at.radio(key="pgx_src").set_value(PGX_OFFLINE_LABEL).run()
     assert not at.exception, f"PGx offline raised: {at.exception}"
 
+    # ── 8. Interaction 6: ADMET tab (no Ersilia server → fallback) ─
+    at.button(key="admet_btn").click().run()
+    assert not at.exception, f"ADMET tab raised: {at.exception}"
+    assert any("Ersilia" in w.value for w in at.info), "ADMET fallback banner missing"
+
     dt = time.time() - t0
-    print(f"OK: 12 tabs | i18n ar<->en | 5 interactions | dock ΔG={best:.2f} kcal/mol"
+    print(f"OK: 13 tabs | i18n ar<->en | 6 interactions | dock ΔG={best:.2f} kcal/mol"
           f" | downloads={len(dl)} | {dt:.1f}s")
     return 0
 
