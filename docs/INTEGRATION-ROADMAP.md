@@ -86,6 +86,12 @@ JapanFold **حقيقي وموثّق** (أُطلق سبتمبر 2026 من ai& وT
 يستدعي `boltz2_affinity` — يحتاج مفتاح المستخدم ورصيده ووظائف تستغرق دقائق،
 فهو ميزة opt-in لا افتراضية.
 
+**✅ نُفِّذ في S7-b (2026-10-29):** زر «🌐 تحقق خارجي عبر Boltz-2» في تبويب Docking —
+opt-in صريح: يعمل فقط بـ`JAPANFOLD_API_KEY` من البيئة (بلا مفتاح: رسالة تشرح
+كيفية الحصول عليه، وكل المختبرات المحلية تعمل كالمعتاد). النجاح يعرض حقول
+affinity بجانب درجة Vina، وأي فشل (401/402/شبكة/مهلة) يُترجم لسبب مقروء
+لا يُعطّل شيئاً.
+
 ## 3-سابق) خطوة التحقق الأصلية (للأرشيف)
 
 خطوة التحقق أولاً (توثيق النقطة الفعلية في هذا الملف قبل كتابة أي كود):
@@ -106,38 +112,45 @@ def expand_library(seed_smiles: list[str], n: int = 20) -> list[str] | None:
     """None عند فشل الشبكة — يستدعيه تبويب Make كخيار «توسيع بالذكاء»."""
 ```
 
-## 4) المسار الثالث: محرك التحقام الثاني (Matcha/DockThor)
+## 4) المسار الثالث: المحرك الثاني — ✅ حُسم بالبناء المحلي (S7-a)
 
-بعد تحقق `pip index versions dock-thor-client` (هل الحزمة موجودة فعلاً؟):
+**نتيجة خطوة التحقق (2026-10-29 — pip download + فحص العجلة فعلياً):**
 
-1. أضف `engine` selector في تبويب Docking: `Vina (محلي) | DockThor (سحابي)`.
-2. قيَن DockThor تكتب في نفس `DockingResult` (وحدة `dataclass` موجودة) —
-   الواجهة والعرض ثلاثي الأبعاد لا يتغيران؛ درس الطالب: «نفس الليغاند، محركان،
-   فرق الدرجات = اختلاف دوال التسجيل».
-3. Matcha يدخل لاحقاً كخيار «سريع» بعد نشر مخطط API الفعلي في هذا الملف.
+| المسار المخطط | ما وجدناه فعلاً | القرار |
+|---|---|---|
+| `pip install dock-thor-client` | الحزمة موجودة (1.2.0) لكنها **أداة مراقبة أخطاء** لخدمة dock.codes (شبيهة Sentry: `capture_event/capture_exception`) — **ليست** محرك DockThor الحقيقي (LNCC) — تصادم أسماء كما حذّرنا مع K-Fold | ❌ مسار ميت — موثّق هنا |
+| Matcha (PyPI) | نفس الاسم لكن ليست التحقام الانتشاري؛ الأصل يحتاج PyTorch/GPU | ❌ خارج النطاق |
+| DockThor الحقيقي | بوابة سحابية تتطلب تسجيلاً/حساباً | ❌ تحتاج اشتراكاً — مخالفة للمبدأ |
 
-## 5) المحرك الآلي الشامل — `core/auto_pipeline.py` (السبت الأخير)
+**القرار (وفق مبدأ «اعمل نفسه»):** بنينا المحرك الثاني **محلياً بالكامل** —
+`core/contacts.py`: محلل تفاعلات يقرأ نفس بوزات Vina ويُعيد تقييمها هندسياً
+(اتصالات ≤4.5Å، روابط H ≤3.5Å بالاتجاهين، أزواج كارهة للماء ≤4.2Å، تعارضات
+<2.7Å) ودرجة تعليمية موزونة. يُعرض بجانب درجة Vina في تبويب Docking — درس
+«نفس البوز، محركان، فرق الدرجات = اختلاف دوال التسجيل» (قاعدة الخندق التعليمي).
+12 اختباراً على المستقبل الحقيقي 7VH8 + بوزات صناعية، بلا شبكة وبلا Vina.
+
+## 5) المحرك الآلي الشامل — ✅ منجز (S8): `core/auto_pipeline.py`
 
 ```python
 @dataclass
 class AutoReport:
-    target: str
-    library_size: int
-    docked: int
-    admet_passed: int
-    pgx_flags: list[str]
-    best_smiles: str
+    seed: str; receptor_id: str; source: str; library: list[str]
+    funnel: dict[str, int]; results: list[dict]
+    admet_engine: str        # ersilia | local | none — يوثّق ما استُخدم فعلاً
+    admet_passed: int; pgx_flags: list[str]
+    best_smiles: str; best_vina: float | None; best_inhouse: float | None
     report_pdf: bytes | None
 
-def run_auto_pipeline(target_pdb: str, n_library: int = 50,
-                      use_japanfold: bool = False,
-                      admet_model: str | None = None) -> AutoReport:
-    """زر واحد: مكتبة (Capstone) → (توسيع JapanFold اختياري) → Vina
-    → فلتر ADMET (Ersilia اختياري) → علم PGx → تقرير عربي PDF."""
+def run_auto_pipeline(seed_smiles, receptor, n_library=8, dock_top=3, ...) -> AutoReport
 ```
 
-قواعده الصارمة: كل خطوة خارجية اختيارية وfallback فوري للوضع المحلي؛
-التقرير يوثّق أي محركات استُخدمت فعلاً؛ بلا أي توكن في الكود (متغيرات بيئة فقط).
+الخط: مكتبة حول البذرة (PubChem حي → BRICS محلي) → فلتر ADME محلي
+(Lipinski+Veber عبر RDKit + hERG المحاكى من core.oracle) → ربط Vina
+(فشل جزيء يُحتسب ولا يوقف الخط) → المحلل الداخلي (S7-a) → فلتر ADMET
+(Ersilia إن استجاب خادمها وإلا المحلي — المحرك يُعلَن في الواجهة) →
+أعلام PGx صادقة (حجوزات + إحالة للتبويب، لا أرقام اختراعية) →
+تقرير PDF عربي (Tajawal، يعيد استخدام قمع capstone). زر «⚙️ القراءة
+التلقائية» في نهاية تبويب Capstone. 11 اختباراً معزولاً (expand/dock مزافران).
 
 ## 6) ترتيب السبرنتات المقترح
 
@@ -145,8 +158,8 @@ def run_auto_pipeline(target_pdb: str, n_library: int = 50,
 |---|---|---|
 | S5 | ✅ **منجز** — دمج `feat/pharma-hardening` في main + عميل Ersilia وتبويب ADMET | اختبارات mock خضراء + تحقق موثّق أعلاه (النداء الحي بانتظار `ersilia serve` محلياً) |
 | S6 | ✅ **منجز** — تحقق JapanFold الكامل + عميل بالعقد الموثّق + «توسيع المكتبة» في Make (PubChem/BRICS) | 31 اختبار mock أخضر + عقد موثّق في القسم 3 (الوظيفة الحية تحتاج مفتاح المستخدم) |
-| S7 | DockThor/Matcha كمحرك ثانٍ في Docking · **S7-b**: زر Boltz-2 الخارجي (opt-in بمفتاح) | نفس DockingResult يعمل بمحركين |
-| S8 | `auto_pipeline.py` + زر «قراءة تلقائية» في Capstone | تقرير PDF كامل من نقرة واحدة |
+| S7 | ✅ **منجز** — القسم 4: dock-thor-client تصادم أسماء → **محلل داخلي محلي** + زر Boltz-2 opt-in | 12 اختبار محلل + الواجهة تعرض الدرجتين جنباً إلى جنب |
+| S8 | ✅ **منجز** — القسم 5: `auto_pipeline.py` + زر «القراءة التلقائية» في Capstone | 11 اختبار معزول + الحزمة الكاملة 222 خضراء |
 
 ## 7) قواعد ثابتة أيا كان السبرنت
 

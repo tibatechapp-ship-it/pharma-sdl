@@ -30,7 +30,12 @@ _قيد النشر_
 - 🎓 **Capstone**: خط الاكتشاف الكامل «من الهدف إلى القرار» — مكتبة (PubChem حي أو محلية) → فلترة ADME (Lipinski+Veber) → تنبؤ ML → قرار PK/PD (C90 من Hill مقابل Cmax فموي) → تقرير PDF عربي جاهز للتنزيل
 - 🧲 **Docking**: ربط جزيئي حقيقي بـ AutoDock Vina + Meeko على مستقبلات PDB مُجهّزة مسبقاً (Mpro 7VH8 — نفس هدف نموذج ML، وPLpro 7CMD)، عرض البوز ثلاثي الأبعاد بـ 3Dmol.js، وضع درس عربي كامل، ومقارنة فيزياء↔ML عبر جسر Cheng-Prusoff (ΔG ≈ −1.364×pIC50) — سبرنت 4
 - 💊 **PGx**: توصيات الصيدلة الجينية لخمسة جينات (CYP2D6 · TPMT · UGT1A1 · CYP2C19 · CYP3A5) — جلب حي من CPIC API بكاش 24 ساعة + احتياطي مدمج فوري + تنبيه تعليمي دائم — سبرنت 4
-- 🌐 **مبدّل عربي/إنجليزي** في الشريط الجانبي (يغطي العنوان والتبويبين الجديدين والقوالب العامة)
+- 🧪 **ADMET Hub (Ersilia)**: نماذج مفتوحة موثّقة (hERG CardioToxNet + ذوبان SolTranNet) عبر خادم Ersilia محلي — بلا مفاتيح، وعند غياب الخادم مرجعية دوائية موثّقة بدل أرقام مختلقة — سبرنت 5
+- 🌱 **توسيع المكتبة**: جيران تشابه حقيقيون من PubChem (بلا مفتاح) أو BRICS محلي عبر RDKit (بلا شبكة) — المصدر يُعلَن دائماً — سبرنت 6
+- 🔬 **المحلل الداخلي للبوزات**: محرك تسجيل ثانٍ صنعناه محلياً (اتصالات/روابط H/تعارضات) يقرأ نفس بوزات Vina — درس «دالتا تسجيل، نتائج مختلفة» — سبرنت 7
+- 🌐 **تحقق Boltz-2 (opt-in)**: ميزة اختيارية بمفتاح المستخدم من البيئة فقط (JAPANFOLD_API_KEY) — كل المختبرات تعمل بلا مفتاح — سبرنت 7
+- ⚙️ **القراءة التلقائية**: خط كامل من نقرة واحدة — مكتبة حول البذرة → فلتر ADME محلي → ربط Vina → المحلل الداخلي → فلتر ADMET (Ersilia إن توفّر وإلا محلي) → أعلام PGx صادقة → تقرير PDF عربي — سبرنت 8
+- 🌐 **مبدّل عربي/إنجليزي** في الشريط الجانبي (يغطي العنوان والتبويبات الجديدة والقوالب العامة)
 
 ### 🤖 Model Card (Predict)
 | البند | القيمة |
@@ -57,7 +62,7 @@ pytest --cov=core --cov-report=html
 ```
 
 ## 📚 Tech Stack
-Python 3.11 | Streamlit | RDKit | AutoDock Vina 1.2 | Meeko | 3Dmol.js | scikit-learn | Plotly | PubChem API | CPIC API | ReportLab
+Python 3.11 | Streamlit | RDKit | AutoDock Vina 1.2 | Meeko | 3Dmol.js | scikit-learn | Plotly | PubChem API | CPIC API | Ersilia Model Hub | JapanFold API | ReportLab
 
 ## 🗺️ سجل السبرنتات
 
@@ -67,7 +72,11 @@ Python 3.11 | Streamlit | RDKit | AutoDock Vina 1.2 | Meeko | 3Dmol.js | scikit-
 | 2 | Lab06 ML (pIC50 + فترة ثقة) · تبويب Predict | ✅ |
 | 3 | Capstone: خط اكتشاف كامل + تقرير PDF عربي | ✅ |
 | 4 | Docking (Vina+Meeko) · PGx (CPIC) · مبدّل لغة · GitHub Pages | ✅ |
-| 5 | قياس TDC · تحسين Predict بـdescriptors · دفتر Boltz-2 | 📋 [ROADMAP-2026](docs/ROADMAP-2026.md) |
+| 5 | ADMET Hub (Ersilia) — نماذج موثّقة بلا مفاتيح + مرجعية مدمجة | ✅ |
+| 6 | توسيع المكتبة (PubChem/BRICS) · عميل JapanFold موثّق بالعقد الفعلي | ✅ |
+| 7 | المحلل الداخلي للبوزات (محرك ثانٍ محلي) · تحقق Boltz-2 opt-in | ✅ |
+| 8 | القراءة التلقائية: زر واحد من البذرة إلى تقرير PDF عربي | ✅ |
+| 9 | قياس TDC · تحسين Predict بـdescriptors · دفتر Boltz-2 | 📋 [ROADMAP-2026](docs/ROADMAP-2026.md) |
 
 ### إعادة توليد المستقبلات المُجهّزة
 ```bash
@@ -88,5 +97,5 @@ MIT © 2026
 | 05 | CYP2C19 (قطر) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab05-CYP2C19/Lab05_CYP2C19.ipynb) | 45 دقيقة |
 | 06 | التنبؤ بالفعالية (ML) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tibatechapp-ship-it/pharma-sdl/blob/main/download/Lab06-ML-Potency/Lab06_ML_Potency.ipynb) | 60 دقيقة |
 
-### 🧠 خط التعلم الكامل (9 مراحل)
-PK → RDKit Discovery → PK/PD المضادات → PROTAC → CYP2C19 → **ML التنبؤ** → **Capstone: من الهدف إلى القرار** → **Docking ثلاثي الأبعاد (Vina)** → **PGx السريري (CPIC)**
+### 🧠 خط التعلم الكامل (12 مرحلة)
+PK → RDKit Discovery → PK/PD المضادات → PROTAC → CYP2C19 → **ML التنبؤ** → **Capstone: من الهدف إلى القرار** → **Docking ثلاثي الأبعاد (Vina)** → **PGx السريري (CPIC)** → **ADMET (Ersilia)** → **المحلل الداخلي للبوزات** → **القراءة التلقائية الشاملة**
