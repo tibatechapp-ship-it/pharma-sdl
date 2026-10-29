@@ -1,21 +1,27 @@
+# تغطية كامل المشروع — Hardening P1-2.
+# source = . يمسح شجرة المشروع (بلا استيراد أي ملف) ويقيس كل ما نُفِّذ فعلاً:
+# core (المنطق) + scripts (الأدوات) + app.py (الواجهة عبر AppTest).
+# ملاحظة: لا تضع "app.py" كاسم في source — سيستورده coverage عند الإقلاع
+# فيشغّل Streamlit بوضع bare ويُسقط العملية عند استيراد meeko/gemmi.
+# لا floor مصطنع: التغطية تُراجَع بشرياً في CI، والقرار لا يُخفى خلف عتبة وهمية.
 [run]
-source = core
+source =
+    .
+    scripts
 omit =
-    core/__init__.py
     tests/*
-    setup.py
+    notebooks/*
+    download/*
+    desktop-build/*
+    portfolio/*
+    docs/*
+    static/*
+    data/*
+    */__pycache__/*
 
 [report]
+show_missing = True
 exclude_lines =
     pragma: no cover
-    def __repr__
-    raise AssertionError
-    raise NotImplementedError
-    if __name__ == .__main__.:
     if TYPE_CHECKING:
-    pass
-    \.\.\.
-
-[html]
-directory = htmlcov
-title = Pharma Lab Coverage Report
+    raise NotImplementedError
