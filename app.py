@@ -588,6 +588,106 @@ with tabs[9]:
                 )
             else:
                 d2.info("PDF غير متاح في هذه البيئة — استخدم Markdown.")
+
+            # ── القراءة التلقائية (S8): مكتبة → ADME → Vina → محلل داخلي → ADMET → PDF ──
+            st.divider()
+            st.markdown(f"### {t(LANG, 'auto_title')}")
+            st.caption(t(LANG, "auto_caption"))
+            from core.docking import HAS_MEEKO, HAS_VINA, load_receptors
+
+            auto_recs = load_receptors()
+            auto_receptor = auto_recs[0] if auto_recs else None
+            if auto_recs:
+                auto_opts = {
+                    (r.label_ar if LANG == "ar" else r.label_en): r for r in auto_recs
+                }
+                auto_rec_sel = st.selectbox(
+                    t(LANG, "auto_target"), list(auto_opts), key="auto_rec"
+                )
+                auto_receptor = auto_opts[auto_rec_sel]
+            auto_seed = st.text_input(
+                t(LANG, "auto_seed"), value="CC(=O)OC1=CC=CC=C1C(=O)O", key="auto_seed"
+            )
+            a1, a2 = st.columns(2)
+            auto_n = a1.slider(t(LANG, "auto_n"), 4, 12, 6, key="auto_n")
+            auto_top = a2.slider(t(LANG, "auto_top"), 2, 6, 3, key="auto_top")
+            if st.button(t(LANG, "auto_btn"), type="primary", key="auto_btn"):
+                if not auto_seed.strip():
+                    st.info(t(LANG, "auto_empty_seed"))
+                elif not (HAS_VINA and HAS_MEEKO) or auto_receptor is None:
+                    st.warning(t(LANG, "auto_no_engine"))
+                else:
+                    from core.auto_pipeline import run_auto_pipeline
+
+                    with st.status(t(LANG, "auto_status"), expanded=True) as astat:
+                        st.write("**1/6** بناء المكتبة حول البذرة (حياً ثم محلياً)…")
+                        st.write("**2/6** فلتر ADME محلي (Lipinski+Veber+hERG المحاكى)…")
+                        st.write("**3/6** ربط Vina — ثوانٍ لكل جزيء…")
+                        st.write("**4/6** المحلل الداخلي للبوزات (S7)…")
+                        st.write("**5/6** فلتر ADMET (Ersilia إن توفّر خادم وإلا محلي)…")
+                        st.write("**6/6** الأعلام والتقرير…")
+                        auto_report = run_auto_pipeline(
+                            auto_seed,
+                            auto_receptor,
+                            n_library=auto_n,
+                            dock_top=auto_top,
+                            model=_capstone_model(),
+                        )
+                        astat.update(
+                            label=t(LANG, "auto_done"), state="complete", expanded=False
+                        )
+                    st.session_state["auto_rep"] = auto_report
+
+            rep = st.session_state.get("auto_rep")
+            if rep is not None:
+                m1, m2, m3, m4 = st.columns(4)
+                m1.metric(t(LANG, "auto_m_lib"), len(rep.library))
+                m2.metric(t(LANG, "auto_m_docked"), len(rep.results))
+                m3.metric(t(LANG, "auto_m_admet"), rep.admet_passed)
+                m4.metric(
+                    t(LANG, "auto_m_best"),
+                    f"{rep.best_vina:.2f}" if rep.best_vina is not None else "—",
+                )
+                st.caption(
+                    f"{t(LANG, 'auto_engine')}: **{rep.admet_engine}** · "
+                    f"المصدر: {rep.source}"
+                )
+                if rep.results:
+                    st.markdown(f"#### {t(LANG, 'auto_table_title')}")
+                    df_auto = pd.DataFrame(
+                        [
+                            {
+                                "SMILES": r["smiles"],
+                                t(LANG, "col_vina"): (
+                                    round(r["vina"], 2)
+                                    if r.get("vina") is not None else None
+                                ),
+                                t(LANG, "col_inhouse"): r.get("inhouse"),
+                                t(LANG, "col_hbonds"): r.get("hbonds"),
+                                t(LANG, "col_clashes"): r.get("clashes"),
+                                "ADMET": "✅" if r.get("admet_ok") else "❌",
+                            }
+                            for r in rep.results
+                        ]
+                    )
+                    st.dataframe(df_auto, hide_index=True, width="stretch")
+                if rep.best_smiles:
+                    st.markdown(f"**{t(LANG, 'auto_best_smiles')}:**")
+                    st.code(rep.best_smiles)
+                st.markdown(f"#### {t(LANG, 'auto_flags_title')}")
+                for fl in rep.pgx_flags:
+                    st.markdown(f"- {fl}")
+                if rep.report_pdf:
+                    st.download_button(
+                        t(LANG, "auto_pdf"),
+                        rep.report_pdf,
+                        file_name="auto_report.pdf",
+                        mime="application/pdf",
+                        key="auto_pdf",
+                        width="stretch",
+                    )
+                else:
+                    st.info(t(LANG, "auto_no_pdf"))
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في Capstone: {e}")
 
@@ -709,6 +809,42 @@ with tabs[10]:
                     },
                 )
 
+                # ── المحلل الداخلي للبوزات (S7-a) — محرك تسجيل ثانٍ صنعناه محلياً ──
+                st.markdown(f"#### {t(LANG, 'dock_contacts_title')}")
+                st.caption(t(LANG, "dock_contacts_caption"))
+                try:
+                    from core.contacts import LESSON as CONTACT_LESSON
+                    from core.contacts import score_poses
+
+                    c_rows = score_poses(receptor.receptor_file_path, res.poses_pdbqt)
+                    df_c = pd.DataFrame(
+                        [
+                            r.to_row(
+                                pose_index=i + 1,
+                                vina_kcal=(
+                                    res.scores[i] if i < len(res.scores) else None
+                                ),
+                            )
+                            for i, r in enumerate(c_rows)
+                        ]
+                    ).rename(
+                        columns={
+                            "vina": t(LANG, "col_vina"),
+                            "contacts": t(LANG, "col_contacts"),
+                            "hbonds": t(LANG, "col_hbonds"),
+                            "hydrophobic": t(LANG, "col_hydro"),
+                            "clashes": t(LANG, "col_clashes"),
+                            "inhouse": t(LANG, "col_inhouse"),
+                        }
+                    )
+                    st.dataframe(df_c, hide_index=True, width="stretch")
+                    with st.expander(t(LANG, "dock_contacts_lesson"), expanded=False):
+                        st.markdown(
+                            CONTACT_LESSON.get(LANG, CONTACT_LESSON["ar"])
+                        )
+                except Exception:  # noqa: BLE001 — التحليل إضافي لا يُعطّل العرض
+                    st.info(t(LANG, "dock_contacts_fail"))
+
                 st.markdown(f"#### {t(LANG, 'dock_3d_title')}")
                 st.html(
                     build_3d_html(
@@ -735,6 +871,35 @@ with tabs[10]:
                     key="dock_dl_pdbqt",
                     width="stretch",
                 )
+
+                # ── تحقق خارجي اختياري عبر Boltz-2 (S7-b) — opt-in بمفتاح المستخدم فقط ──
+                with st.expander(t(LANG, "boltz_title"), expanded=False):
+                    st.caption(t(LANG, "boltz_caption"))
+                    from core.clients import japanfold
+
+                    seq = st.text_area(t(LANG, "boltz_seq"), key="boltz_seq", height=110)
+                    if st.button(t(LANG, "boltz_btn"), key="boltz_btn"):
+                        if not seq.strip():
+                            st.info(t(LANG, "boltz_empty"))
+                        elif japanfold.get_api_key() is None:
+                            st.info(t(LANG, "boltz_no_key"))
+                        else:
+                            with st.spinner(t(LANG, "boltz_running")):
+                                fields, reason, _job = japanfold.boltz2_affinity(seq, smi)
+                            if fields:
+                                st.success(t(LANG, "boltz_done"))
+                                st.dataframe(
+                                    pd.DataFrame(
+                                        [
+                                            {"field": k, "value": round(v, 4)}
+                                            for k, v in fields.items()
+                                        ]
+                                    ),
+                                    hide_index=True,
+                                    width="stretch",
+                                )
+                            else:
+                                st.warning(t(LANG, "boltz_fail").format(reason=reason))
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في Docking: {e}")
 
