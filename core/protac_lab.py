@@ -3,6 +3,8 @@
 """
 import numpy as np
 
+from core import palette
+
 try:
     import plotly.graph_objects as go
 except ImportError:
@@ -58,16 +60,16 @@ def render():  # pragma: no cover
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=conc, y=deg_vep, mode='lines',
                              name='Vepdegestrant (PROTAC)',
-                             line={"color": '#3b82f6', "width": 3}))
+                             line={"color": palette.BLUE, "width": 3}))
     fig.add_trace(go.Scatter(x=conc, y=deg_fulv, mode='lines',
                              name='Fulvestrant (مثبط)',
-                             line={"color": '#ef4444', "width": 2, "dash": 'dash'}))
+                             line={"color": palette.RED, "width": 2, "dash": 'dash'}))
     fig.add_trace(go.Scatter(x=conc, y=tern, mode='lines',
                              name='المعقد الثلاثي (%)',
-                             line={"color": '#a855f7', "width": 2},
+                             line={"color": palette.PURPLE, "width": 2},
                              yaxis='y2'))
-    fig.add_vline(x=dc50, line_dash="dot", line_color="#3b82f6", opacity=0.5)
-    fig.add_vline(x=peak_conc, line_dash="dot", line_color="#a855f7", opacity=0.5)
+    fig.add_vline(x=dc50, line_dash="dot", line_color=palette.BLUE, opacity=0.5)
+    fig.add_vline(x=peak_conc, line_dash="dot", line_color=palette.PURPLE, opacity=0.5)
     fig.update_layout(
         xaxis={"title": "التركيز (nM)", "type": "log"},
         yaxis={"title": "نسبة التحلل (%)", "range": [-5, 105]},

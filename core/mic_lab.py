@@ -4,6 +4,8 @@
 """
 import numpy as np
 
+from core import palette
+
 try:
     import plotly.graph_objects as go
 except ImportError:
@@ -22,19 +24,19 @@ DRUGS = {
     'gentamicin': {
         'name': 'الجنتامايسين', 'icon': '🔷',
         'index': 'cmax_mic', 'index_label': 'Cmax/MIC', 'index_target': 10,
-        'color': '#3b82f6',
+        'color': palette.BLUE,
         'dose': 350, 'vd': 17.5, 'cl': 5.25, 'mic': 2.0,
     },
     'ceftriaxone': {
         'name': 'السيفترياكسون', 'icon': '🔶',
         'index': 'ft_mic', 'index_label': 'fT>MIC', 'index_target': 50,
-        'color': '#f97316',
+        'color': palette.ORANGE,
         'dose': 2000, 'vd': 10, 'cl': 1.0, 'mic': 1.0,
     },
     'vancomycin': {
         'name': 'الفانكومايسين', 'icon': '🟣',
         'index': 'auc_mic', 'index_label': 'AUC/MIC', 'index_target': 400,
-        'color': '#a855f7',
+        'color': palette.PURPLE,
         'dose': 1500, 'vd': 50, 'cl': 4.5, 'mic': 1.0,
     },
 }

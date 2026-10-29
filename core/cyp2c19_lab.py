@@ -4,6 +4,8 @@
 """
 import numpy as np
 
+from core import palette
+
 try:
     import plotly.graph_objects as go
 except ImportError:
@@ -26,7 +28,7 @@ PHENOTYPES = {
         'activity_score': 3.0,
         'prevalence_me': '1-2%',
         'prevalence_ar': '3%',
-        'color': '#3b82f6',
+        'color': palette.BLUE,
     },
     'NM': {
         'name': 'Normal Metabolizer',
@@ -35,7 +37,7 @@ PHENOTYPES = {
         'activity_score': 2.0,
         'prevalence_me': '35-40%',
         'prevalence_ar': '55%',
-        'color': '#22c55e',
+        'color': palette.GREEN,
     },
     'IM': {
         'name': 'Intermediate Metabolizer',
@@ -44,7 +46,7 @@ PHENOTYPES = {
         'activity_score': 1.0,
         'prevalence_me': '18-25%',
         'prevalence_ar': '37%',
-        'color': '#f59e0b',
+        'color': palette.AMBER,
     },
     'PM': {
         'name': 'Poor Metabolizer',
@@ -53,7 +55,7 @@ PHENOTYPES = {
         'activity_score': 0.0,
         'prevalence_me': '2-15%',
         'prevalence_ar': '5%',
-        'color': '#ef4444',
+        'color': palette.RED,
     },
 }
 

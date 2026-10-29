@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from core.i18n import t
+from core import palette
 
 # Check RDKit availability (not available on Stlite/WASM)
 HAS_RDKIT = importlib.util.find_spec("rdkit") is not None
@@ -123,29 +124,49 @@ if is_stlite():
 
 
 # ═══════════════════════════════════════════════════════════
-# التبويبات — ربط الوحدات (13 تبويباً)
+# التبويبات — 4 مجموعات بدل شريط مسطح واحد من 13 تبويباً
+# (تدقيق UX §4.6/P-3: يخفف كلفة المسح البصري ويمنح كل سياق بابه)
 # ═══════════════════════════════════════════════════════════
 
 st.header(t(LANG, "lab_header"))
 
-tabs = st.tabs([
+st.caption(t(LANG, "group_pipeline"))
+g_pipeline = st.tabs([
     "🏭 Make",
     "🔬 Test",
     "🧠 Analyze",
     "🧬 PROTAC",
+])
+
+st.caption(t(LANG, "group_labs"))
+g_labs = st.tabs([
     "💊 MIC Lab",
     "🎯 PROTAC Lab",
-    "🔌 PubChem",
     "🧫 CYP2C19",
-    "🤖 Predict",
-    "🎓 Capstone",
-    t(LANG, "tab_docking"),
     t(LANG, "tab_pgx"),
+])
+
+st.caption(t(LANG, "group_tools"))
+g_tools = st.tabs([
+    "🔌 PubChem",
+    "🤖 Predict",
+    t(LANG, "tab_docking"),
+])
+
+st.caption(t(LANG, "group_reports"))
+g_reports = st.tabs([
+    "🎓 Capstone",
     t(LANG, "tab_admet"),
 ])
 
+# خريطة مواضع محتوى التبويبات القديمة (tabs[0..12]) إلى المجموعات الجديدة:
+#   0 Make→pipeline[0] · 1 Test→pipeline[1] · 2 Analyze→pipeline[2] · 3 PROTAC→pipeline[3]
+#   4 MIC→labs[0] · 5 PROTAC Lab→labs[1] · 6 PubChem→tools[0] · 7 CYP→labs[2]
+#   8 Predict→tools[1] · 9 Capstone→reports[0] · 10 Docking→tools[2]
+#  11 PGx→labs[3] · 12 ADMET→reports[1]
+
 # ═══ Tab 0: Make ═══
-with tabs[0]:
+with g_pipeline[0]:
     st.subheader("توليد SMILES بـ RDKit")
     try:
         from core.maker import MoleculeMaker
@@ -187,7 +208,7 @@ with tabs[0]:
         st.error(f"خطأ: {e}")
 
 # ═══ Tab 1: Test ═══
-with tabs[1]:
+with g_pipeline[1]:
     st.subheader("محاكاة hERG + LDL-C")
     try:
         import numpy as np
@@ -205,7 +226,7 @@ with tabs[1]:
         st.error(f"خطأ: {e}")
 
 # ═══ Tab 2: Analyze ═══
-with tabs[2]:
+with g_pipeline[2]:
     st.subheader("تحليل Pareto")
     st.info("استخدم مختبر MIC/PROTAC للحصول على نتائج محاكاة كاملة.")
     try:
@@ -217,7 +238,7 @@ with tabs[2]:
         st.error(f"خطأ: {e}")
 
 # ═══ Tab 3: PROTAC (overview) ═══
-with tabs[3]:
+with g_pipeline[3]:
     st.subheader("PROTAC — نظرة عامة")
     st.write("Vepdegestrant (Veppanu) — أول PROTAC معتمد (FDA 2026-05-01)")
     try:
@@ -229,7 +250,7 @@ with tabs[3]:
         st.error(f"خطأ: {e}")
 
 # ═══ Tab 4: MIC Lab ═══
-with tabs[4]:
+with g_labs[0]:
     try:
         from core.mic_lab import render as render_mic
 
@@ -238,7 +259,7 @@ with tabs[4]:
         st.error(f"خطأ في MIC Lab: {e}")
 
 # ═══ Tab 5: PROTAC Lab ═══
-with tabs[5]:
+with g_labs[1]:
     try:
         from core.protac_lab import render as render_protac
 
@@ -247,7 +268,7 @@ with tabs[5]:
         st.error(f"خطأ في PROTAC Lab: {e}")
 
 # ═══ Tab 6: PubChem ═══
-with tabs[6]:
+with g_tools[0]:
     st.subheader("🔌 PubChem")
     try:
         query = st.text_input("اسم الدواء", value="aspirin", key="pubchem_q")
@@ -275,7 +296,7 @@ with tabs[6]:
         st.error(f"خطأ: {e}")
 
 # ═══ Tab 7: CYP2C19 ═══
-with tabs[7]:
+with g_labs[2]:
     try:
         from core.cyp2c19_lab import render as render_cyp
 
@@ -284,7 +305,7 @@ with tabs[7]:
         st.error(f"خطأ في CYP2C19: {e}")
 
 # ═══ Tab 8: Predict — من الاستعلام إلى التنبؤ ═══
-with tabs[8]:
+with g_tools[1]:
     st.subheader("🤖 التنبؤ بالفعالية pIC50")
     st.caption(
         "RandomForest على بصمات Morgan — مدرَّب على قياسات IC50 الحقيقية "
@@ -364,12 +385,12 @@ with tabs[8]:
                 fig = go.Figure()
                 fig.add_bar(
                     y=["جزيئك (تنبؤ)"], x=[res["pic50"]],
-                    marker_color="#667eea", orientation="h", name="تنبؤ",
+                    marker_color=palette.PRIMARY, orientation="h", name="تنبؤ",
                 )
                 for i, row in enumerate(top3.itertuples(), 1):
                     fig.add_bar(
                         y=[f"أقوى مثبط حقيقي #{i}"], x=[row.pchembl_value],
-                        marker_color="#2dd4a7", orientation="h", name="قياس",
+                        marker_color=palette.TEAL, orientation="h", name="قياس",
                     )
                 fig.update_layout(
                     height=280,
@@ -430,8 +451,7 @@ with tabs[8]:
                 subplot_titles=("R² (أعلى أفضل)", "RMSE (أقل أفضل)"),
             )
             model_colors = {
-                "RandomForest": "#667eea",
-                "GradientBoosting": "#2dd4a7",
+                **palette.MODEL_COLORS,
             }
             for r in cmp_reports:
                 fig_cmp.add_bar(
@@ -460,7 +480,7 @@ with tabs[8]:
         st.error(f"خطأ في Predict: {e}")
 
 # ═══ Tab 9: Capstone — من الهدف إلى القرار ═══
-with tabs[9]:
+with g_reports[0]:
     st.subheader("🎓 خط الاكتشاف الكامل: هدف ← مكتبة ← ADME ← ML ← PK/PD ← تقرير")
     st.caption(
         "الهدف المعروض: **SARS-CoV-2 Mpro**. يبدأ الخط من مكتبة جزيئات، يفلترها "
@@ -539,7 +559,7 @@ with tabs[9]:
                 x=list(res.funnel.values()), y=list(res.funnel.keys()),
                 orientation="h", text=list(res.funnel.values()),
                 color=list(res.funnel.values()),
-                color_continuous_scale=["#c7d2fe", "#667eea"],
+                color_continuous_scale=[palette.PRIMARY_SOFT, palette.PRIMARY],
             )
             fig_funnel.update_layout(
                 height=260, margin={"l": 0, "r": 0, "t": 10, "b": 0},
@@ -588,12 +608,12 @@ with tabs[9]:
             for i, r in enumerate(valid.head(10).itertuples(), 1):
                 fig_ci.add_scatter(
                     x=[r.pic50, r.pic50], y=[i - 0.15, i + 0.15],
-                    mode="lines", line={"color": "#667eea", "width": 3},
+                    mode="lines", line={"color": palette.PRIMARY, "width": 3},
                     showlegend=False, hoverinfo="skip",
                 )
                 fig_ci.add_scatter(
                     x=[r.ci_lo, r.ci_hi], y=[i, i], mode="lines",
-                    line={"color": "#2dd4a7", "width": 6}, showlegend=False,
+                    line={"color": palette.TEAL, "width": 6}, showlegend=False,
                     name=f"#{i}",
                 )
             fig_ci.update_layout(
@@ -724,7 +744,7 @@ with tabs[9]:
         st.error(f"خطأ في Capstone: {e}")
 
 # ═══ Tab 10: Docking — فيزياء ثلاثية الأبعاد ═══
-with tabs[10]:
+with g_tools[2]:
     st.subheader(t(LANG, "dock_title"))
     st.caption(t(LANG, "dock_caption"))
     try:
@@ -937,7 +957,7 @@ with tabs[10]:
         st.error(f"خطأ في Docking: {e}")
 
 # ═══ Tab 11: PGx — الجينوم الدوائي ═══
-with tabs[11]:
+with g_labs[3]:
     st.subheader(t(LANG, "pgx_title"))
     st.caption(t(LANG, "pgx_caption"))
     try:
@@ -1001,7 +1021,7 @@ def _ersilia_cached(smiles_tuple: tuple[str, ...], model_id: str) -> list:
 
 
 # ═══ Tab 12: ADMET Hub — Ersilia Model Hub ═══
-with tabs[12]:
+with g_reports[1]:
     st.subheader(t(LANG, "admet_title"))
     st.caption(t(LANG, "admet_caption"))
     try:
