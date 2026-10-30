@@ -61,3 +61,29 @@ jobs:
           name: pharma-lab-${{ matrix.target }}
           path: desktop-build/dist/*
           retention-days: 30
+
+  # مطلوب حتى لا يبقى الإصدار قشرة فارغة: كانت الحزم تُبنى وتُرفع
+  # كـ artifacts مؤقتة (30 يوماً) فقط ولا يصلها أي مسار إلى صفحة
+  # الإصدار، فبقيت v0.1.0 بلا أصول بعد أول بناء ناجح. هذه المهمة
+  # تجمع حزم الأنظمة الثلاثة من نفس التشغيل وتُلحقها بالإصدار.
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download built bundles
+        uses: actions/download-artifact@v7
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: List bundles
+        run: ls -laR dist
+
+      - name: Attach bundles to the tag release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**
+          fail_on_unmatched_files: true
