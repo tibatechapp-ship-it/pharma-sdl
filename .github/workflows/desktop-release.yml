@@ -85,5 +85,10 @@ jobs:
       - name: Attach bundles to the tag release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/**
+          # المستوى الأعلى فقط: الحزم القابلة للتوزيع (.dmg/.exe/.AppImage/
+          # .deb/.blockmap وملفات التحديث). النمط التكراري dist/** يلتقط
+          # محتويات الحزمة المفككة (آلاف ملفات .pak/.dll) ويسبق الحد
+          # الثانوي للمعدل.
+          files: dist/*
+          overwrite_files: true
           fail_on_unmatched_files: true
