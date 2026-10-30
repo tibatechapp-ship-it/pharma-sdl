@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     strategy:
+      # فشل نظام واحد لا يجب أن يلغي بناء بقية الأنظمة.
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
@@ -21,11 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # لا يوجد package-lock.json في desktop-build، وطلب cache لملف غائب
+      # كان يُفشل setup-node فوراً ("Some specified paths were not
+      # resolved") فيفشل البناء على كل الأنظمة عند أي وسم إصدار.
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: desktop-build/package-lock.json
+          node-version: '22'
 
       - name: Install dependencies
         working-directory: desktop-build
