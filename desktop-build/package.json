@@ -50,5 +50,8 @@
     "electron-builder": "^24.9.1"
   },
   "homepage": "https://github.com/tibatechapp-ship-it/pharma-sdl",
-  "author": "tibatechapp-ship-it"
+  "author": {
+    "name": "tibatechapp-ship-it",
+    "email": "tibatechapp-ship-it@users.noreply.github.com"
+  }
 }
