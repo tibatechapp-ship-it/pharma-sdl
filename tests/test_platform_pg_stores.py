@@ -312,3 +312,56 @@ def test_cli_migration_commands_accept_postgres_dsn(pg_dsn, clean_db, tmp_path, 
     assert [r.experiment_id for r in pg.lineage(rounds[-1].experiment_id)] == [
         r.experiment_id for r in rounds
     ]
+
+
+def test_import_survives_same_second_timestamps_and_reversed_file(pg_dsn, clean_db):
+    """انحدار CI الحقيقي: ساعة بدقة ثانية (timespec=seconds) تعطي الجولات
+    المتسارعة created_at واحداً، والتصدير يكتب الأحدث أولاً — الطفل قبل الأب
+    في الملف ومع تواريخ متطابقة. الترتيب الاعتمادي (سلسلة الأسلاف) هو ما
+    يحمي الاستيراد فوق مخازن FK — لا مقارنة زمنية."""
+    from pharma_sdl.experiments.pg_store import PostgresExperimentStore
+    from pharma_sdl.experiments.portability import import_jsonl
+
+    same_ts = "2026-11-01T15:45:31+00:00"
+    root = ExperimentRecord(
+        experiment_id="root00000001",
+        hypothesis_ar="جذر",
+        created_at=same_ts,
+        updated_at=same_ts,
+    )
+    mid = ExperimentRecord(
+        experiment_id="mid00000001",
+        hypothesis_ar="وسط",
+        parent_experiment_id=root.experiment_id,
+        created_at=same_ts,
+        updated_at=same_ts,
+    )
+    leaf = ExperimentRecord(
+        experiment_id="leaf00000001",
+        hypothesis_ar="ورقة",
+        parent_experiment_id=mid.experiment_id,
+        created_at=same_ts,
+        updated_at=same_ts,
+    )
+    # الملف بترتيب معكوس كلياً — الأحدث أولاً كما تُصدِّر latest()
+    jsonl = "\n".join(r.model_dump_json() for r in (leaf, mid, root))
+    path = _write_jsonl(jsonl)
+
+    pg = PostgresExperimentStore(pg_dsn)
+    assert import_jsonl(pg, path) == 3
+    assert [r.experiment_id for r in pg.lineage(leaf.experiment_id)] == [
+        root.experiment_id,
+        mid.experiment_id,
+        leaf.experiment_id,
+    ]
+    # الاستيراد آمن لإعادة المحاولة فوق FK أيضاً
+    assert import_jsonl(pg, path) == 0
+
+
+def _write_jsonl(text: str):
+    import tempfile
+    from pathlib import Path
+
+    f = Path(tempfile.mkstemp(suffix=".jsonl")[1])
+    f.write_text(text + "\n", encoding="utf-8")
+    return f

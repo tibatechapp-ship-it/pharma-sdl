@@ -42,9 +42,11 @@ def import_jsonl(
             f"ملف الاستيراد غير موجود: {path}", f"Import file not found: {path}"
         )
     imported = 0
-    # الترتيب الزمني الصاعد قبل الكتابة: مخازن FK (PostgreSQL — ADR-0008)
-    # ترفض طفلاً بلا أبيض، والتصدير أحدث-أولاً — الفرز يجعل الاستيراد
-    # صالحاً على أي خلفية وبأي ترتيب ملف، بلا تغيير في المحتوى.
+    # الترتيب الاعتمادي قبل الكتابة: مخازن FK (PostgreSQL — ADR-0008) ترفض
+    # طفلاً بلا أبيض. والتصدير أحدث-أولاً، وساعة المنصة بدقة ثانية
+    # (timespec="seconds") فالجولات السريعة تتشارك created_at نفسه —
+    # لذا الترتيب يتطلب سلسلة الأسلاف نفسها (أعلاوي) لا مقارنة زمنية:
+    # الأساس زمني صاعد، ثم تُصدر كل تجربة بعد أبيها (داخل الملف أو في المخزن).
     records: list[ExperimentRecord] = []
     for i, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         raw = raw.strip()
@@ -58,7 +60,23 @@ def import_jsonl(
                 f"Line {i} is not a valid experiment record: {exc}",
             ) from exc
     records.sort(key=lambda r: r.created_at)
-    for record in records:
+    in_file = {r.experiment_id for r in records}
+    emitted: set[str] = set()
+    ordered: list[ExperimentRecord] = []
+    remaining = records
+    while remaining:
+        progressed = False
+        for record in list(remaining):
+            parent = record.parent_experiment_id
+            if parent is None or parent in emitted or parent not in in_file:
+                ordered.append(record)
+                emitted.add(record.experiment_id)
+                remaining.remove(record)
+                progressed = True
+        if not progressed:  # pragma: no cover — دورة أسلاف: تُرفض فوق FK بصدق
+            ordered.extend(remaining)
+            break
+    for record in ordered:
         if not overwrite and registry.get(record.experiment_id) is not None:
             continue
         registry.upsert(record)
