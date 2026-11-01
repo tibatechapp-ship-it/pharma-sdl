@@ -183,7 +183,10 @@ def test_run_pipeline_end_to_end(library, model):
     assert 0 < len(res.top) <= 10
     assert res.top["pic50"].notna().any()
     md = build_markdown_report(res, "SARS-CoV-2 Mpro")
-    assert "قمع الفلترة" in md and "تعليمي" in md
+    # التدقيق العلمي P0: التقرير يحمل التحذير العلمي/الطبي الكامل + وسم مسار pIC50
+    assert "قمع الفلترة" in md and "تنبيه علمي وطبي" in md
+    assert "لا يجوز اتخاذ قرارات تشخيصية أو علاجية" in md
+    assert "الفعالية المتنبأ بها (ML)" in md
     assert "اختبار" in md  # المصدر يظهر في التقرير
 
 

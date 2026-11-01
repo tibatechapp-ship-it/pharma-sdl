@@ -10,6 +10,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from pharma_sdl.scores import DISCLAIMER_AR, DISCLAIMER_EN
+
 
 def utcnow_iso() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
@@ -107,6 +109,10 @@ class ScreeningResult(BaseModel):
     rejected: list[Rejection] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     elapsed_seconds: float = 0.0
+    # عقد الصدق (تدقيق P0): كل استجابة فرز تحمل التحذير العلمي/الطبي معها —
+    # التحذير يسافر مع البيانات وليس في التوثيق فقط.
+    disclaimer_ar: str = DISCLAIMER_AR
+    disclaimer_en: str = DISCLAIMER_EN
 
     def top(self, n: int) -> list[ScoredHit]:
         return self.hits[:n]

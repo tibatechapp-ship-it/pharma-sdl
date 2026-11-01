@@ -253,6 +253,7 @@ class PipelineResult:
 
 def build_markdown_report(res: PipelineResult, target_name: str = "SARS-CoV-2 Mpro") -> str:
     """تقرير Markdown — يعمل دائماً بلا تبعيات إضافية."""
+    from pharma_sdl.scores import DISCLAIMER_AR  # عقد الصدق الواحد (تدقيق P0)
     lines = [
         f"# تقرير خط الاكتشاف — {target_name}",
         "",
@@ -290,8 +291,13 @@ def build_markdown_report(res: PipelineResult, target_name: str = "SARS-CoV-2 Mp
             "- **PK/PD**: C90 من Hill (θ=90%)، Cmax من حجرة واحدة فموية "
             f"(F={PK_PARAMS['F']}, Vd={PK_PARAMS['Vd_L']}L, t½={PK_PARAMS['t_half_h']}h)"
         ),
+        (
+            "- **مسارات الدرجات**: عمود pIC50 في هذا التقرير = مسار «الفعالية المتنبأ بها (ML)» "
+            "حصراً — ليس قياساً تجريبياً، ولا درجة التحام؛ النشاط التجريبي مسار مستقل "
+            "يُراجع من ChEMBL عند توافره."
+        ),
         "",
-        "> ⚠️ تقرير تعليمي — لا يصلح لقرارات سريرية.",
+        f"> ⚠️ {DISCLAIMER_AR}",
     ]
     return "\n".join(lines)
 
@@ -330,6 +336,12 @@ def build_pdf_report(res: PipelineResult, target_name: str = "SARS-CoV-2 Mpro") 
     bold = FONTS_DIR / "Tajawal-Bold.ttf"
     if not reg.exists():
         return None
+    try:
+        from pharma_sdl.scores import DISCLAIMER_AR  # عقد الصدق الواحد (تدقيق P0)
+
+        DISCLAIMER_PDF_TEXT = DISCLAIMER_AR.replace("**تنبيه علمي وطبي:** ", "")
+    except ImportError:  # pragma: no cover — نادر: المنصة غير مثبتة
+        DISCLAIMER_PDF_TEXT = "تقرير تعليمي — لا يصلح لقرارات سريرية."
     pdfmetrics.registerFont(TTFont("Tajawal", str(reg)))
     if bold.exists():
         pdfmetrics.registerFont(TTFont("Tajawal-Bold", str(bold)))
@@ -414,11 +426,12 @@ def build_pdf_report(res: PipelineResult, target_name: str = "SARS-CoV-2 Mpro") 
             shape_arabic(
                 "المنهجية: ADME = Lipinski + Veber · الفعالية = RandomForest/Morgan على ChEMBL Mpro · "
                 f"PK/PD = C90 من Hill ثم Cmax فموي (F={PK_PARAMS['F']}, Vd={PK_PARAMS['Vd_L']}L, "
-                f"t½={PK_PARAMS['t_half_h']}h)"
+                f"t½={PK_PARAMS['t_half_h']}h) · pIC50 هنا = تنبؤ ML وليس قياساً تجريبياً"
             ),
             st_small,
         ),
-        Paragraph(shape_arabic("⚠️ تقرير تعليمي — لا يصلح لقرارات سريرية."), st_body),
+        Spacer(1, 4),
+        Paragraph(shape_arabic("⚠️ تنبيه علمي وطبي: " + DISCLAIMER_PDF_TEXT), st_body),
     ]
     doc.build(story)
     return buf.getvalue()

@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 from pharma_sdl.models import ScreeningResult
+from pharma_sdl.scores import disclaimer_md, lanes_legend_md
 
 _LABELS = {
     "ar": {
@@ -26,6 +27,8 @@ _LABELS = {
             "تمرير أفضل المرشحين إلى فحص FRET تأكيدي (محاكى حالياً عبر "
             "`POST /api/v1/lab/assays`)، ثم مراجعة بشرية قبل أي التزام مختبري."
         ),
+        "lanes": "مسارات الدرجات",
+        "disclaimer": "التحذير العلمي والطبي",
         "none": "لا يوجد",
     },
     "en": {
@@ -45,6 +48,8 @@ _LABELS = {
             "Send top hits to confirmatory FRET (currently simulated via "
             "`POST /api/v1/lab/assays`), then human review before any lab commitment."
         ),
+        "lanes": "Score lanes",
+        "disclaimer": "Scientific & medical notice",
         "none": "none",
     },
 }
@@ -101,8 +106,18 @@ def build_markdown(result: ScreeningResult, lang: str = "ar") -> str:
             lines.append(f"- {w}")
         lines.append("")
 
+    lines.append("")
+
+    lines.append(f"## {t['lanes']}")
+    lines.append(lanes_legend_md(lang))
+    lines.append("")
+
     lines.append(f"## {t['next']}")
     lines.append(t["next_text"])
+    lines.append("")
+
+    lines.append(f"## {t['disclaimer']}")
+    lines.append(disclaimer_md(lang))
     return "\n".join(lines) + "\n"
 
 

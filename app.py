@@ -114,6 +114,14 @@ st.title(t(LANG, "app_title"))
 st.markdown(t(LANG, "app_tagline"))
 
 # ═══════════════════════════════════════════════════════════
+# التحذير العلمي/الطبي — عقد صدق (تدقيق P0): ظاهر في الواجهة دائماً،
+# وليس في التوثيق فقط. المصدر الواحد: pharma_sdl.scores
+# ═══════════════════════════════════════════════════════════
+from pharma_sdl.scores import disclaimer_md, lanes_legend_md  # عقد صدق خالص stdlib
+
+st.error(disclaimer_md(LANG), icon="⚠️")
+
+# ═══════════════════════════════════════════════════════════
 # توجيه بيئة stlite (متصفح/WASM) — رسالة صريحة بدل أخطاء استيراد غامضة
 # ═══════════════════════════════════════════════════════════
 from core.runtime import is_stlite  # استيراد موضعي بعد إعداد الصفحة
@@ -634,6 +642,12 @@ with g_reports[0]:
 
             # ── جدول القرار ──
             st.markdown("#### 🏆 أعلى المرشحين — تنبؤ + قرار")
+            st.caption(
+                "🧭 عمود pIC50 هنا = مسار «الفعالية المتنبأ بها (ML)» — ليس قياساً تجريبياً؛ "
+                "القياس التجريبي مسار مستقل من ChEMBL، ودرجة الالتحام مسار ثالث منفصل."
+            )
+            with st.expander("🧭 مسارات الدرجات الثلاثة — كيف تُقرأ الأرقام؟"):
+                st.markdown(lanes_legend_md(LANG))
             show = valid[["pic50", "ci_lo", "ci_hi", "ic50_nm", "dose_needed_mg", "pkpd_icon", "pkpd_verdict", "smiles"]].head(10)
             show = show.copy()
             show.insert(0, "الترتيب", range(1, len(show) + 1))
@@ -901,6 +915,12 @@ with g_tools[2]:
                     st.caption(t(LANG, "dock_compare_caption"))
 
                 st.markdown(f"#### {t(LANG, 'dock_table_title')}")
+                st.caption(
+                    "🧭 درجات هذا الجدول من مسار «الالتحام» حصراً (kcal/mol) — "
+                    "لا تُقارن بدرجات بروتين آخر ولا تُقرأ كفعالية."
+                )
+                with st.expander("🧭 مسارات الدرجات الثلاثة — كيف تُقرأ الأرقام؟"):
+                    st.markdown(lanes_legend_md(LANG))
                 en_df = pd.DataFrame(
                     res.energies,
                     columns=["total", "inter", "intra", "torsions", "intra_best"],
