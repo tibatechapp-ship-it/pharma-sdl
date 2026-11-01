@@ -20,7 +20,7 @@
 
 ---
 
-## 🚀 v0.2.0 — النقلة النوعية: منصة API-First
+## 🚀 v0.3.0 — منصة API-First محصّنة: هوية، ذاكرة، قبول هندسي
 
 > **الخبر:** طبقة جديدة كاملة `pharma_sdl/` تحوّل المشروع من تطبيق تعليمي إلى
 > **منصة اكتشاف أدوية تشغيلية** وفق [الخطة الاستراتيجية v1.1](docs/plan/PharmaSDL_Strategic_Plan_v1.1.pdf) —
@@ -146,6 +146,30 @@ _قيد النشر_
   pharma-sdl loop              # فرضية ← تنفيذ ← تقييم ← ذاكرة ← جولة تالية
   pharma-sdl experiments       # قراءة الذاكرة التجريبية
   ```
+
+### 🛡️ المصادقة والأدوار + العرض العام المحدود + القبول الهندسي (P2)
+
+بعد تقييم كامل (docs/audit/PLATFORM-EVALUATION-P1.md) عُلجت 9 إشكاليات —
+أبرزها: المهام لم تعد تضيع بعد إعادة التشغيل، وبوابة الاعتماد صارت لها هوية:
+
+- **مفاتيح API وأدوار صارمة** — `viewer < scientist < admin`، والترقية
+  الاعتمادية عبر API **admin حصراً** مع توقيع (`actor`) إلزامي:
+  ```bash
+  PHARMA_SDL_API_KEYS="lab:sk-...:admin,batch:sk-...:scientist,read:sk-...:viewer"
+  curl -H "X-API-Key: sk-..." http://localhost:8000/api/v1/auth/whoami
+  ```
+  المفاتيح تُجزَّأ sha256 عند التحميل؛ الوضع المفتوح (تطوير فقط) معلن في /health.
+- **ترقية اعتماد عبر API** — البطاقة كاملة (التاريخ والمرفقات) تُحفظ في السجل:
+  `GET /api/v1/experiments/{id}/validation` ثم `POST …/validation/promote`.
+- **وضع عرض عام محدود** (`PHARMA_SDL_DEMO_MODE=1`) — حد معدل لكل IP
+  (`429` + ترويسات X-RateLimit)، قفل المحركات على `simulation`، سقوف أدنى.
+- **طابور دائم (ADR-0007)** — النتائج تُستعاد والمقاطعة تُوثَّق بعد أي إعادة نشر.
+- **قبول إعادة الربط ضد البلورة** — معيار المجال: RMSD ≤ 2.0 Å:
+  ```bash
+  python scripts/fetch_reference_ligands.py   # مرة واحدة (مُلتزم أصلاً)
+  python scripts/redocking_suite.py           # 7VH8: 0.93 Å · 7CMD: 0.17 Å ✅
+  ```
+- **طريق PostgreSQL جاهز** — `pharma-sdl export-experiments` + deploy/postgres/schema.sql.
 
 ## 🚀 Quick Start
 ```bash

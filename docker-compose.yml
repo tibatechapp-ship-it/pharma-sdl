@@ -1,4 +1,4 @@
-# Pharma SDL v0.2.0 — خدمتان من صورة واحدة:
+# Pharma SDL v0.3.0 — خدمتان من صورة واحدة:
 #   api       : بوابة المنصة API-First (FastAPI/Uvicorn) — OpenAPI على /docs
 #   dashboard : لوحة Streamlit التعليمية القائمة (تبقى تعمل كما هي)
 #
@@ -8,12 +8,22 @@
 services:
   api:
     build: .
-    image: pharma-sdl:0.2.0
+    image: pharma-sdl:0.3.0
     ports:
       - "8000:8000"
     environment:
       PHARMA_SDL_ENGINE_FALLBACK: "1"
       PHARMA_SDL_BOLTZ2_ENDPOINT: ${PHARMA_SDL_BOLTZ2_ENDPOINT:-}
+      # ── P2: المصادقة ووضع العرض والمهام الدائمة ──
+      # مفاتيح API بصيغة id:key:role — فارغ = وضع مفتوح (تطوير فقط! النشر يستوجب مفاتيح)
+      PHARMA_SDL_API_KEYS: ${PHARMA_SDL_API_KEYS:-}
+      # وضع العرض العام المحدود: حد معدل + قفل محركات + سقوف أدنى
+      PHARMA_SDL_DEMO_MODE: ${PHARMA_SDL_DEMO_MODE:-"0"}
+      PHARMA_SDL_RATE_LIMIT: ${PHARMA_SDL_RATE_LIMIT:-"0"}
+      # التخزين الدائم: تثبيت مجلد البيانات يحفظ التجارب والمهام عبر إعادة النشر
+      PHARMA_SDL_DATA_DIR: /app/data
+    volumes:
+      - pharma-data:/app/data
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
       interval: 30s
@@ -22,9 +32,12 @@ services:
     restart: unless-stopped
 
   dashboard:
-    image: pharma-sdl:0.2.0
+    image: pharma-sdl:0.3.0
     build: .
     command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
     ports:
       - "8501:8501"
     restart: unless-stopped
+
+volumes:
+  pharma-data:
