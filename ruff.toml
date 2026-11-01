@@ -14,4 +14,4 @@ ignore = [
 ]
 
 [lint.isort]
-known-first-party = ["core"]
+known-first-party = ["core", "pharma_sdl"]

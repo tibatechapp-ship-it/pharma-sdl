@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pharma-sdl"
+version = "0.2.0"
+description = "Pharma SDL — Arabic-first, API-First drug-discovery platform (curation → screening → affinity → lab → report)"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Tiba Tech — Pharma SDL Team" }]
+requires-python = ">=3.11"
+keywords = ["drug-discovery", "virtual-screening", "boltz2", "vina", "fastapi", "cheminformatics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+
+# الاعتماديات مثبَّتة بدقة — متوافقة سطراً بسطر مع requirements.txt (Hardening P1-1).
+dependencies = [
+    "streamlit==1.66.1",
+    "numpy==2.1.3",
+    "pandas==2.2.3",
+    "scikit-learn==1.5.2",
+    "scipy==1.14.1",
+    "plotly==6.5.2",
+    "rdkit==2026.9.1",
+    "requests==2.33.0",
+    "reportlab==4.4.9",
+    "arabic-reshaper==3.0.1",
+    "python-bidi==0.6.12",
+    "vina==1.2.7",
+    "meeko==0.8.0",
+    "gemmi==0.7.5",
+    "fastapi==0.128.0",
+    "uvicorn==0.44.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "pytest-cov==7.0.0",
+    "ruff==0.17.3",
+    "httpx==0.28.1",
+]
+
+[project.scripts]
+pharma-sdl = "pharma_sdl.cli:main"
+
+[project.urls]
+Repository = "https://github.com/tibatechapp-ship-it/pharma-sdl"
+Documentation = "https://github.com/tibatechapp-ship-it/pharma-sdl/tree/main/docs"
+Changelog = "https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+packages = [
+    "core",
+    "core.clients",
+    "pharma_sdl",
+    "pharma_sdl.api",
+    "pharma_sdl.api.routes",
+    "pharma_sdl.affinity",
+    "pharma_sdl.chemistry",
+    "pharma_sdl.curation",
+    "pharma_sdl.engines",
+    "pharma_sdl.jobs",
+    "pharma_sdl.lab",
+    "pharma_sdl.reporting",
+    "pharma_sdl.screening",
+    "pharma_sdl.targets",
+]

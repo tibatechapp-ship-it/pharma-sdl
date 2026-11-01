@@ -1,0 +1,25 @@
+id,name,smiles,source
+X77-01,X77,CC(C)(C)C1=CC=C(C=C1)N(C(C2=CN=CC=C2)C(=O)NC3CCCCC3)C(=O)C4=CN=CN4,PubChem — مثبط Mpro غير تساهمي (PDB 6W63)
+ENS-01,Ensitrelvir,CN1C=C2C=C(C(=CC2=N1)Cl)NC3=NC(=O)N(C(=O)N3CC4=CC(=C(C=C4F)F)F)CC5=NN(C=N5)C,PubChem — مثبط Mpro غير تساهمي معتمد سريرياً
+BAI-01,Baicalein,C1=CC=C(C=C1)C2=CC(=O)C3=C(O2)C=C(C(=C3O)O)O,PubChem — فلافونيد يرتبط بـMpro غير تساهمياً
+PF8-01,PF-00835231,[H]/N=C\[C@H](C[C@@H]1CCNC1=O)NC(=O)[C@@H]1[C@@H]2[C@H](CN1C(=O)[C@@H](NC(=O)C(F)(F)F)C(C)(C)C)C2(C)C,receptors.json — الليغاند المشتبك في 7VH8
+NIR-01,Nirmatrelvir,CC1(C2C1C(N(C2)C(=O)C(C(C)(C)C)NC(=O)C(F)(F)F)C(=O)NC(CC3CCNC3=O)C#N)C,PubChem — مثبط تساهمي (نيتريل) لاختبار بوابة السياسة
+COV-01,N-phenylacrylamide (trap),C=CC(=O)Nc1ccccc1,trap — أكريلاميد
+COV-02,4-chlorobenzaldehyde (trap),O=Cc1ccc(Cl)cc1,trap — ألدهيد
+COV-03,2-chloro-N-phenylacetamide (trap),O=C(Nc1ccccc1)CCl,trap — كلوروأسيتاميد
+COV-04,phenyl vinyl sulfone (trap),O=S(=O)(C=C)c1ccccc1,trap — فينيل سلفون
+FRG-01,Benzamide,O=C(N)c1ccccc1,fragment
+FRG-02,4-Fluorobenzamide,O=C(N)c1ccc(F)cc1,fragment
+FRG-03,Acetanilide,CC(=O)Nc1ccccc1,fragment
+FRG-04,Paracetamol,CC(=O)Nc1ccc(O)cc1,fragment
+FRG-05,Caffeine,Cn1cnc2c1c(=O)n(C)c(=O)n2C,fragment
+FRG-06,Indole-3-carbinol,OCc1c[nH]c2ccccc12,fragment
+FRG-07,Ibuprofen,CC(C)Cc1ccc(cc1)C(C)C(=O)O,fragment
+FRG-08,Naproxen,COc1ccc2cc(ccc2c1)[C@H](C)C(=O)O,fragment
+FRG-09,Nicotinamide,NC(=O)c1ccncc1,fragment
+FRG-10,Isoniazid,NNC(=O)c1ccncc1,fragment
+FRG-11,Phenylurea,NC(=O)Nc1ccccc1,fragment
+FRG-12,Benzylamine,NCc1ccccc1,fragment
+FRG-13,Diphenyl ether,O(c1ccccc1)c1ccccc1,fragment
+FRG-14,Behenic acid,CCCCCCCCCCCCCCCCCCCC(=O)O,fragment — علم LogP
+FRG-15,Sulfanilamide,Nc1ccc(S(N)(=O)=O)cc1,fragment — سلفوناميد كلاسيكي
