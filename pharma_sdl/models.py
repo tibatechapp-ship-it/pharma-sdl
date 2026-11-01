@@ -11,6 +11,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 from pharma_sdl.scores import DISCLAIMER_AR, DISCLAIMER_EN
+from pharma_sdl.validation.gate import ValidationCard
 
 
 def utcnow_iso() -> str:
@@ -113,6 +114,9 @@ class ScreeningResult(BaseModel):
     # التحذير يسافر مع البيانات وليس في التوثيق فقط.
     disclaimer_ar: str = DISCLAIMER_AR
     disclaimer_en: str = DISCLAIMER_EN
+    # بوابة الاعتماد العلمي (تدقيق P1): كل نتيجة تولد UNVALIDATED —
+    # الترقية بشرية صريحة عبر pharma_sdl.validation.promote حصراً، بلا استثناء.
+    validation: ValidationCard | None = None
 
     def top(self, n: int) -> list[ScoredHit]:
         return self.hits[:n]

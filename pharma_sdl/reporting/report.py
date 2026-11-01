@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from pharma_sdl.models import ScreeningResult
 from pharma_sdl.scores import disclaimer_md, lanes_legend_md
+from pharma_sdl.validation.gate import card_summary
 
 _LABELS = {
     "ar": {
@@ -29,6 +30,7 @@ _LABELS = {
         ),
         "lanes": "مسارات الدرجات",
         "disclaimer": "التحذير العلمي والطبي",
+        "validation": "حالة الاعتماد العلمي",
         "none": "لا يوجد",
     },
     "en": {
@@ -50,6 +52,7 @@ _LABELS = {
         ),
         "lanes": "Score lanes",
         "disclaimer": "Scientific & medical notice",
+        "validation": "Scientific validation state",
         "none": "none",
     },
 }
@@ -69,6 +72,8 @@ def build_markdown(result: ScreeningResult, lang: str = "ar") -> str:
     lines.append(f"- **{t['engine']}:** `{result.engine_used}` (طلب: `{result.engine_requested}`)")
     lines.append(f"- **{t['created']}:** {result.created_at}")
     lines.append(f"- **{t['counts']}:** {result.counts}")
+    if result.validation is not None:
+        lines.append(f"- **{t['validation']}:** {card_summary(result.validation, lang)}")
     lines.append("")
 
     lines.append(f"## {t['hits'].format(n=len(result.hits))}")

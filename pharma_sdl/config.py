@@ -55,6 +55,8 @@ class Settings:
     data_dir: Path = REPO_ROOT / "data"
     # عمر المهمة في الطابور الداخلي قبل التنظيف.
     job_ttl_seconds: int = 3600
+    # سجل التجارب الدائم (تدقيق P1) — الذاكرة التجريبية لا تضيع بعد إعادة التشغيل.
+    experiments_db: Path = REPO_ROOT / "data" / "experiments.sqlite3"
     # عمق البحث في Vina (exhaustiveness) عند تشغيل محرك الربط الفعلي.
     vina_exhaustiveness: int = 8
 
@@ -70,6 +72,12 @@ class Settings:
             cors_origins=_env_str("PHARMA_SDL_CORS", "*"),
             boltz2_endpoint=os.getenv("PHARMA_SDL_BOLTZ2_ENDPOINT") or None,
             data_dir=Path(_env_str("PHARMA_SDL_DATA_DIR", str(REPO_ROOT / "data"))),
+            experiments_db=Path(
+                _env_str(
+                    "PHARMA_SDL_EXPERIMENTS_DB",
+                    str(Path(_env_str("PHARMA_SDL_DATA_DIR", str(REPO_ROOT / "data"))) / "experiments.sqlite3"),
+                )
+            ),
             job_ttl_seconds=_env_int("PHARMA_SDL_JOB_TTL", 3600),
             vina_exhaustiveness=_env_int("PHARMA_SDL_VINA_EXHAUSTIVENESS", 8),
         )

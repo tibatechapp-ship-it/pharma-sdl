@@ -15,8 +15,10 @@ from collections.abc import Iterable
 from pharma_sdl.curation.pipeline import run_curation
 from pharma_sdl.engines.registry import get_engine
 from pharma_sdl.errors import ScreeningError
+from pharma_sdl.experiments.registry import code_version, ligands_fingerprint
 from pharma_sdl.models import LigandInput, ScoredHit, ScreeningResult
 from pharma_sdl.targets.registry import get_target
+from pharma_sdl.validation.gate import default_card
 
 
 def run_screening(
@@ -80,14 +82,30 @@ def run_screening(
         )
 
     elapsed = round(time.perf_counter() - started, 3)
+    run_id = uuid.uuid4().hex[:12]
+    # بوابة الاعتماد (تدقيق P1): كل جولة تولد UNVALIDATED — بطاقة تُحمل
+    # مع النتيجة في الـAPI والتقارير؛ الترقية بشرية صريحة حصراً.
+    validation = default_card(
+        subject=f"screening_run:{run_id}",
+        result_id=run_id,
+        engine=engine.name,
+        method=ranked[0].method if ranked else None,
+        data_version=ligands_fingerprint([l.canonical_smiles for l in report.kept]),
+        code_version=code_version(),
+        limits=(
+            "درجات التحام/تنبؤات حاسوبية — لا تثبت فعالية أو سلامة؛ "
+            "الترقية تتطلب أدلة تجريبية موثقة عبر بوابة الاعتماد."
+        ),
+    )
     return ScreeningResult(
-        run_id=uuid.uuid4().hex[:12],
+        run_id=run_id,
         target_id=target.id,
         target_label_ar=target.label_ar,
         target_label_en=target.label_en,
         engine_requested=engine_name or "default",
         engine_used=engine.name,
         fallback_note=fallback_note,
+        validation=validation,
         counts={
             "input": report.counts.get("input", len(items)),
             "kept": report.counts.get("kept", 0),
