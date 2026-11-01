@@ -21,8 +21,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from pharma_sdl.experiments.registry import ExperimentRegistry  # noqa: E402
-from pharma_sdl.loop.closed_loop import format_lineage, run_closed_loop  # noqa: E402
+from pharma_sdl.experiments.registry import ExperimentRegistry
+from pharma_sdl.loop.closed_loop import format_lineage, run_closed_loop
 
 
 def main() -> int:
