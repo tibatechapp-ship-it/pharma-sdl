@@ -57,6 +57,17 @@ class Settings:
     job_ttl_seconds: int = 3600
     # سجل التجارب الدائم (تدقيق P1) — الذاكرة التجريبية لا تضيع بعد إعادة التشغيل.
     experiments_db: Path = REPO_ROOT / "data" / "experiments.sqlite3"
+    # طابور المهام الدائم (ADR-0007) — النتائج تُستعاد والمقاطعة تُوثَّق لا تُخفى.
+    jobs_db: Path = REPO_ROOT / "data" / "jobs.sqlite3"
+    # المصادقة وRBAC (P2): مفاتيح API بصيغة id:key:role مفصولة بفواصل — فارغ = وضع مفتوح.
+    api_keys: str = ""
+    # وضع العرض العام المحدود (P2): سقوف أدنى + قفل المحركات + حد معدل.
+    demo_mode: bool = False
+    demo_max_ligands: int = 25
+    demo_max_top_n: int = 10
+    demo_allowed_engines: str = "simulation"
+    # حد المعدل لكل IP (طلبات/دقيقة) — 0 يعطّله؛ وضع العرض يفرض قيمة افتراضية.
+    rate_limit_per_min: int = 0
     # عمق البحث في Vina (exhaustiveness) عند تشغيل محرك الربط الفعلي.
     vina_exhaustiveness: int = 8
 
@@ -79,6 +90,18 @@ class Settings:
                 )
             ),
             job_ttl_seconds=_env_int("PHARMA_SDL_JOB_TTL", 3600),
+            jobs_db=Path(
+                _env_str(
+                    "PHARMA_SDL_JOBS_DB",
+                    str(Path(_env_str("PHARMA_SDL_DATA_DIR", str(REPO_ROOT / "data"))) / "jobs.sqlite3"),
+                )
+            ),
+            api_keys=_env_str("PHARMA_SDL_API_KEYS", ""),
+            demo_mode=_env_bool("PHARMA_SDL_DEMO_MODE", False),
+            demo_max_ligands=_env_int("PHARMA_SDL_DEMO_MAX_LIGANDS", 25),
+            demo_max_top_n=_env_int("PHARMA_SDL_DEMO_MAX_TOP_N", 10),
+            demo_allowed_engines=_env_str("PHARMA_SDL_DEMO_ENGINES", "simulation"),
+            rate_limit_per_min=_env_int("PHARMA_SDL_RATE_LIMIT", 0),
             vina_exhaustiveness=_env_int("PHARMA_SDL_VINA_EXHAUSTIVENESS", 8),
         )
 
