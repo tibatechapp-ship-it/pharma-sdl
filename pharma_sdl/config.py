@@ -70,6 +70,11 @@ class Settings:
     rate_limit_per_min: int = 0
     # عمق البحث في Vina (exhaustiveness) عند تشغيل محرك الربط الفعلي.
     vina_exhaustiveness: int = 8
+    # ── P3: التخزين الحي — خلفية السجل التجريبي وطابور المهام ──
+    # sqlite (الافتراضي) أو postgres — العقود نفسها حرفياً (ADR-0008)؛
+    # postgres يستوجب psycopg + DSN صريحاً — لا ترقية صامتة ولا ادعاء بلا خدمة.
+    store_backend: str = "sqlite"
+    pg_dsn: str | None = None
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -103,6 +108,8 @@ class Settings:
             demo_allowed_engines=_env_str("PHARMA_SDL_DEMO_ENGINES", "simulation"),
             rate_limit_per_min=_env_int("PHARMA_SDL_RATE_LIMIT", 0),
             vina_exhaustiveness=_env_int("PHARMA_SDL_VINA_EXHAUSTIVENESS", 8),
+            store_backend=_env_str("PHARMA_SDL_STORE", "sqlite").lower(),
+            pg_dsn=os.getenv("PHARMA_SDL_PG_DSN") or None,
         )
 
 

@@ -20,6 +20,46 @@
 
 ---
 
+## 🚀 v0.4.0 — منصة API-First: تخزين حي حقيقي + حلقة كخدمة (P3)
+
+> **الجديد في v0.4.0:** إكمال وعد ADR-0007 بكود حي مُختبر فعلاً — مخزنان فوق
+> PostgreSQL بنفس العقود حرفياً، تُختبر على خادم PostgreSQL مضمّن (لا mocks)،
+> والحلقة المغلقة تصبح نقطة نهاية: `POST /api/v1/loop/runs` — ثلاث جولات
+> متسلسلة بالأسلاف في مهمة دائمة، كلها UNVALIDATED (بوابة الاعتماد بشرية حصراً).
+> كل ما في v0.3.0 أدناه يعمل كما هو بلا أي كسر.
+
+**الترقية الحية صارت زراً لا مشروعاً:**
+
+```bash
+# الافتراضي — SQLite الدائم (بلا خدمات):
+uvicorn pharma_sdl.api.app:create_app --factory --port 8000
+
+# PostgreSQL الحي (ADR-0008) — نفس العقود حرفياً:
+pip install 'pharma-sdl[pg]'
+export PHARMA_SDL_STORE=postgres
+export PHARMA_SDL_PG_DSN=postgresql://user:pass@host:5432/pharma_sdl
+#   أو بالحاويات: docker compose --profile pg up --build
+
+# ترحيل الذاكرة القديمة:
+pharma-sdl export-experiments --db data/experiments.sqlite3 --out exp.jsonl
+pharma-sdl import-experiments --db "$PHARMA_SDL_PG_DSN" --in exp.jsonl
+```
+
+نقاط نهاية P3:
+
+```bash
+# الحلقة المغلقة كخدمة — ثلاث جولات (خط أساس ← استكشاف ← توظيف) مهمة دائمة
+curl -s -X POST localhost:8000/api/v1/loop/runs \
+  -H 'Content-Type: application/json' -d '{"target_id": "7VH8_A", "top_n": 3}'
+curl -s localhost:8000/api/v1/loop/runs/<job_id> | python3 -m json.tool
+# → rounds: 3 متسلسلة بالأسلاف، كلها UNVALIDATED
+
+# عدّادات صادقة من الذاكرة الحية (sqlite | postgres معلن في /health أيضاً)
+curl -s localhost:8000/api/v1/metrics | python3 -m json.tool
+```
+
+---
+
 ## 🚀 v0.3.0 — منصة API-First محصّنة: هوية، ذاكرة، قبول هندسي
 
 > **الخبر:** طبقة جديدة كاملة `pharma_sdl/` تحوّل المشروع من تطبيق تعليمي إلى
@@ -69,7 +109,7 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 ```
 
 📖 التفاصيل الكاملة: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) ·
-[قرارات التصميم ADR-0001…0005](docs/adr/) · [CHANGELOG](CHANGELOG.md)
+[قرارات التصميم ADR-0001…0008](docs/adr/) · [CHANGELOG](CHANGELOG.md)
 
 ---
 
@@ -215,6 +255,9 @@ Python 3.11 | **FastAPI (منصة v0.2.0)** | Streamlit | RDKit | AutoDock Vina 
 | 10 | التصنيف الدوائي ATC (23 مجموعة + RxNorm حي) + رسم 2D + إثراء MIC بالمجموعات | ✅ |
 | 11 | قياس TDC · تحسين Predict بـdescriptors · دفتر Boltz-2 | 📋 [ROADMAP-2026](docs/ROADMAP-2026.md) · [الاستراتيجية](docs/STRATEGY-2026.md) |
 | **12** | **النقلة النوعية: منصة API-First — `pharma_sdl/` بـ9 وحدات، FastAPI، Vina حقيقي خلف عقد محركات، بوابة التساهمية، Docker، 46 اختباراً** | ✅ [v0.2.0](CHANGELOG.md) · [المعمارية](docs/ARCHITECTURE.md) |
+| **P0–P1** | التدقيق العلمي المستقل (scaffold split، ثلاث درجات، تقرير بأرقام حقيقية) + بوابة الاعتماد الأربع حالات + السجل التجريبي الدائم + الحلقة المغلقة | ✅ [v0.2.x](CHANGELOG.md) |
+| **P2** | المصادقة وRBAC (admin حصراً يرقّى) + وضع عرض محدود + مهام دائمة (SQLite) + جناح redocking بلورية مرجعية (RMSD ≤ 2 Å) | ✅ [v0.3.0](CHANGELOG.md) · [ADR-0006/0007](docs/adr/) |
+| **P3** | التخزين الحي الحقيقي: PostgreSQL بنفس العقود (مُختبر على خادم مضمّن — لا mocks) + الحلقة المغلقة كخدمة + مقاييس صادقة + ترقية JSONL من طرف إلى طرف | ✅ [v0.4.0](CHANGELOG.md) · [ADR-0008](docs/adr/ADR-0008-live-postgres-loop-service.md) |
 
 ### إعادة توليد المستقبلات المُجهّزة
 ```bash

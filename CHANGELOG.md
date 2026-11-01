@@ -2,6 +2,66 @@
 
 كل التغييرات الجوهرية تُوثّق هنا، وفق [Keep a Changelog](https://keepachangelog.com/) وإصدارات دلالية.
 
+## [0.4.0] — 2026-11-01 — P3: التخزين الحي الحقيقي + الحلقة كخدمة
+
+إكمال وعد ADR-0007 المؤجَّل بكود حي مُختبر فعلاً — لا mocks: خادم PostgreSQL
+مضمّن (pgserver) يشغّل اختبارات العقد في CI ومحلياً. المبدأ الحاكم: **العقد
+نفسه حرفياً على أي خلفية، وفشل الخدمة خطأ مترجم لا انهيار صامت.**
+
+### Added
+- **مخزن تجارب حي فوق PostgreSQL** (`experiments/pg_store.py`):
+  `PostgresExperimentStore` بنفس دوال `ExperimentRegistry` حرفياً — payload
+  كائن JSONB كامل (لا نص مضاعف الترميز — استعلامات `payload->>'…'` تعمل)،
+  مخطط ينصب نفسه مطابقاً لـdeploy/postgres/schema.sql بالمفتاح الأجنبي على
+  `parent_experiment_id`، وبطاقة الاعتماد تنجو مع التجربة كما في P2.
+- **طابور مهام حي فوق PostgreSQL** (`jobs/pg_store.py`): `PostgresJobStore`
+  بنفس دوال `SQLiteJobStore` — توثيق المقاطع عند الإقلاع، تنظيف TTL، ونتائج
+  pydantic تعود كما كُتبت.
+- **اختيار الخلفية من الإعدادات**: `PHARMA_SDL_STORE=sqlite|postgres` +
+  `PHARMA_SDL_PG_DSN` — غياب DSN أو psycopg خطأ صريح مُعلّل (`PlatformError`)؛
+  فشل الاتصال أثناء التشغيل `store_unavailable` (503). `/health` يعلن
+  `store_backend` — لا خلفية خفية.
+- **الحلقة المغلقة كخدمة** (`api/routes/loop.py` + بارامتر `registry` اختياري
+  في `run_closed_loop`): `POST /api/v1/loop/runs` (scientist) مهمة دائمة تشغّل
+  ثلاث جولات متسلسلة بالأسلاف في سجل المنصة نفسه — sqlite أو postgres بنفس
+  الكود؛ `GET /api/v1/loop/runs/{id}` يقرأها من الطابور الدائم. كل النتائج
+  UNVALIDATED — لا ترقية آلية أبداً. وضع العرض: قفل المحرك + سقف top_n
+  مفروض في مسار التنفيذ.
+- **مقاييس صادقة** (`GET /api/v1/metrics`, viewer): تجارب بحسب الحالة وحالة
+  الاعتماد (`validation_stats` جديدة على الخلفيتين)، مهام بحسب الحالة،
+  الخلفية الحية، المحركات — لحظة الطلب بلا كاش.
+- **اختبارات PostgreSQL الحقيقية** (`tests/test_platform_pg_stores.py`):
+  تكافؤ العقد بين الخلفيتين على تسلسل موحد + استرجاع بعد إعادة التشغيل +
+  توثيق المقاطع + ترقية من طرف إلى طرف: حلقة كاملة SQLite → JSONL →
+  PostgreSQL وسلسلة الأسلاف تنجو حرفياً. تُخطّى بصدق إن غاب pgserver.
+- **اختبارات الحلقة كخدمة والمقاييس** (`test_platform_loop_api.py`,
+  `test_platform_metrics.py`): الأدوار (viewer ممنوع من الإطلاق)، قفل وضع
+  العرض، 404 الصادق، والعدّادات تطابق المخازن لحظة الطلب.
+- **ADR-0008** — القرار والبدائل المرفوضة (Celery/Redis، ORM، connection pool)
+  واستراتيجية الاختبار بلا mocks.
+- **docker-compose**: خدمة `postgres` بملف تعريف `pg` (`--profile pg`) +
+  متغيرات P3 للـAPI + volume مستقل لقاعدة البيانات.
+
+### Fixed
+- `import_jsonl` يرتب السجلات زمنياً صعوداً قبل الكتابة — الاستيراد يعمل فوق
+  مخازن المفاتيح الأجنبية (PostgreSQL) بأي ترتيب ملف، وكان يفشل مع الترتيب
+  التنازلي الافتراضي للتصدير (طفل قبل أبيه).
+
+### Changed
+- الإصدار إلى **0.4.0** (pyproject + `__init__` + الصورة).
+- `pharma_sdl.jobs` يصدّر `reset_job_store` رسمياً (كان داخلياً للاختبارات).
+- `pharma-sdl export-experiments` / `import-experiments` يتعرّفان على DSN
+  (`postgresql://…`) في `--db` ويوجّهانه إلى PostgreSQL الحي — الأوامر الموثقة
+  للترحيل تعمل حرفياً (كانت تنشئ ملف SQLite باسم الـDSN!).
+- بوابة الجودة (platform.yml) تشغّل اختبارات P3 الثلاثة الجديدة — pgserver
+  من requirements-dev يجعل نفس الاختبارات تعمل محلياً وفي CI.
+- deps التطوير: `psycopg[binary]==3.2.3` + `pgserver==0.1.4`؛ extras جديد
+  `pg` للتشغيل الحي (`pip install 'pharma-sdl[pg]'`).
+
+### Security
+- لا مفاتيح في الكود — DSN من البيئة حصراً؛ فشل الاتصال لا يسرّب كلمة
+  السر في التتبعات المعرّضة (رسالة منصة مختصرة، والاستثناء الأصلي محفوظ بسلسلة الـcause).
+
 ## [0.3.0] — 2026-11-01 — P2: هوية بشرية للاعتماد + منصة دائمة + قبول هندسي
 
 بعد تقييم كامل لحالة ما بعد P1 (docs/audit/PLATFORM-EVALUATION-P1.md) —

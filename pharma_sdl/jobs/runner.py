@@ -162,6 +162,14 @@ class SQLiteJobStore:
         self._cleanup()
         return [self._row_to_job(r) for r in rows]
 
+    def stats(self) -> dict[str, int]:
+        """توزيع المهام على الحالات — عدّاد تشغيلي صادق للمقاييس (P3)."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT status, COUNT(*) AS n FROM jobs GROUP BY status"
+            ).fetchall()
+        return {r["status"]: int(r["n"]) for r in rows}
+
     # ── واجهة التنفيذ (نفس العقد) ────────────────────────────
 
     def submit(self, kind: str, fn: Callable[..., Any], *args: Any) -> JobInfo:
@@ -239,17 +247,26 @@ _store_lock = threading.Lock()
 
 
 def get_job_store() -> JobStore:
-    """نسخة وحيدة من الخزّن الدائم بإعدادات المنصة."""
+    """نسخة وحيدة من الخزّن بإعدادات المنصة — sqlite أو postgres وفق PHARMA_SDL_STORE."""
     global _store
     if _store is None:
         with _store_lock:
             if _store is None:
                 settings = get_settings()
-                _store = SQLiteJobStore(
-                    db_path=settings.jobs_db,
-                    max_workers=2,
-                    ttl_seconds=settings.job_ttl_seconds,
-                )
+                if settings.store_backend == "postgres":
+                    from pharma_sdl.jobs.pg_store import PostgresJobStore
+
+                    _store = PostgresJobStore(
+                        dsn=settings.pg_dsn or "",
+                        max_workers=2,
+                        ttl_seconds=settings.job_ttl_seconds,
+                    )
+                else:
+                    _store = SQLiteJobStore(
+                        db_path=settings.jobs_db,
+                        max_workers=2,
+                        ttl_seconds=settings.job_ttl_seconds,
+                    )
     return _store
 
 

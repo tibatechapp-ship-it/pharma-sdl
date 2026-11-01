@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+from pharma_sdl.experiments.registry import ExperimentRecord
 from pharma_sdl.models import AssayResult, LigandInput, ScreeningResult
 from pharma_sdl.validation.gate import ValidationState
 
@@ -15,6 +16,7 @@ class HealthOut(BaseModel):
     engines_available: list[str]
     auth_mode: str = "open"  # open | enforced — لا وضع مصادقة خفي (P2)
     demo_mode: bool = False  # وضع العرض العام المحدود صادق ومعلن (P2)
+    store_backend: str = "sqlite"  # sqlite | postgres — الخلفية معلنة لا خفية (P3)
 
 
 class VersionOut(BaseModel):
@@ -115,3 +117,39 @@ class ValidationRevokeIn(BaseModel):
 
     reason: str = Field(min_length=1)
     actor: str = Field(min_length=1)
+
+
+# ── الحلقة كخدمة (P3) ──
+class LoopCreate(BaseModel):
+    """طلب حلقة مغلقة — ثلاث جولات (خط أساس ← استكشاف ← توظيف) في مهمة دائمة."""
+
+    target_id: str = "7VH8_A"
+    engine: str | None = Field(None, description="الافتراضي: simulation — حتمي ومتاح دائماً")
+    top_n: int = Field(5, ge=1, le=25, description="أفضل المرشحين لكل جولة")
+
+
+class LoopRunOut(BaseModel):
+    """حالة حلقة مغلقة — الجولات الثلاث متسلسلة بالأسلاف، كلها UNVALIDATED."""
+
+    job_id: str
+    kind: str = "closed_loop"
+    status: str
+    error: str | None = None
+    rounds: list[ExperimentRecord] | None = None  # None حتى اكتمال المهمة
+    round_count: int = 0
+    note_ar: str = ""
+    note_en: str = ""
+
+
+# ── المقاييس التشغيلية (P3) ──
+class MetricsOut(BaseModel):
+    """عدّادات صادقة من الذاكرة الحية — لا تقديرات ولا تجميل."""
+
+    version: str
+    registry_backend: str
+    experiments_by_status: dict[str, int]
+    experiments_by_validation_state: dict[str, int]
+    jobs_by_status: dict[str, int]
+    engines_available: list[str]
+    auth_mode: str
+    demo_mode: bool

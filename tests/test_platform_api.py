@@ -35,7 +35,10 @@ def test_health_and_version(client):
 
     version = client.get("/api/v1/version")
     assert version.status_code == 200
-    assert version.json()["version"] == "0.3.0"
+    # مصدر الحقيقة الوحيد — يبقى صادقاً مع كل ترقية إصدار
+    from pharma_sdl import __version__
+
+    assert version.json()["version"] == __version__
 
 
 def test_root_points_to_docs(client):

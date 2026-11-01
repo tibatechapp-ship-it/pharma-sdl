@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pharma-sdl"
-version = "0.3.0"
+version = "0.4.0"
 description = "Pharma SDL — Arabic-first, API-First drug-discovery platform (curation → screening → affinity → lab → report)"
 readme = "README.md"
 license = { text = "MIT" }
@@ -41,11 +41,16 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+pg = [
+    "psycopg[binary]==3.2.3",
+]
 dev = [
     "pytest==9.1.1",
     "pytest-cov==7.0.0",
     "ruff==0.17.3",
     "httpx==0.28.1",
+    "psycopg[binary]==3.2.3",
+    "pgserver==0.1.4",
 ]
 
 [project.scripts]

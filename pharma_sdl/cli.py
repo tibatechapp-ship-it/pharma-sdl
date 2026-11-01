@@ -149,24 +149,37 @@ def _cmd_experiments(args: argparse.Namespace) -> int:
     return 0
 
 
+def _registry_from_db_arg(db: str):
+    """الخلفية من شكل الوسيطة: DSN (postgresql://) → PostgreSQL الحي، وإلا SQLite.
+
+    وعد ADR-0007/0008 بلا مفاجآت: نفس الأمر يرحّر الذاكرة إلى الخلفية الحية،
+    والكشف صريح من البادئة لا من التخمين.
+    """
+    if db.startswith(("postgres://", "postgresql://")):
+        from pharma_sdl.experiments.pg_store import PostgresExperimentStore
+
+        return PostgresExperimentStore(db)
+    from pharma_sdl.experiments.registry import ExperimentRegistry
+
+    return ExperimentRegistry(db)
+
+
 def _cmd_export_experiments(args: argparse.Namespace) -> int:
     """تصدير السجل التجريبي إلى JSONL — طريق الترقية إلى PostgreSQL (ADR-0007)."""
     from pharma_sdl.experiments.portability import export_jsonl
-    from pharma_sdl.experiments.registry import ExperimentRegistry
 
-    registry = ExperimentRegistry(args.db)
+    registry = _registry_from_db_arg(args.db)
     count = export_jsonl(registry, args.out)
     print(f"صُدّرت {count} تجربة إلى {args.out}")
-    print("الخطوة التالية: psql -f deploy/postgres/schema.sql ثم الاستيراد")
+    print("الخطوة التالية: pharma-sdl import-experiments --db postgresql://… --in هذا الملف")
     return 0
 
 
 def _cmd_import_experiments(args: argparse.Namespace) -> int:
     """استيراد تجارب من JSONL — المعرّفات وسلاسل الأسلاف محفوظة حرفياً."""
     from pharma_sdl.experiments.portability import import_jsonl
-    from pharma_sdl.experiments.registry import ExperimentRegistry
 
-    registry = ExperimentRegistry(args.db)
+    registry = _registry_from_db_arg(args.db)
     count = import_jsonl(registry, args.input, overwrite=args.overwrite)
     print(f"استُوردت {count} تجربة إلى {args.db}")
     return 0

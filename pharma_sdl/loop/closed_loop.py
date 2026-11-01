@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from rdkit import Chem
 
@@ -32,6 +33,9 @@ from pharma_sdl.experiments.registry import (
 from pharma_sdl.models import LigandInput
 from pharma_sdl.screening.runner import run_screening
 from pharma_sdl.validation.gate import ValidationState
+
+if TYPE_CHECKING:  # pragma: no cover — العقد المضاعف (sqlite | postgres) موثّق نمطياً
+    from pharma_sdl.experiments.pg_store import PostgresExperimentStore
 
 DEMO_CSV = Path(__file__).resolve().parent.parent.parent / "data" / "demo_ligands.csv"
 
@@ -107,11 +111,12 @@ def _screen_and_complete(
 
 
 def run_closed_loop(
-    db_path: str | Path,
+    db_path: str | Path | None = None,
     target_id: str = "7VH8_A",
     ligands_csv: str | Path | None = None,
     top_n: int = 5,
     engine_name: str | None = None,
+    registry: ExperimentRegistry | PostgresExperimentStore | None = None,
 ) -> list[ExperimentRecord]:
     """حلقة واحدة مغلقة بثلاث جولات — كل جولة تقرأ ذاكرة سابقتها.
 
@@ -119,9 +124,18 @@ def run_closed_loop(
     الجولة 2 (explore): استبعاد مرشحي الجولة 1 (من الذاكرة!) وتجريب البقية.
     الجولة 3 (exploit): توظيف التعلم — إعادة فرز دمج الأفضل من الجولتين.
 
+    `registry` (P3): سجل خارجي مشترك — خدمة الـAPI تكتب في سجل المنصة نفسه
+    (sqlite أو postgres) بدل قاعدة مستقلة؛ وعند إهماله تُبنى قاعدة على `db_path`
+    (السلوك التاريخي للمستدعين الحاليين حرفياً).
+
     تُرجع السجلات بترتيب الجولات؛ سلسلة parent_experiment_id تكتب القصة.
     """
-    registry = ExperimentRegistry(db_path)
+    if registry is None:
+        if db_path is None:
+            from pharma_sdl.config import get_settings
+
+            db_path = get_settings().experiments_db
+        registry = ExperimentRegistry(db_path)
     csv_path = Path(ligands_csv) if ligands_csv else DEMO_CSV
     all_ligands = load_ligands_csv(csv_path)
     all_smiles = [l.smiles for l in all_ligands]

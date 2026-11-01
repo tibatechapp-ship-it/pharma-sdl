@@ -21,6 +21,7 @@ def health() -> HealthOut:
         engines_available=[e.name for e in list_engines() if e.available],
         auth_mode=auth_mode_label(),
         demo_mode=app_settings().demo_mode,
+        store_backend=app_settings().store_backend,
     )
 
 

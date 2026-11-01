@@ -1,14 +1,16 @@
-# Pharma SDL v0.3.0 — خدمتان من صورة واحدة:
+# Pharma SDL v0.4.0 — خدمتان من صورة واحدة + PostgreSQL اختياري (P3):
 #   api       : بوابة المنصة API-First (FastAPI/Uvicorn) — OpenAPI على /docs
 #   dashboard : لوحة Streamlit التعليمية القائمة (تبقى تعمل كما هي)
+#   postgres  : خلفية التخزين الحية (P3) — تُفعَّل بملف التعريف "pg" فقط
 #
 # تشغيل:  docker compose up --build
+# مع PostgreSQL الحي (P3):  docker compose --profile pg up --build
 # Boltz-2 (اختياري):  PHARMA_SDL_BOLTZ2_ENDPOINT=https://... docker compose up api
 
 services:
   api:
     build: .
-    image: pharma-sdl:0.3.0
+    image: pharma-sdl:0.4.0
     ports:
       - "8000:8000"
     environment:
@@ -22,6 +24,9 @@ services:
       PHARMA_SDL_RATE_LIMIT: ${PHARMA_SDL_RATE_LIMIT:-"0"}
       # التخزين الدائم: تثبيت مجلد البيانات يحفظ التجارب والمهام عبر إعادة النشر
       PHARMA_SDL_DATA_DIR: /app/data
+      # ── P3: التخزين الحي — يُفعَّل تلقائياً حين تعمل خدمة postgres (ملف التعريف pg) ──
+      PHARMA_SDL_STORE: ${PHARMA_SDL_STORE:-sqlite}
+      PHARMA_SDL_PG_DSN: ${PHARMA_SDL_PG_DSN:-}
     volumes:
       - pharma-data:/app/data
     healthcheck:
@@ -32,12 +37,29 @@ services:
     restart: unless-stopped
 
   dashboard:
-    image: pharma-sdl:0.3.0
+    image: pharma-sdl:0.4.0
     build: .
     command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
     ports:
       - "8501:8501"
     restart: unless-stopped
 
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["pg"]
+    environment:
+      POSTGRES_USER: pharma
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pharma-local-change-me}
+      POSTGRES_DB: pharma_sdl
+    volumes:
+      - pharma-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pharma -d pharma_sdl"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 volumes:
   pharma-data:
+  pharma-pg:

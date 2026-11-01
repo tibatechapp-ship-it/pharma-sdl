@@ -62,3 +62,10 @@ class RateLimitError(PlatformError):
 
     http_status = 429
     code = "rate_limited"
+
+
+class StoreUnavailableError(PlatformError):
+    """خلفية التخزين الحية غير قابلة للوصول (P3) — فشل صريح لا ادعاء تشغيل."""
+
+    http_status = 503
+    code = "store_unavailable"

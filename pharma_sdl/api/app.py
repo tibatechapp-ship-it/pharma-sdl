@@ -21,7 +21,16 @@ from pharma_sdl import __version__
 from pharma_sdl.api.auth import Role, auth_mode_label, require_role, resolve_principal
 from pharma_sdl.api.demo import install_rate_limit
 from pharma_sdl.api.deps import app_settings
-from pharma_sdl.api.routes import engines, experiments, health, lab, screening, targets
+from pharma_sdl.api.routes import (
+    engines,
+    experiments,
+    health,
+    lab,
+    loop,
+    metrics,
+    screening,
+    targets,
+)
 from pharma_sdl.engines.registry import list_engines
 from pharma_sdl.errors import PlatformError
 
@@ -34,6 +43,8 @@ _DESCRIPTION = f"""**Pharma SDL — منصة اكتشاف الأدوية API-Fir
 * `POST /api/v1/screening/runs` — جولة فرز (202 غير متزامنة)
 * `GET /api/v1/screening/runs/{{id}}/report` — تقرير Markdown ثنائي اللغة
 * `POST /api/v1/lab/assays` — فحص FRET (محاكى — simulated=true دائماً حتى الدمج الحقيقي)
+* `POST /api/v1/loop/runs` — حلقة مغلقة كخدمة: ثلاث جولات متسلسلة بالأسلاف (P3)
+* `GET /api/v1/metrics` — عدّادات صادقة للذاكرة العلمية والمهام (P3)
 
 المحرك الافتراضي `simulation` حتمي ومتاح دائماً — الوصول لـ`vina` يتطلب
 vina/meeko المحليين، ولـ`boltz2` بوابة `PHARMA_SDL_BOLTZ2_ENDPOINT`.
@@ -83,6 +94,8 @@ def create_app() -> FastAPI:
     app.include_router(screening.router, prefix="/api/v1")
     app.include_router(lab.router, prefix="/api/v1")
     app.include_router(experiments.router, prefix="/api/v1")
+    app.include_router(loop.router, prefix="/api/v1")
+    app.include_router(metrics.router, prefix="/api/v1")
 
     @app.get(
         "/api/v1/auth/whoami",

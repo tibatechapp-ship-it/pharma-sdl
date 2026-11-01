@@ -22,7 +22,7 @@ v0.2.0 — النقلة النوعية: من تطبيق تعليمي Streamlit �
 
 from __future__ import annotations
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __all__ = ["Settings", "__version__", "get_settings"]
 
 

@@ -280,6 +280,28 @@ class ExperimentRegistry:
             ).fetchall()
         return {r["status"]: r["n"] for r in rows}
 
+    def validation_stats(self) -> dict[str, int]:
+        """توزيع حالات الاعتماد — عدّاد تشغيلي صادق (P3 /metrics).
+
+        json_extract متاح في SQLite المدمجة حديثاً؛ وعند غيابه يُعدّ من
+        الـpayload مباشرة — العدّاد صادق بأي حال، والترتيب ثابت.
+        """
+        try:
+            with self._connect() as conn:
+                rows = conn.execute(
+                    "SELECT json_extract(payload, '$.validation_state') AS state, "
+                    "COUNT(*) AS n FROM experiments GROUP BY state ORDER BY state"
+                ).fetchall()
+            return {r["state"] or "unknown": int(r["n"]) for r in rows}
+        except sqlite3.OperationalError:  # pragma: no cover — SQLite قديمة بلا JSON1
+            counts: dict[str, int] = {}
+            with self._connect() as conn:
+                rows = conn.execute("SELECT payload FROM experiments").fetchall()
+            for row in rows:
+                state = json.loads(row["payload"]).get("validation_state") or "unknown"
+                counts[state] = counts.get(state, 0) + 1
+            return dict(sorted(counts.items()))
+
     def count(self) -> int:
         """إجمالي التجارب في السجل — بلا تحميل payloads."""
         with self._connect() as conn:

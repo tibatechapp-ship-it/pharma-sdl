@@ -42,17 +42,23 @@ def import_jsonl(
             f"ملف الاستيراد غير موجود: {path}", f"Import file not found: {path}"
         )
     imported = 0
+    # الترتيب الزمني الصاعد قبل الكتابة: مخازن FK (PostgreSQL — ADR-0008)
+    # ترفض طفلاً بلا أبيض، والتصدير أحدث-أولاً — الفرز يجعل الاستيراد
+    # صالحاً على أي خلفية وبأي ترتيب ملف، بلا تغيير في المحتوى.
+    records: list[ExperimentRecord] = []
     for i, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         raw = raw.strip()
         if not raw:
             continue
         try:
-            record = ExperimentRecord.model_validate_json(raw)
+            records.append(ExperimentRecord.model_validate_json(raw))
         except ValueError as exc:
             raise ValidationError(
                 f"السطر {i} ليس تجربة صالحة: {exc}",
                 f"Line {i} is not a valid experiment record: {exc}",
             ) from exc
+    records.sort(key=lambda r: r.created_at)
+    for record in records:
         if not overwrite and registry.get(record.experiment_id) is not None:
             continue
         registry.upsert(record)
