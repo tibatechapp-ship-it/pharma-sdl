@@ -31,10 +31,10 @@ jobs:
           pip install -e . --no-deps
 
       - name: Ruff — lint the platform layer
-        run: ruff check pharma_sdl tests/test_platform_targets.py tests/test_platform_chemistry.py tests/test_platform_curation.py tests/test_platform_engines.py tests/test_platform_screening.py tests/test_platform_api.py tests/test_platform_cli.py
+        run: ruff check pharma_sdl tests/test_platform_targets.py tests/test_platform_chemistry.py tests/test_platform_curation.py tests/test_platform_engines.py tests/test_platform_screening.py tests/test_platform_api.py tests/test_platform_cli.py tests/test_platform_validation.py tests/test_platform_experiments.py
 
       - name: Platform unit + API tests
-        run: pytest tests/test_platform_targets.py tests/test_platform_chemistry.py tests/test_platform_curation.py tests/test_platform_engines.py tests/test_platform_screening.py tests/test_platform_api.py tests/test_platform_cli.py -v --no-cov
+        run: pytest tests/test_platform_targets.py tests/test_platform_chemistry.py tests/test_platform_curation.py tests/test_platform_engines.py tests/test_platform_screening.py tests/test_platform_api.py tests/test_platform_cli.py tests/test_platform_validation.py tests/test_platform_experiments.py -v --no-cov
 
       - name: CLI smoke — engines, targets, tiny screening run
         run: |
@@ -42,6 +42,9 @@ jobs:
           python -m pharma_sdl.cli engines
           python -m pharma_sdl.cli targets
           python -m pharma_sdl.cli screen --target 7VH8_A --ligands data/demo_ligands.csv --top 3
+
+      - name: Closed-loop smoke — documented single closed loop in a temp registry
+        run: python -m pharma_sdl.cli loop --db /tmp/loop-smoke.sqlite3 --top 3
 
   docker:
     name: Docker build + health smoke

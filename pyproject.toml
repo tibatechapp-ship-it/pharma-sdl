@@ -67,9 +67,12 @@ packages = [
     "pharma_sdl.chemistry",
     "pharma_sdl.curation",
     "pharma_sdl.engines",
+    "pharma_sdl.experiments",
     "pharma_sdl.jobs",
     "pharma_sdl.lab",
+    "pharma_sdl.loop",
     "pharma_sdl.reporting",
     "pharma_sdl.screening",
     "pharma_sdl.targets",
+    "pharma_sdl.validation",
 ]

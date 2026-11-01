@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 from pharma_sdl import __version__
+from pharma_sdl.config import get_settings
 
 
 def _cmd_engines(_args: argparse.Namespace) -> int:
@@ -90,6 +91,64 @@ def _cmd_assay(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_loop(args: argparse.Namespace) -> int:
+    """الحلقة المغلقة — فرضية ← تنفيذ ← تقييم ← ذاكرة ← جولة تالية."""
+    from pharma_sdl.experiments.registry import ExperimentRegistry
+    from pharma_sdl.loop.closed_loop import format_lineage, run_closed_loop
+
+    records = run_closed_loop(
+        db_path=args.db,
+        target_id=args.target,
+        ligands_csv=args.ligands,
+        top_n=args.top,
+    )
+    registry = ExperimentRegistry(args.db)
+    print(f"اكتملت الحلقة — {len(records)} تجارب موثقة في {args.db}")
+    for rec in records:
+        role = rec.parameters.get("role", "?")
+        best = rec.top_hits[0] if rec.top_hits else None
+        best_txt = (
+            f"{best['name'] or best['smiles'][:24]} @ {best['kcal']:.2f} kcal/mol"
+            if best
+            else "—"
+        )
+        print(f"  [{rec.experiment_id}] {role:<16} {best_txt} — {rec.validation_state}")
+    print()
+    print("سلسلة الذاكرة (كما ستُقرأ في الجولة التالية):")
+    print(format_lineage(registry, records[-1].experiment_id))
+    print()
+    print("لا ترقية تلقائية — كل النتائج UNVALIDATED حتى مراجعة بشرية موثقة.")
+    return 0
+
+
+def _cmd_experiments(args: argparse.Namespace) -> int:
+    """عرض أحدث التجارب من السجل الدائم — الذاكرة التجريبية."""
+    from pharma_sdl.experiments.registry import ExperimentRegistry
+
+    registry = ExperimentRegistry(args.db)
+    records = registry.latest(limit=args.limit)
+    if not records:
+        print("السجل فارغ — شغّل: pharma-sdl loop")
+        return 0
+    stats = registry.stats()
+    print(f"السجل: {args.db} — {sum(stats.values())} تجربة {stats}")
+    for rec in records:
+        best = rec.top_hits[0] if rec.top_hits else None
+        best_txt = (
+            f"{best['name'] or best['smiles'][:24]} @ {best['kcal']:.2f}"
+            if best
+            else (rec.error or "—")
+        )
+        print(
+            f"  [{rec.experiment_id}] {rec.status:<9} {rec.target_id or '—':<8} "
+            f"{rec.engine_used or '—':<12} {best_txt}"
+        )
+        print(f"      الفرضية: {rec.hypothesis_ar[:80]}")
+        if rec.lesson:
+            print(f"      الدرس: {rec.lesson[:90]}")
+    return 0
+
+
 def _cmd_serve(args: argparse.Namespace) -> int:
     try:
         import uvicorn
@@ -130,6 +189,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_assay.add_argument("--smiles", required=True)
     p_assay.add_argument("--dg", type=float, required=True, help="ΔG kcal/mol من جولة الفرز")
     p_assay.set_defaults(func=_cmd_assay)
+
+    p_loop = sub.add_parser(
+        "loop",
+        help="الحلقة المغلقة الموثقة: فرضية ← تنفيذ ← تقييم ← ذاكرة ← جولة تالية",
+    )
+    p_loop.add_argument("--db", default=str(get_settings().experiments_db), help="مسار سجل التجارب")
+    p_loop.add_argument("--target", default="7VH8_A")
+    p_loop.add_argument("--ligands", help="CSV البليغاندات (افتراضي مكتبة العرض)")
+    p_loop.add_argument("--top", type=int, default=5)
+    p_loop.set_defaults(func=_cmd_loop)
+
+    p_exp = sub.add_parser("experiments", help="عرض أحدث التجارب من السجل الدائم")
+    p_exp.add_argument("--db", default=str(get_settings().experiments_db), help="مسار سجل التجارب")
+    p_exp.add_argument("--limit", type=int, default=10)
+    p_exp.set_defaults(func=_cmd_experiments)
 
     p_serve = sub.add_parser("serve", help="تشغيل بوابة الـAPI")
     p_serve.add_argument("--host", default="0.0.0.0")
