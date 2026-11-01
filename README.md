@@ -14,8 +14,64 @@
   <img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white" alt="Python 3.11 | 3.12">
   <img src="https://img.shields.io/badge/Streamlit-UI-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit">
   <img src="https://img.shields.io/badge/%D8%A7%D8%AE%D8%AA%D8%A8%D8%A7%D8%B1%D8%A7%D8%AA-170%2B-brightgreen" alt="170+ tests">
+  <a href=".github/workflows/platform.yml"><img src="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/platform.yml/badge.svg" alt="Platform API"></a>
+  <img src="https://img.shields.io/badge/API-FastAPI%20v0.2.0-009688?logo=fastapi&logoColor=white" alt="FastAPI platform">
 </p>
 
+---
+
+## 🚀 v0.2.0 — النقلة النوعية: منصة API-First
+
+> **الخبر:** طبقة جديدة كاملة `pharma_sdl/` تحوّل المشروع من تطبيق تعليمي إلى
+> **منصة اكتشاف أدوية تشغيلية** وفق [الخطة الاستراتيجية v1.1](docs/plan/PharmaSDL_Strategic_Plan_v1.1.pdf) —
+> واللوحة التعليمية أسفله تعمل كما هي بلا أي كسر.
+
+**خط التشغيل الكامل:** تنقية ← فرز ظاهري ← إجماع علاجي ← مختبر ← تقرير —
+بمحركات قابلة للتبديل وسياسات أهداف صريحة (Mpro **غير تساهمي حصراً**).
+
+| الوحدة | ماذا تفعل |
+|---|---|
+| `curation` | توحيد + إزالة تكرار (InChIKey) + PAINS + Lipinski/Veber + **بوابة الرؤوس التساهمية** — كل رفض مسبَّب عربي/إنجليزي |
+| `targets` | سجل أهداف بسياسات: 7VH8 (Mpro) و7CMD (PLpro) بصناديق ربط مُتحقق منها |
+| `engines` | `simulation` (حتمي، دائماً متاح) · `vina` (ربط فعلي) · `boltz2` (تقارب مباشر عبر بوابة) — التراجع بينها **مُعلَن** |
+| `screening` | جولة فرز كاملة من نداء واحد — **الهيكل الهزّ من الخطة منفَّذ** |
+| `affinity` | جسر Cheng-Prusoff (ΔG ≈ −1.364×pIC50) مع حكم اتفاق صريح |
+| `lab` | مقبس مختبر موحّد — FRET محاكى الآن، دمج حقيقي لاحقاً بعلامة `simulated=true` |
+| `reporting` | تقرير Markdown/JSON ثنائي اللغة لكل جولة |
+| `api` | FastAPI + طابور مهام + OpenAPI تفاعلي على `/docs` |
+
+### ⚡ جرب المنصة في 60 ثانية
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+
+# بوابة الـAPI مع توثيق تفاعلي
+uvicorn pharma_sdl.api.app:create_app --factory --port 8000
+#   → http://localhost:8000/docs
+
+# أو من سطر الأوامر مباشرة
+pharma-sdl engines
+pharma-sdl targets
+pharma-sdl screen --target 7VH8_A --ligands data/demo_ligands.csv --top 10
+
+# أو بالحاويات (API على :8000 + لوحة على :8501)
+docker compose up --build
+```
+
+نداء فرز حي (وضع العرض — 24 جزيء جاهزون):
+
+```bash
+curl -s -X POST localhost:8000/api/v1/screening/runs \
+  -H 'Content-Type: application/json' -d '{"target_id": "7VH8_A", "top_n": 5}'
+# → 202 {"job_id": "...", "run_url": "..."} ثم:
+curl -s localhost:8000/api/v1/screening/runs/<job_id> | python3 -m json.tool
+curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
+```
+
+📖 التفاصيل الكاملة: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) ·
+[قرارات التصميم ADR-0001…0005](docs/adr/) · [CHANGELOG](CHANGELOG.md)
+
+---
 
 ## 🌐 Live Demo
 
@@ -73,7 +129,7 @@ pytest --cov=core --cov-report=html
 ```
 
 ## 📚 Tech Stack
-Python 3.11 | Streamlit | RDKit | AutoDock Vina 1.2 | Meeko | 3Dmol.js | scikit-learn | Plotly | PubChem API | CPIC API | Ersilia Model Hub | JapanFold API | ReportLab
+Python 3.11 | **FastAPI (منصة v0.2.0)** | Streamlit | RDKit | AutoDock Vina 1.2 | Meeko | 3Dmol.js | scikit-learn | Plotly | PubChem API | CPIC API | Ersilia Model Hub | JapanFold API | ReportLab | Docker
 
 ## 🤝 المساهمة والتوثيق
 
@@ -101,6 +157,7 @@ Python 3.11 | Streamlit | RDKit | AutoDock Vina 1.2 | Meeko | 3Dmol.js | scikit-
 | 9 | التوليد الموجّه بالهدف — مكافئ ChatChemTS محلي حتمي بلا مفتاح (ChatChemTS يشترط OpenAI مدفوع) | ✅ |
 | 10 | التصنيف الدوائي ATC (23 مجموعة + RxNorm حي) + رسم 2D + إثراء MIC بالمجموعات | ✅ |
 | 11 | قياس TDC · تحسين Predict بـdescriptors · دفتر Boltz-2 | 📋 [ROADMAP-2026](docs/ROADMAP-2026.md) · [الاستراتيجية](docs/STRATEGY-2026.md) |
+| **12** | **النقلة النوعية: منصة API-First — `pharma_sdl/` بـ9 وحدات، FastAPI، Vina حقيقي خلف عقد محركات، بوابة التساهمية، Docker، 46 اختباراً** | ✅ [v0.2.0](CHANGELOG.md) · [المعمارية](docs/ARCHITECTURE.md) |
 
 ### إعادة توليد المستقبلات المُجهّزة
 ```bash
