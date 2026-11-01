@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-11-01T14:06:46.332350+00:00",
+  "acceptance": {
+    "rmsd_max_angstrom": 2.0,
+    "ddg_max_kcal": 2.5
+  },
+  "all_accepted": true,
+  "results": [
+    {
+      "target_id": "7VH8_A",
+      "ligand_name": "4WI — co-crystallized ligand",
+      "n_poses": 9,
+      "exhaustiveness": 8,
+      "best_kcal": -8.726,
+      "rmsd_best": 0.9477717582205729,
+      "rmsd_top3": 0.9477717582205729,
+      "self_dock_reference_kcal": -8.28,
+      "ddg_error": 0.4460000000000015,
+      "accepted": true,
+      "failures": []
+    },
+    {
+      "target_id": "7CMD_A",
+      "ligand_name": "TTT — co-crystallized ligand",
+      "n_poses": 3,
+      "exhaustiveness": 8,
+      "best_kcal": -10.014,
+      "rmsd_best": 0.17608023452254848,
+      "rmsd_top3": 0.17608023452254848,
+      "self_dock_reference_kcal": -10.0,
+      "ddg_error": 0.013999999999999346,
+      "accepted": true,
+      "failures": []
+    }
+  ]
+}
