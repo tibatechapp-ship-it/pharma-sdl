@@ -1,0 +1,30 @@
+# Pharma SDL v0.2.0 — خدمتان من صورة واحدة:
+#   api       : بوابة المنصة API-First (FastAPI/Uvicorn) — OpenAPI على /docs
+#   dashboard : لوحة Streamlit التعليمية القائمة (تبقى تعمل كما هي)
+#
+# تشغيل:  docker compose up --build
+# Boltz-2 (اختياري):  PHARMA_SDL_BOLTZ2_ENDPOINT=https://... docker compose up api
+
+services:
+  api:
+    build: .
+    image: pharma-sdl:0.2.0
+    ports:
+      - "8000:8000"
+    environment:
+      PHARMA_SDL_ENGINE_FALLBACK: "1"
+      PHARMA_SDL_BOLTZ2_ENDPOINT: ${PHARMA_SDL_BOLTZ2_ENDPOINT:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  dashboard:
+    image: pharma-sdl:0.2.0
+    build: .
+    command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
