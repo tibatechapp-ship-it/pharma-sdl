@@ -35,7 +35,7 @@ def test_health_and_version(client):
 
     version = client.get("/api/v1/version")
     assert version.status_code == 200
-    assert version.json()["version"] == "0.2.0"
+    assert version.json()["version"] == "0.3.0"
 
 
 def test_root_points_to_docs(client):

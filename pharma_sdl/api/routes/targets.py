@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from pharma_sdl.api.auth import Role, require_role
 from pharma_sdl.api.schemas import PolicyOut, TargetOut
 from pharma_sdl.targets.registry import list_targets
 
-router = APIRouter(prefix="/targets", tags=["targets"])
+router = APIRouter(
+    dependencies=[Depends(require_role(Role.VIEWER))],
+    prefix="/targets", tags=["targets"])
 
 
 @router.get("", response_model=list[TargetOut])

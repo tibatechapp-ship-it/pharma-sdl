@@ -13,13 +13,15 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from pharma_sdl import __version__
+from pharma_sdl.api.auth import Role, auth_mode_label, require_role, resolve_principal
+from pharma_sdl.api.demo import install_rate_limit
 from pharma_sdl.api.deps import app_settings
-from pharma_sdl.api.routes import engines, health, lab, screening, targets
+from pharma_sdl.api.routes import engines, experiments, health, lab, screening, targets
 from pharma_sdl.engines.registry import list_engines
 from pharma_sdl.errors import PlatformError
 
@@ -80,6 +82,22 @@ def create_app() -> FastAPI:
     app.include_router(targets.router, prefix="/api/v1")
     app.include_router(screening.router, prefix="/api/v1")
     app.include_router(lab.router, prefix="/api/v1")
+    app.include_router(experiments.router, prefix="/api/v1")
+
+    @app.get(
+        "/api/v1/auth/whoami",
+        tags=["auth"],
+        dependencies=[Depends(require_role(Role.VIEWER))],
+    )
+    def whoami(request: Request) -> dict[str, str]:
+        """من أنا في هذه النسخة؟ — معرّف المفتاح والدور ووضع المصادقة (بلا أسرار)."""
+        principal = resolve_principal(request.headers.get("x-api-key"))
+        return {
+            **principal.public(),
+            "auth_mode": auth_mode_label(),
+        }
+
+    install_rate_limit(app)
 
     @app.get("/", tags=["meta"])
     def root() -> dict[str, Any]:

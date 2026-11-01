@@ -41,3 +41,24 @@ class ScreeningError(PlatformError):
 
     http_status = 500
     code = "screening_error"
+
+
+class UnauthorizedError(PlatformError):
+    """لا هوية أو هوية غير معروفة — المصادقة مفعلة والمفتاح مفقود/مرفوض (P2)."""
+
+    http_status = 401
+    code = "unauthorized"
+
+
+class ForbiddenError(PlatformError):
+    """هوية معروفة لكن دورها أدنى مما تتطلبه العملية — RBAC (P2)."""
+
+    http_status = 403
+    code = "forbidden"
+
+
+class RateLimitError(PlatformError):
+    """تجاوز حد المعدل في وضع العرض العام — عدالة الحساب المشترك (P2)."""
+
+    http_status = 429
+    code = "rate_limited"

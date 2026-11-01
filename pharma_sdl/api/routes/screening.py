@@ -7,8 +7,10 @@ GET  /api/v1/screening/runs/{id}/report?lang=ar → تقرير Markdown جاهز
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
+from pharma_sdl.api.auth import Role, require_role
+from pharma_sdl.api.demo import demo_caps, demo_engine_allowed
 from pharma_sdl.api.deps import app_settings, job_store
 from pharma_sdl.api.schemas import RunAcceptedOut, RunStatusOut, ScreeningCreate
 from pharma_sdl.curation.loader import load_ligands_csv
@@ -28,21 +30,52 @@ def _resolve_ligands(create: ScreeningCreate):
     return load_ligands_csv(settings.data_dir / "demo_ligands.csv")
 
 
-@router.post("/runs", response_model=RunAcceptedOut, status_code=202)
+@router.post(
+    "/runs",
+    response_model=RunAcceptedOut,
+    status_code=202,
+    dependencies=[Depends(require_role(Role.SCIENTIST))],
+)
 def create_run(create: ScreeningCreate) -> RunAcceptedOut:
     settings = app_settings()
     get_target(create.target_id)  # فشل سريع وصريح قبل قبول المهمة
     get_engine(create.engine)  # وكذلك المحرك — لا مهمة تُقبل بأمر مستحيل
+    # وضع العرض العام (P2): المحرك مقفول على القائمة المسموحة — vina على
+    # نفقة المشغّل ليست ضمن ضيافة العرض.
+    if not demo_engine_allowed(create.engine):
+        engine_name = create.engine or settings.default_engine
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "engine_not_allowed_demo",
+                "message_ar": f"المحرك {engine_name} غير متاح في وضع العرض العام — "
+                f"المسموح: {settings.demo_allowed_engines}",
+                "message_en": f"Engine {engine_name} is not available in public demo mode — "
+                f"allowed: {settings.demo_allowed_engines}",
+            },
+        )
     ligands = _resolve_ligands(create)
-    if len(ligands) > settings.max_ligands_per_run:
+    # سقف الطلب: العام 250 — وضع العرض يفرض سقفه الأدنى (العدالة قبل الكرم).
+    ligand_cap = settings.max_ligands_per_run
+    top_n_cap = 100
+    if settings.demo_mode:
+        ligand_cap, top_n_cap = demo_caps()
+    if len(ligands) > ligand_cap:
         raise HTTPException(
             status_code=422,
             detail={
                 "code": "too_many_ligands",
-                "message_ar": f"عدد الليغاندات {len(ligands)} يتجاوز سقف الطلب "
-                f"({settings.max_ligands_per_run})",
-                "message_en": f"{len(ligands)} ligands exceed the request cap "
-                f"({settings.max_ligands_per_run})",
+                "message_ar": f"عدد الليغاندات {len(ligands)} يتجاوز سقف الطلب ({ligand_cap})",
+                "message_en": f"{len(ligands)} ligands exceed the request cap ({ligand_cap})",
+            },
+        )
+    if create.top_n > top_n_cap:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "top_n_capped",
+                "message_ar": f"top_n={create.top_n} يتجاوز سقف العرض ({top_n_cap})",
+                "message_en": f"top_n={create.top_n} exceeds the demo cap ({top_n_cap})",
             },
         )
     store = job_store()
@@ -92,7 +125,11 @@ def _load_result(run_id: str) -> ScreeningResult:
     return result
 
 
-@router.get("/runs/{run_id}", response_model=RunStatusOut)
+@router.get(
+    "/runs/{run_id}",
+    response_model=RunStatusOut,
+    dependencies=[Depends(require_role(Role.VIEWER))],
+)
 def run_status(run_id: str) -> RunStatusOut:
     job = job_store().get(run_id)
     if job is None:
@@ -114,7 +151,9 @@ def run_status(run_id: str) -> RunStatusOut:
     )
 
 
-@router.get("/runs/{run_id}/report")
+@router.get(
+    "/runs/{run_id}/report", dependencies=[Depends(require_role(Role.VIEWER))]
+)
 def run_report(
     run_id: str,
     lang: str = Query("ar", pattern="^(ar|en)$"),

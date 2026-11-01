@@ -5,6 +5,8 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from pharma_sdl import __version__
+from pharma_sdl.api.auth import auth_mode_label
+from pharma_sdl.api.deps import app_settings
 from pharma_sdl.api.schemas import HealthOut, VersionOut
 from pharma_sdl.engines.registry import list_engines
 
@@ -17,6 +19,8 @@ def health() -> HealthOut:
         status="ok",
         version=__version__,
         engines_available=[e.name for e in list_engines() if e.available],
+        auth_mode=auth_mode_label(),
+        demo_mode=app_settings().demo_mode,
     )
 
 
