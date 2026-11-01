@@ -22,6 +22,7 @@ from pharma_sdl.api.auth import Role, auth_mode_label, require_role, resolve_pri
 from pharma_sdl.api.demo import install_rate_limit
 from pharma_sdl.api.deps import app_settings
 from pharma_sdl.api.routes import (
+    campaigns,
     engines,
     experiments,
     health,
@@ -95,6 +96,7 @@ def create_app() -> FastAPI:
     app.include_router(lab.router, prefix="/api/v1")
     app.include_router(experiments.router, prefix="/api/v1")
     app.include_router(loop.router, prefix="/api/v1")
+    app.include_router(campaigns.router, prefix="/api/v1")
     app.include_router(metrics.router, prefix="/api/v1")
 
     @app.get(

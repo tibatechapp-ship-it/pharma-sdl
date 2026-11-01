@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
+from pharma_sdl.campaign import CampaignReport
 from pharma_sdl.experiments.registry import ExperimentRecord
 from pharma_sdl.models import AssayResult, LigandInput, ScreeningResult
 from pharma_sdl.validation.gate import ValidationState
@@ -137,6 +140,30 @@ class LoopRunOut(BaseModel):
     error: str | None = None
     rounds: list[ExperimentRecord] | None = None  # None حتى اكتمال المهمة
     round_count: int = 0
+    note_ar: str = ""
+    note_en: str = ""
+
+
+# ── حملات التعلم النشط (P4) ──
+class CampaignCreate(BaseModel):
+    """طلب حملة تعلم نشط — N جولات يُحدَّث فيها النموذج من نتائجه."""
+
+    strategy: Literal["random", "greedy", "uncertainty", "ucb"] = "uncertainty"
+    rounds: int = Field(6, ge=2, le=15, description="جولات التعلم — كل جولة ملاءمة جديدة")
+    batch_size: int = Field(8, ge=1, le=24, description="حجم الدفعة المختارة كل جولة")
+    initial_labeled: int = Field(40, ge=20, le=200, description="البذرة المُعنونة الابتدائية")
+    n_estimators: int = Field(300, ge=20, le=300, description="عدد أشجار RF")
+    kappa: float = Field(1.0, gt=0.0, le=5.0, description="معامل الاستكشاف في ucb")
+
+
+class CampaignRunOut(BaseModel):
+    """حالة حملة تعلم — وعند الاكتمال التقرير الكامل بمنحنى التعلم."""
+
+    job_id: str
+    kind: str = "learning_campaign"
+    status: str
+    error: str | None = None
+    report: CampaignReport | None = None  # None حتى اكتمال المهمة
     note_ar: str = ""
     note_en: str = ""
 
