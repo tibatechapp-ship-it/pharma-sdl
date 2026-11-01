@@ -68,6 +68,9 @@ class ExperimentRecord(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     elapsed_seconds: float = 0.0
     validation_state: str = ValidationState.UNVALIDATED.value
+    # بطاقة الاعتماد كاملة (dict من ValidationCard) — التاريخ والمنطق والمرفقات
+    # تُحفظ مع التجربة، فـ«لماذا رُقّيت؟» يُجاب من السجل لا من ذاكرة ناقصة (P2).
+    validation_card: dict | None = None
     parent_experiment_id: str | None = None  # الحلقة: من أي تجربة انطلقت
     lesson: str | None = None  # ماذا تعلمنا وما بقي غير مؤكد
     error: str | None = None
@@ -144,6 +147,11 @@ class ExperimentRegistry:
         self._upsert(record)
         return record
 
+    def upsert(self, record: ExperimentRecord) -> ExperimentRecord:
+        """كتابة سجل كامل كما هو — للاستيراد والنقل (يحفظ المعرّفات والتواريخ)."""
+        self._upsert(record)
+        return record
+
     def complete(
         self,
         experiment_id: str,
@@ -182,11 +190,51 @@ class ExperimentRegistry:
     def attach_validation(
         self, experiment_id: str, card: ValidationCard, reason: str | None = None
     ) -> ExperimentRecord:
-        """ربط حالة بوابة الاعتماد بالتجربة — الترقية تبقى بشرية عبر gate.promote."""
+        """ربط حالة بوابة الاعتماد بالتجربة — الترقية تبقى بشرية عبر gate.promote.
+
+        البطاقة كاملة (التاريخ والمرفقات والمنطق) تُحفظ مع التجربة — لا نص حالة مجرّد.
+        """
         record = self._require(experiment_id)
         record.validation_state = card.state.value
+        record.validation_card = card.model_dump(mode="json")
         if reason:
             record.lesson = f"{record.lesson or ''} — {reason}".strip(" —")
+        record.updated_at = utcnow_iso()
+        self._upsert(record)
+        return record
+
+    def validation_card_of(self, experiment_id: str) -> ValidationCard:
+        """قراءة البطاقة المحفوظة — أو بطاقة UNVALIDATED افتراضية مشتقة من السجل.
+
+        الاشتقاق صادق: لا يخترع تاريخاً ولا مرفقات — إن لم تُحفظ بطاقة فالسجل
+        لا يدّعي أن ترقيات حصلت.
+        """
+        from pharma_sdl.validation.gate import default_card
+
+        record = self._require(experiment_id)
+        if record.validation_card:
+            return ValidationCard.model_validate(record.validation_card)
+        try:
+            state = ValidationState(record.validation_state)
+        except ValueError:
+            state = ValidationState.UNVALIDATED
+        card = default_card(
+            subject=f"experiment:{record.experiment_id}",
+            result_id=record.experiment_id,
+            engine=record.engine_used,
+            method=record.method,
+            data_version=record.data_version,
+            code_version=record.code_version,
+        )
+        return card.model_copy(update={"state": state})
+
+    def save_validation_card(
+        self, experiment_id: str, card: ValidationCard
+    ) -> ExperimentRecord:
+        """حفظ بطاقة بعد ترقية/تخفيض بشري — الحالة النصية تُزامن تلقائياً."""
+        record = self._require(experiment_id)
+        record.validation_card = card.model_dump(mode="json")
+        record.validation_state = card.state.value
         record.updated_at = utcnow_iso()
         self._upsert(record)
         return record
@@ -231,6 +279,12 @@ class ExperimentRegistry:
                 "SELECT status, COUNT(*) AS n FROM experiments GROUP BY status"
             ).fetchall()
         return {r["status"]: r["n"] for r in rows}
+
+    def count(self) -> int:
+        """إجمالي التجارب في السجل — بلا تحميل payloads."""
+        with self._connect() as conn:
+            row = conn.execute("SELECT COUNT(*) AS n FROM experiments").fetchone()
+        return int(row["n"])
 
     # ── داخلي ────────────────────────────────────────────────
 

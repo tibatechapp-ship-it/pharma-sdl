@@ -149,6 +149,29 @@ def _cmd_experiments(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_export_experiments(args: argparse.Namespace) -> int:
+    """تصدير السجل التجريبي إلى JSONL — طريق الترقية إلى PostgreSQL (ADR-0007)."""
+    from pharma_sdl.experiments.portability import export_jsonl
+    from pharma_sdl.experiments.registry import ExperimentRegistry
+
+    registry = ExperimentRegistry(args.db)
+    count = export_jsonl(registry, args.out)
+    print(f"صُدّرت {count} تجربة إلى {args.out}")
+    print("الخطوة التالية: psql -f deploy/postgres/schema.sql ثم الاستيراد")
+    return 0
+
+
+def _cmd_import_experiments(args: argparse.Namespace) -> int:
+    """استيراد تجارب من JSONL — المعرّفات وسلاسل الأسلاف محفوظة حرفياً."""
+    from pharma_sdl.experiments.portability import import_jsonl
+    from pharma_sdl.experiments.registry import ExperimentRegistry
+
+    registry = ExperimentRegistry(args.db)
+    count = import_jsonl(registry, args.input, overwrite=args.overwrite)
+    print(f"استُوردت {count} تجربة إلى {args.db}")
+    return 0
+
+
 def _cmd_serve(args: argparse.Namespace) -> int:
     try:
         import uvicorn
@@ -204,6 +227,23 @@ def build_parser() -> argparse.ArgumentParser:
     p_exp.add_argument("--db", default=str(get_settings().experiments_db), help="مسار سجل التجارب")
     p_exp.add_argument("--limit", type=int, default=10)
     p_exp.set_defaults(func=_cmd_experiments)
+
+    p_export = sub.add_parser(
+        "export-experiments", help="تصدير السجل التجريبي إلى JSONL (طريق PostgreSQL)"
+    )
+    p_export.add_argument("--db", default=str(get_settings().experiments_db))
+    p_export.add_argument("--out", required=True, help="ملف JSONL الهدف")
+    p_export.set_defaults(func=_cmd_export_experiments)
+
+    p_import = sub.add_parser(
+        "import-experiments", help="استيراد تجارب من JSONL — المعرّفات محفوظة"
+    )
+    p_import.add_argument("--db", default=str(get_settings().experiments_db))
+    p_import.add_argument("--in", dest="input", required=True, help="ملف JSONL المصدر")
+    p_import.add_argument(
+        "--overwrite", action="store_true", help="الكتابة فوق المكرر (الافتراضي: التخطي)"
+    )
+    p_import.set_defaults(func=_cmd_import_experiments)
 
     p_serve = sub.add_parser("serve", help="تشغيل بوابة الـAPI")
     p_serve.add_argument("--host", default="0.0.0.0")
