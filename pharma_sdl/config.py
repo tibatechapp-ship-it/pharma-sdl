@@ -94,6 +94,8 @@ class Settings:
     lims_poll_interval_s: float = 2.0
     lims_max_polls: int = 60
     lims_outbox: Path | None = REPO_ROOT / "data" / "lab-outbox.jsonl"
+    # البوابة المرجعية لـLIMS (P9) — أوامر العمل تنجو من إعادة التشغيل (sqlite).
+    gateway_db: Path = REPO_ROOT / "data" / "lims-gateway.sqlite3"
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -138,6 +140,12 @@ class Settings:
                 _env_str(
                     "PHARMA_SDL_LIMS_OUTBOX",
                     str(REPO_ROOT / "data" / "lab-outbox.jsonl"),
+                )
+            ),
+            gateway_db=Path(
+                _env_str(
+                    "PHARMA_SDL_GATEWAY_DB",
+                    str(REPO_ROOT / "data" / "lims-gateway.sqlite3"),
                 )
             ),
         )

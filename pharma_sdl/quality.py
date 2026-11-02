@@ -203,9 +203,10 @@ def measure_target_quality(
     )
 
     if registry is not None:
-        registry.add(
+        registry.upsert(
             ExperimentRecord(
                 kind="target_quality_measurement",
+                status="completed",
                 hypothesis_ar=(
                     f"جودة نموذج {spec.name_ar} على هياكل محجوزة معلنة بجانب "
                     "الهدف نفسه — بلا وعود بلا قياس؟"

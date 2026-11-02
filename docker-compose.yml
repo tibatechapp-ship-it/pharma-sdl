@@ -1,4 +1,4 @@
-# Pharma SDL v0.9.0 — خدمتان من صورة واحدة + PostgreSQL اختياري (P3):
+# Pharma SDL v0.10.0 — خدمتان من صورة واحدة + PostgreSQL اختياري (P3):
 #   api       : بوابة المنصة API-First (FastAPI/Uvicorn) — OpenAPI على /docs
 #   dashboard : لوحة Streamlit التعليمية القائمة (تبقى تعمل كما هي)
 #   postgres  : خلفية التخزين الحية (P3) — تُفعَّل بملف التعريف "pg" فقط

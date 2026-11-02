@@ -16,6 +16,12 @@ from pharma_sdl.lab.batch import (
     BatchTicket,
     LabBatchClient,
 )
+from pharma_sdl.lab.confirmation import (
+    reconcile_batches,
+    run_physical_confirmation,
+    submit_confirmation_batch,
+)
+from pharma_sdl.lab.ingest import MeasurementIngestor
 from pharma_sdl.lab.interface import AssayRequest, LabClient
 from pharma_sdl.lab.lims import HttpLimsLab, LimsSettings
 from pharma_sdl.lab.outbox import BatchOutbox
@@ -35,8 +41,12 @@ __all__ = [
     "LabBatchClient",
     "LabClient",
     "LimsSettings",
+    "MeasurementIngestor",
     "SimulatedFretLab",
     "make_lab_client",
+    "reconcile_batches",
+    "run_physical_confirmation",
+    "submit_confirmation_batch",
 ]
 
 

@@ -200,6 +200,22 @@ def _cmd_serve(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_gateway(args: argparse.Namespace) -> int:
+    """البوابة المرجعية لـLIMS — الجهة الأخرى من عقد ADR-0013 (P9)."""
+    try:
+        import uvicorn
+    except ImportError:
+        print("uvicorn غير متاح — ثبّته: pip install uvicorn", file=sys.stderr)
+        return 1
+    uvicorn.run(
+        "pharma_sdl.lab.gateway_app:create_gateway_app",
+        factory=True,
+        host=args.host,
+        port=args.port,
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="pharma-sdl",
@@ -262,6 +278,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_serve.add_argument("--host", default="0.0.0.0")
     p_serve.add_argument("--port", type=int, default=8000)
     p_serve.set_defaults(func=_cmd_serve)
+
+    p_gateway = sub.add_parser(
+        "gateway",
+        help="تشغيل البوابة المرجعية لـLIMS — الجهة الأخرى من عقد ADR-0013",
+    )
+    p_gateway.add_argument("--host", default="0.0.0.0")
+    p_gateway.add_argument("--port", type=int, default=8100)
+    p_gateway.set_defaults(func=_cmd_gateway)
 
     return parser
 
