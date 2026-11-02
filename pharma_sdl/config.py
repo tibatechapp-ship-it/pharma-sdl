@@ -96,6 +96,14 @@ class Settings:
     lims_outbox: Path | None = REPO_ROOT / "data" / "lab-outbox.jsonl"
     # البوابة المرجعية لـLIMS (P9) — أوامر العمل تنجو من إعادة التشغيل (sqlite).
     gateway_db: Path = REPO_ROOT / "data" / "lims-gateway.sqlite3"
+    # ── P10: جهة الميدان — سواقة الجهاز خلف نقطة رفع البوابة (ADR-0015) ──
+    # مضيف فارغ = لا سواقة مهيأة (المصنع يعيد None صريحاً — لا محاكاة صامتة).
+    # علم simulated الافتراضي True: الجهاز الحقيقي قرار بشري موثق يتطلب
+    # PHARMA_SDL_INSTRUMENT_SIMULATED=false + رمز موافقة بشرية عند القياس.
+    instrument_host: str | None = None
+    instrument_port: int = 10001
+    instrument_simulated: bool = True
+    instrument_timeout_s: float = 30.0
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -148,6 +156,10 @@ class Settings:
                     str(REPO_ROOT / "data" / "lims-gateway.sqlite3"),
                 )
             ),
+            instrument_host=os.getenv("PHARMA_SDL_INSTRUMENT_HOST") or None,
+            instrument_port=_env_int("PHARMA_SDL_INSTRUMENT_PORT", 10001),
+            instrument_simulated=_env_bool("PHARMA_SDL_INSTRUMENT_SIMULATED", True),
+            instrument_timeout_s=_env_float("PHARMA_SDL_INSTRUMENT_TIMEOUT", 30.0),
         )
 
 

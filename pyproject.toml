@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pharma-sdl"
-version = "0.10.0"
+version = "0.11.0"
 description = "Pharma SDL — Arabic-first, API-First drug-discovery platform (curation → screening → affinity → lab → report)"
 readme = "README.md"
 license = { text = "MIT" }
@@ -75,9 +75,11 @@ packages = [
     "pharma_sdl.experiments",
     "pharma_sdl.jobs",
     "pharma_sdl.lab",
+    "pharma_sdl.lab.instruments",
     "pharma_sdl.loop",
     "pharma_sdl.reporting",
     "pharma_sdl.screening",
     "pharma_sdl.targets",
     "pharma_sdl.validation",
+    "tools",
 ]

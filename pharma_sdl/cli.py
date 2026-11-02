@@ -216,6 +216,25 @@ def _cmd_gateway(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_simulator(args: argparse.Namespace) -> int:
+    """محاكي جهاز FRET — عتاد الوهم لتجربة جهة الميدان بلا عتاد (P10)."""
+    from tools.fret_simulator import FRETSimulator
+
+    simulator = FRETSimulator(
+        host=args.host,
+        port=args.port,
+        noise=args.noise,
+        seed=args.seed,
+        step_delay=args.step_delay,
+    )
+    try:
+        simulator.start()
+    except KeyboardInterrupt:
+        print("\nأُوقف المحاكي.")
+        simulator.stop()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="pharma-sdl",
@@ -286,6 +305,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_gateway.add_argument("--host", default="0.0.0.0")
     p_gateway.add_argument("--port", type=int, default=8100)
     p_gateway.set_defaults(func=_cmd_gateway)
+
+    p_sim = sub.add_parser(
+        "simulator",
+        help="تشغيل محاكي جهاز FRET (SCPI عبر TCP) — جهة الميدان بلا عتاد",
+    )
+    p_sim.add_argument("--host", default="0.0.0.0")
+    p_sim.add_argument("--port", type=int, default=10001)
+    p_sim.add_argument("--noise", type=float, default=0.02)
+    p_sim.add_argument("--seed", type=int, default=None)
+    p_sim.add_argument("--step-delay", type=float, default=0.3)
+    p_sim.set_defaults(func=_cmd_simulator)
 
     return parser
 

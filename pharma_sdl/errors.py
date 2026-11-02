@@ -91,3 +91,39 @@ class LimsContractError(LabError):
 
     http_status = 502
     code = "lims_contract_violation"
+
+
+class InstrumentError(PlatformError):
+    """فشل سواقة جهاز مخبري (P10) — اتصال أو بروتوكول أو حالة الجهاز.
+
+    جهة الميدان في ADR-0013/0014: السواقة تقف خلف نقطة رفع البوابة،
+    وفشلها فشل صريح — لا قيمة تُختلق عند فشل قياس أبداً.
+    """
+
+    http_status = 502
+    code = "instrument_error"
+
+
+class InstrumentConnectionError(InstrumentError):
+    """تعذّر الاتصال بالجهاز أو انقطع أثناء جلسة القياس."""
+
+    http_status = 502
+    code = "instrument_connection_error"
+
+
+class CalibrationError(InstrumentError):
+    """فشل معايرة الجهاز — لا قياس بعد معايرة فاشلة."""
+
+    http_status = 502
+    code = "instrument_calibration_error"
+
+
+class SafetyViolation(InstrumentError):
+    """خرق حاجز سلامة ميداني (P10) — موافقة غائبة أو حد استخدام متجاوز.
+
+    الجهاز الفيزيائي مورد نادر: كل قياس حقيقي يتطلب رمز موافقة بشرية
+    موثقاً، وخرق الحواجز رفض صريح لا تحذير يُتجاهل.
+    """
+
+    http_status = 403
+    code = "safety_violation"

@@ -20,6 +20,41 @@
 
 ---
 
+## 🚀 v0.11.0 — جهة الميدان: طبقة الأجهزة ومراقب جودة القراءات (P10)
+
+> **الجديد في v0.11.0:** P9 قال «هنا تُوصَل الأجهزة» عند البوابة؛ هذه
+> المرحلة تبني **ما خلف نقطة الرفع**: بروتوكول `InstrumentDriver`
+> موحّد، سواقة `FRETReaderDriver` (SCPI عبر TCP بـbuffer استقبال
+> دائم)، محاكي جهاز واقعي (`pharma-sdl simulator`)، و**مراقب جودة
+> خمس طبقات** يمنع رفع أي قراءة مستحيلة فيزيائياً أو خارج ضوابط
+> الصفيحة. القراءة المحاكاة تحمل `SIMULATED-…` تلقائياً؛ والحقيقية
+> تتطلب موافقة بشرية ≥ 16 حرفاً وإلا `SafetyViolation`. والجسر إلى
+> البوابة صادق بالبناء: **الكود لا يشتق IC50 من نسبة FRET واحدة** —
+> القيمة المقاسة من ملاءمة المنحنى تُمرَّر صراحة (ADR-0015). ومعها
+> حوكمة تمنع تكرار درس «كود يُكتب ولا يُشغَّل»: `AGENTS.md` +
+> `HANDOFF.md` — القرارات البشرية الثلاثة موثقة الآن في ملف واحد.
+
+```bash
+# طرفية 1: محاكي الجهاز (عتاد الوهم)
+pharma-sdl simulator --port 10001
+
+# طرفية 2: قياس مباشر من السواقة + فحص جودة قبل الرفع
+python -c "
+from pharma_sdl.lab.instruments import FRETReaderDriver
+from pharma_sdl.lab.anomaly_detector import LabAnomalyDetector
+
+drv = FRETReaderDriver(host='127.0.0.1', port=10001)
+drv.connect()
+try:
+    reading = drv.run_assay('CMP-042', '7VH8_A', 'FRET_Mpro_v1', '')
+finally:
+    drv.disconnect()
+print(LabAnomalyDetector().analyze_reading(reading).to_dict())
+"
+```
+
+---
+
 ## 🚀 v0.10.0 — الحلقة الفيزيائية: بوابة مرجعية ومسار قياسات (P9)
 
 > **الجديد في v0.10.0:** الجهة الأخرى من العقد صارت كوداً — **بوابة
@@ -395,6 +430,7 @@ Python 3.11 | **FastAPI (منصة v0.2.0)** | Streamlit | RDKit | AutoDock Vina 
 | **P7** | مقاييس صدق الأهداف: لكل هدف R²/MAE على هياكل محجوزة وتغطية conformal مقاسة — Mpro R²=0.537 والأهداف الجديدة بتغطية أدنى من الاسمية منشورة كما هي — الأرشيف مُلزم والـAPI يقرأه بلا حساب حي | ✅ [v0.8.0](CHANGELOG.md) · [ADR-0012](docs/adr/ADR-0012-target-quality-metrics.md) · [التقرير](docs/audit/TIBB-QUALITY.md) |
 | **P8** | جسر الفيزياء: عقد دفعات REST للمختبر الحقيقي (`LabBatchClient` + `HttpLimsLab` + صندوق صادر) — التكامل الفعلي ضبطُ تهيئة لا إعادة كتابة، وعقد نتائج صارم يرفض الدفعة المخرقة كاملة — لا جهاز في CI والحد مُعلن | ✅ [v0.9.0](CHANGELOG.md) · [ADR-0013](docs/adr/ADR-0013-physical-lab-bridge.md) |
 | **P9** | الحلقة الفيزيائية: بوابة LIMS مرجعية أمينة أوامر عمل (لا تختلق رقماً — الرفع من الميدان حصراً) + مسار قياسات يعيد المقبول إلى الذاكرة الدائمة + تسوية ما بعد المقاطعة + إصلاح فجوتي P7 (انهيار كامن في التسجيل وسكربت القياس المفقود — الأرقام تتكاثر حرفياً) | ✅ [v0.10.0](CHANGELOG.md) · [ADR-0014](docs/adr/ADR-0014-physical-loop-gateway-and-measurements.md) |
+| **P10** | جهة الميدان: بروتوكول أجهزة موحد (`InstrumentDriver`) + سواقة FRET عبر SCPI/TCP + محاكي جهاز واقعي + مراقب جودة خمس طبقات (Recall=100% وFPR=0% مُقاسان على الحالات المصطنعة) + موافقة بشرية إلزامية للحقيقي + حوكمة الوكلاء (`AGENTS.md`/`HANDOFF.md`) — مؤجل بقرار: وكلاء LLM ومكدس Grafana | ✅ [v0.11.0](CHANGELOG.md) · [ADR-0015](docs/adr/ADR-0015-bench-instrument-layer-and-reading-qc.md) · [دليل التوصيل](docs/HARDWARE_HANDOFF.md) |
 
 ### إعادة توليد المستقبلات المُجهّزة
 ```bash
