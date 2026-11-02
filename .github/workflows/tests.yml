@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: write  # لخطوة نشر شارة الاختبارات الديناميكية فقط
+
 jobs:
   test:
     name: Tests & Coverage
@@ -29,11 +32,56 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Unit tests (coverage over core + scripts + app.py)
-        run: pytest -m "not integration" -v
+        run: pytest -m "not integration" -v --junitxml=/tmp/junit-unit.xml
 
       - name: Integration tests
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: pytest -m integration -v --no-cov
+        run: pytest -m integration -v --no-cov --junitxml=/tmp/junit-int.xml
+
+      - name: Compute dynamic test badge (count from real run, not a static claim)
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          python - <<'PYEOF'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          totals = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+          for f in ("/tmp/junit-unit.xml", "/tmp/junit-int.xml"):
+              p = Path(f)
+              if not p.exists():
+                  continue  # جناح التكامل لا يعمل إلا على push إلى main
+              for s in ET.parse(p).getroot().iter("testsuite"):
+                  for k in totals:
+                      totals[k] += int(s.get(k, 0))
+          passed = totals["tests"] - totals["failures"] - totals["errors"] - totals["skipped"]
+          ok = totals["tests"] > 0 and totals["failures"] == 0 and totals["errors"] == 0
+          badge = {
+              "schemaVersion": 1,
+              "label": "اختبارات",
+              "message": f"{passed} ناجح",
+              "color": "brightgreen" if ok else "red",
+          }
+          Path("badges").mkdir(exist_ok=True)
+          Path("badges/tests.json").write_text(
+              json.dumps(badge, ensure_ascii=False) + "\n", encoding="utf-8"
+          )
+          print(json.dumps(badge, ensure_ascii=False))
+          PYEOF
+
+      - name: Publish badge (commit back to main, no CI retrigger)
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        continue-on-error: true  # فشل نشر الشارة لا يُخضّر/يُحمرّ الجناح — الشارة ليست حكماً على الاختبارات
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add badges/tests.json
+          if git diff --cached --quiet; then
+            echo "badge unchanged — nothing to commit"
+          else
+            git commit -m "chore(ci): تحديث شارة الاختبارات من التشغيل الفعلي [skip ci]"
+            git push
+          fi
 
       - name: Upload coverage HTML
         if: always()

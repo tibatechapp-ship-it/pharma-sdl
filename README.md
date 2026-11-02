@@ -13,9 +13,9 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white" alt="Python 3.11 | 3.12">
   <img src="https://img.shields.io/badge/Streamlit-UI-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit">
-  <img src="https://img.shields.io/badge/%D8%A7%D8%AE%D8%AA%D8%A8%D8%A7%D8%B1%D8%A7%D8%AA-170%2B-brightgreen" alt="170+ tests">
+  <a href="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/tests.yml"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftibatechapp-ship-it%2Fpharma-sdl%2Fmain%2Fbadges%2Ftests.json" alt="اختبارات — رقم حي يُحدّثه CI من التشغيل الفعلي"></a>
   <a href=".github/workflows/platform.yml"><img src="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/platform.yml/badge.svg" alt="Platform API"></a>
-  <img src="https://img.shields.io/badge/API-FastAPI%20v0.2.0-009688?logo=fastapi&logoColor=white" alt="FastAPI platform">
+  <img src="https://img.shields.io/badge/API-v0.11.0%20%28FastAPI%29-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.11.0 — واجهة API مبنية بFastAPI (OpenAPI version=__version__)">
 </p>
 
 ---
