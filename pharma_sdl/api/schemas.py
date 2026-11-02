@@ -97,6 +97,51 @@ class AssayOut(AssayResult):
     pass
 
 
+# ── جسر المختبر (P8, ADR-0013) — بادئة Lab تمييزاً عن باقي النطاقات
+#    (درس TibbTargetOut: التصادم يكشفه الاختبار التكاملي فتُسبَّق الأسماء) ──
+
+class LabBackendOut(BaseModel):
+    """أي مختبر خلف مسار /lab الآن؟ — صدق تشغيلي معلن لا يُخمَّن."""
+
+    adapter: str
+    simulated: bool
+    lims_configured: bool
+    note_ar: str
+    note_en: str
+
+
+class LabBatchCreate(BaseModel):
+    """طلب تقديم دفعة فحص — الوحدة الطبيعية للمختبر الحقيقي."""
+
+    assays: list[AssayCreate] = Field(min_length=1, max_length=250)
+    idempotency_key: str | None = Field(
+        default=None,
+        max_length=128,
+        description="مفتاح تعرّج — إعادة الإرسال بالمفتاح نفسه لا تكرر الفحص الفيزيائي",
+    )
+
+
+class LabBatchOut(BaseModel):
+    """تذكرة دفعة مقدَّمة — حالتها عند المختبر لا عند المنصة."""
+
+    batch_id: str
+    adapter: str
+    n_assays: int
+    status: str
+    simulated: bool
+
+
+class LabBatchPollOut(BaseModel):
+    """استطلاع دفعة — النتائج عند الاكتمال السليم فقط، و simulated صادق دائماً."""
+
+    batch_id: str
+    adapter: str
+    status: str
+    results: list[AssayOut] | None = None
+    error_ar: str | None = None
+    error_en: str | None = None
+
+
 # ── الاعتماد العلمي (P2) ──
 class ValidationTransitionIn(BaseModel):
     """طلب ترقية بشرية صريح — التوقيع (actor) إلزامي، والمرفقات بحسب الحالة."""

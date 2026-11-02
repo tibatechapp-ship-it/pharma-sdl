@@ -20,6 +20,31 @@
 
 ---
 
+## 🚀 v0.9.0 — جسر الفيزياء: عقد دفعات REST للمختبر الحقيقي (P8)
+
+> **الجديد في v0.9.0:** المختبر لم يعد محاكاة محصورة — أصبح **مقبساً
+> قابلاً للتبديل بالضبط**: عقد دفعات موحّد (تقديم ← تذكرة ← استطلاع)
+> تنفذه المحاكاة والبوابة الحقيقية معاً بنفس الكود. أي خدمة LIMS/أجهزة
+> تنفذ العقد المرجعي تصبح «المختبر» بمتغيري بيئة (`PHARMA_SDL_LIMS_URL`
+> + `_TOKEN`) — بلا تغيير سطر واحد. انضباط عقود ChEMBL نفسه مطبَّق على
+> الأجهزة: دفعة بخرق واحد تُرفض كاملة، وبوابة «حقيقية» تعلِم
+> `simulated=true` تُرفض فوراً. **والحد الصادق**: لا جهاز في CI — ما
+> أُنجز هو النقطة التي تُوصَل عندها الفيزياء، لا ادعاء أنها وُصلت
+> (ADR-0013).
+
+```bash
+# أي خلفية تعمل الآن فعلاً؟ — صدق تشغيلي معلن لا خمّاس
+curl -s localhost:8000/api/v1/lab/backend -H "X-API-Key: $VIEWER_KEY" | jq
+
+# عقد الدفعات: تقديم ← تذكرة ← استطلاع (المحاكاة تكتمل فوراً)
+curl -s -X POST localhost:8000/api/v1/lab/batches \
+  -H "X-API-Key: $SCIENTIST_KEY" -H "Content-Type: application/json" \
+  -d '{"assays": [{"smiles": "CCO", "dg_kcal": -8.0}], "idempotency_key": "run-1"}'
+curl -s localhost:8000/api/v1/lab/batches/$BATCH_ID -H "X-API-Key: $VIEWER_KEY" | jq
+```
+
+---
+
 ## 🚀 v0.8.0 — مقاييس صدق الأهداف: الجودة تُقاس وتُنشر لا تُدَّعى (P7)
 
 > **الجديد في v0.8.0:** لكل هدف من الثلاثة **رقم تعميم منشور**: R² وMAE
@@ -153,7 +178,7 @@ curl -s localhost:8000/api/v1/metrics | python3 -m json.tool
 | `engines` | `simulation` (حتمي، دائماً متاح) · `vina` (ربط فعلي) · `boltz2` (تقارب مباشر عبر بوابة) — التراجع بينها **مُعلَن** |
 | `screening` | جولة فرز كاملة من نداء واحد — **الهيكل الهزّ من الخطة منفَّذ** |
 | `affinity` | جسر Cheng-Prusoff (ΔG ≈ −1.364×pIC50) مع حكم اتفاق صريح |
-| `lab` | مقبس مختبر موحّد — FRET محاكى الآن، دمج حقيقي لاحقاً بعلامة `simulated=true` |
+| `lab` | مقبس مختبر موحّد (P8): عقد دفعات + جسر LIMS REST حقيقي بالضبط + صندوق صادر — FRET محاكى هو الخلفية الافتراضية بعلامة `simulated=true` |
 | `reporting` | تقرير Markdown/JSON ثنائي اللغة لكل جولة |
 | `api` | FastAPI + طابور مهام + OpenAPI تفاعلي على `/docs` |
 
@@ -339,6 +364,7 @@ Python 3.11 | **FastAPI (منصة v0.2.0)** | Streamlit | RDKit | AutoDock Vina 
 | **P5** | مكتبة الطب النبوي: 17 مركباً مُدقَّقاً (عسل 9 · حبة البركة 6 · شعير 2) بتخريج دقيق «متفق عليه» وطبقات دليل T0–T3 وفرز UNVALIDATED على نموذج الإنتاج — الثيموكينون في المركز الأول على MPRO | ✅ [v0.6.0](CHANGELOG.md) · [ADR-0010](docs/adr/ADR-0010-prophetic-medicine-library.md) |
 | **P6** | توسيع الأهداف: سجل TARGETS معلن — Mpro + AChE (CHEMBL220) + EGFR (CHEMBL203) بتخريج موحد (900 صف لكل هدف) وحارس شحّة في النواة وفرز ثلاثي UNVALIDATED — pinocembrin أولاً على AChE وCAPE أولاً على EGFR | ✅ [v0.7.0](CHANGELOG.md) · [ADR-0011](docs/adr/ADR-0011-multi-target-expansion.md) |
 | **P7** | مقاييس صدق الأهداف: لكل هدف R²/MAE على هياكل محجوزة وتغطية conformal مقاسة — Mpro R²=0.537 والأهداف الجديدة بتغطية أدنى من الاسمية منشورة كما هي — الأرشيف مُلزم والـAPI يقرأه بلا حساب حي | ✅ [v0.8.0](CHANGELOG.md) · [ADR-0012](docs/adr/ADR-0012-target-quality-metrics.md) · [التقرير](docs/audit/TIBB-QUALITY.md) |
+| **P8** | جسر الفيزياء: عقد دفعات REST للمختبر الحقيقي (`LabBatchClient` + `HttpLimsLab` + صندوق صادر) — التكامل الفعلي ضبطُ تهيئة لا إعادة كتابة، وعقد نتائج صارم يرفض الدفعة المخرقة كاملة — لا جهاز في CI والحد مُعلن | ✅ [v0.9.0](CHANGELOG.md) · [ADR-0013](docs/adr/ADR-0013-physical-lab-bridge.md) |
 
 ### إعادة توليد المستقبلات المُجهّزة
 ```bash

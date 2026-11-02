@@ -69,3 +69,25 @@ class StoreUnavailableError(PlatformError):
 
     http_status = 503
     code = "store_unavailable"
+
+
+class LabError(PlatformError):
+    """فشل جسر المختبر (P8) — شبكة أو بوابة LIMS أو مهلة استطلاع.
+
+    الصدق بنيوياً: عند ضبط بوابة حقيقية فإن فشلها فشل صريح — لا عودة
+    صامتة إلى المحاكاة، فذلك تلفيق نتائج مخبرية لم تقع أصلاً.
+    """
+
+    http_status = 502
+    code = "lab_error"
+
+
+class LimsContractError(LabError):
+    """خرق عقد بوابة المختبر (ADR-0013) — استجابة لا تطابق العقد المعلن.
+
+    انضباط عقود ChEMBL نفسه مطبق على الفيزياء: كل الخروق تُجمع في رفض
+    واحد، والدفعة تُرفض كاملة لا تُقبل جزئياً بلا سؤال.
+    """
+
+    http_status = 502
+    code = "lims_contract_violation"

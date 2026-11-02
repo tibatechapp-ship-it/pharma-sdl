@@ -30,6 +30,16 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None or not raw.strip():
+        return default
+    try:
+        return float(raw.strip())
+    except ValueError:
+        return default
+
+
 def _env_str(name: str, default: str) -> str:
     raw = os.getenv(name)
     return default if raw is None or not raw.strip() else raw.strip()
@@ -75,6 +85,15 @@ class Settings:
     # postgres يستوجب psycopg + DSN صريحاً — لا ترقية صامتة ولا ادعاء بلا خدمة.
     store_backend: str = "sqlite"
     pg_dsn: str | None = None
+    # ── P8: جسر الفيزياء — بوابة LIMS حقيقية عبر عقد REST (ADR-0013) ──
+    # رابط فارغ = المختبر المحاكى (الافتراضي التوثيقي). ضبط الرابط يبدّل
+    # نفس الواجهة إلى البوابة الحقيقية — ولا عودة صامتة إلى المحاكاة أبداً.
+    lims_url: str | None = None
+    lims_token: str | None = None
+    lims_timeout_s: float = 10.0
+    lims_poll_interval_s: float = 2.0
+    lims_max_polls: int = 60
+    lims_outbox: Path | None = REPO_ROOT / "data" / "lab-outbox.jsonl"
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -110,6 +129,17 @@ class Settings:
             vina_exhaustiveness=_env_int("PHARMA_SDL_VINA_EXHAUSTIVENESS", 8),
             store_backend=_env_str("PHARMA_SDL_STORE", "sqlite").lower(),
             pg_dsn=os.getenv("PHARMA_SDL_PG_DSN") or None,
+            lims_url=os.getenv("PHARMA_SDL_LIMS_URL") or None,
+            lims_token=os.getenv("PHARMA_SDL_LIMS_TOKEN") or None,
+            lims_timeout_s=_env_float("PHARMA_SDL_LIMS_TIMEOUT", 10.0),
+            lims_poll_interval_s=_env_float("PHARMA_SDL_LIMS_POLL_INTERVAL", 2.0),
+            lims_max_polls=_env_int("PHARMA_SDL_LIMS_MAX_POLLS", 60),
+            lims_outbox=Path(
+                _env_str(
+                    "PHARMA_SDL_LIMS_OUTBOX",
+                    str(REPO_ROOT / "data" / "lab-outbox.jsonl"),
+                )
+            ),
         )
 
 

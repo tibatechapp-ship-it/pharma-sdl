@@ -4,13 +4,20 @@
 مع ضوضاء لوغاريتمية طبيعية موقّعة (hash) تحاكي تفاوت القياس المخبري.
 
 ⚠️ كل نتيجة تخرج بعلامة simulated=True وبيان صريح — صفر التباس مع قياس حقيقي.
+
+P8 (ADR-0013): المحاكاة تنفذ عقد الدفعات `LabBatchClient` حرفياً —
+الدفعة تكتمل فوراً (حتمية)، فما فوق المختبر يتعامل معها كما يتعامل مع
+بوابة LIMS حقيقية، والفرق الوحيد الظاهر حقل `simulated`.
 """
 
 from __future__ import annotations
 
 import hashlib
 import math
+import uuid
 
+from pharma_sdl.errors import NotFoundError
+from pharma_sdl.lab.batch import BatchPoll, BatchTicket
 from pharma_sdl.lab.interface import AssayRequest
 from pharma_sdl.models import AssayResult
 
@@ -27,9 +34,51 @@ def _seeded_noise(smiles: str, sigma: float = 0.15) -> float:
 
 
 class SimulatedFretLab:
-    """فحص FRET افتراضي — للعرض والاختبار وتدريب سير العمل قبل الدمج."""
+    """فحص FRET افتراضي — للعرض والاختبار وتدريب سير العمل قبل الدمج.
+
+    الخلفية الافتراضية دائماً: تُختار حين لا يُضبط رابط LIMS — وحين
+    تُضبط البوابة لا تعود هذه الخلفية قابلة للاختيار تلقائياً أبداً.
+    """
 
     name = "simulated-fret"
+
+    def __init__(self) -> None:
+        # حالة الدفعات في الذاكرة — المحاكاة عرضٌ واختبار، وليست خدمة إنتاج؛
+        # في البوابة الحقيقية الحالة عند المختبر نفسه لا عند المنصة.
+        self._batches: dict[str, list[AssayRequest]] = {}
+
+    # ── عقد الدفعات (P8) — نفس سلوك LIMS: تقديم ← تذكرة ← استطلاع ──
+
+    def submit_batch(
+        self, requests: list[AssayRequest], idempotency_key: str | None = None
+    ) -> BatchTicket:
+        """تقديم دفعة — المحاكاة حتمية فالمفتاح نفسه يعيد التذكرة نفسها."""
+        batch_id = (
+            f"sim-{idempotency_key}" if idempotency_key else f"sim-{uuid.uuid4().hex[:12]}"
+        )
+        self._batches[batch_id] = list(requests)
+        return BatchTicket(
+            batch_id=batch_id,
+            adapter=self.name,
+            n_assays=len(requests),
+            status="completed",
+        )
+
+    def poll_batch(self, batch_id: str) -> BatchPoll:
+        """استطلاع دفعة — مجهولة ⇒ خطأ صريح ثنائي اللغة لا صمت."""
+        requests = self._batches.get(batch_id)
+        if requests is None:
+            raise NotFoundError(
+                f"دفعة المختبر «{batch_id}» غير معروفة لهذه الخلفية.",
+                f"Lab batch “{batch_id}” is unknown to this adapter.",
+            )
+        results = tuple(self.run_assay(r) for r in requests)
+        return BatchPoll(
+            batch_id=batch_id,
+            adapter=self.name,
+            status="completed",
+            results=results,
+        )
 
     def run_assay(self, request: AssayRequest) -> AssayResult:
         if request.dg_kcal is None:
