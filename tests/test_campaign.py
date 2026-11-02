@@ -50,7 +50,13 @@ def test_campaign_structure_and_monotone_discovery():
 def test_campaign_deterministic_with_same_seed():
     a = _quick(strategy="ucb", seed=3)
     b = _quick(strategy="ucb", seed=3)
-    assert a.model_dump_json() == b.model_dump_json()
+    # runtime_seconds قياس حائط لا حتمية نموذج — يُستبعد من المقارنة البايتية
+    # (كشفه CI 2026-11-02: نفس البذرة أعطت 0.4 و0.5 ثانية فقط، وكل القيم
+    # العلمية متطابقة بايت-ببايت)
+    da, db = a.model_dump(), b.model_dump()
+    da.pop("runtime_seconds", None)
+    db.pop("runtime_seconds", None)
+    assert da == db
 
 
 def test_campaign_different_strategies_differ():
