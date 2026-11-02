@@ -150,3 +150,92 @@ def test_unknown_screen_id_is_404_with_bilingual_error():
     detail = out.json()["detail"]
     assert detail["code"] == "tibb_screen_not_found"
     assert "message_ar" in detail and "message_en" in detail
+
+
+# ── توسيع الأهداف (P6) — /targets + فرز بهدف صريح ──
+
+
+def test_targets_requires_auth():
+    """بلا مفتاح → 401 — سجل الأهداف ليس عاماً."""
+    _auth()
+    client = TestClient(create_app())
+    assert client.get("/api/v1/tibb/targets").status_code == 401
+
+
+def test_viewer_lists_trained_targets():
+    """القارئ يرى الأهداف الثلاثة بأسمائها وبياناتها وقصة اختيارها."""
+    _auth()
+    client = TestClient(create_app())
+    out = client.get("/api/v1/tibb/targets", headers={"X-API-Key": "vk-viewer"})
+    assert out.status_code == 200
+    data = out.json()
+    ids = [t["target_id"] for t in data["targets"]]
+    assert ids == ["CHEMBL203", "CHEMBL220", "CHEMBL4523582"]  # sorted
+    for t in data["targets"]:
+        assert t["n_dataset"] == 900  # حجم Mpro المرجعي للكل
+        assert t["dataset"].startswith("data/")
+        assert t["description_ar"] and t["description_en"]
+        assert t["name_ar"] and t["name_en"]
+    assert "UNVALIDATED" in data["note_en"]
+
+
+def test_screen_with_explicit_target_end_to_end():
+    """e2e بهدف صريح: AChE → تقرير target_id=AChE والصفوف UNVALIDATED."""
+    from pharma_sdl.api import deps
+    from pharma_sdl.api.deps import app_settings
+    from pharma_sdl.config import reset_settings
+
+    _auth()
+    reset_settings()
+    app_settings.cache_clear()
+    deps._registry = None
+    try:
+        client = TestClient(create_app())
+        scientist = {"X-API-Key": "sk-sci"}
+        created = client.post(
+            "/api/v1/tibb/screen",
+            headers=scientist,
+            json={"target_id": "CHEMBL220"},
+        )
+        assert created.status_code == 202
+        body = created.json()
+        assert "AChE" in body["note_en"]  # الهدف المطلوب معلن في الملاحظة
+
+        done = _wait(client, body["job_id"], scientist)
+        assert done["status"] == "done"
+        report = done["report"]
+        assert report["target_id"] == "CHEMBL220"
+        assert report["n_dataset"] == 900
+        for row in report["rows"]:
+            assert row["validation_state"] == "UNVALIDATED"
+        preds = [r["predicted_pic50"] for r in report["rows"]]
+        assert preds == sorted(preds, reverse=True)
+    finally:
+        deps._registry = None
+
+
+def test_screen_default_body_still_mpro():
+    """فرز بلا جسم (كما قبل P6) يبقى على Mpro — توافق خلفي كامل."""
+    _auth()
+    client = TestClient(create_app())
+    scientist = {"X-API-Key": "sk-sci"}
+    created = client.post("/api/v1/tibb/screen", headers=scientist)
+    assert created.status_code == 202
+    done = _wait(client, created.json()["job_id"], scientist)
+    assert done["report"]["target_id"] == "CHEMBL4523582"
+
+
+def test_screen_unknown_target_422_bilingual():
+    """هدف غير مُدرَّب → 422 برسالة ثنائية اللغة — لا نموذج مُرتجل عبر الـAPI."""
+    _auth()
+    client = TestClient(create_app())
+    out = client.post(
+        "/api/v1/tibb/screen",
+        headers={"X-API-Key": "sk-sci"},
+        json={"target_id": "CHEMBL999"},
+    )
+    assert out.status_code == 422
+    detail = out.json()["detail"]
+    assert detail["code"] == "tibb_target_not_trained"
+    assert "غير مُدرَّب" in detail["message_ar"]
+    assert "not trained" in detail["message_en"]

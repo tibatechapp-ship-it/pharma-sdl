@@ -13,6 +13,7 @@ from pharma_sdl.prophetic import (
     HADITH_GRADES,
     PROCEDURES,
     SOURCE_NOTES,
+    TARGETS,
     TIER_LABELS,
     library_summary,
     run_library_screen,
@@ -152,3 +153,114 @@ def test_screen_no_featurization_loss():
     )
     assert len(idx) == len(COMPOUNDS)
     assert np.isfinite(X).all()
+
+
+# ── توسيع الأهداف (P6) — سجل TARGETS وبياناته المُخَرَّجة ──
+
+
+def test_targets_registry_has_three_trained_targets():
+    """ثلاثة أهداف مُدرَّبة: Mpro + AChE + EGFR — بلا هدف بلا بيانات."""
+    from pharma_sdl.prophetic import ACHE_TARGET, EGFR_TARGET, MPRO_TARGET, TARGETS
+
+    assert set(TARGETS) == {"CHEMBL4523582", "CHEMBL220", "CHEMBL203"}
+    assert TARGETS["CHEMBL4523582"] is MPRO_TARGET
+    assert TARGETS["CHEMBL220"] is ACHE_TARGET
+    assert TARGETS["CHEMBL203"] is EGFR_TARGET
+    for spec in TARGETS.values():
+        assert spec.dataset_path.exists(), spec.dataset
+        assert spec.description_ar and spec.description_en
+
+
+@pytest.mark.parametrize("target_id", sorted(TARGETS.values(), key=lambda s: s.target_id), ids=lambda s: s.target_id)
+def test_target_dataset_curated_like_production(target_id):
+    """كل بيانات هدف مُخَرَّجة كإنتاج Mpro حرفياً: 900 صفاً بلا فراغات."""
+    import pandas as pd
+
+    df = pd.read_csv(target_id.dataset_path)
+    assert list(df.columns) == ["smiles", "pchembl_value", "mol_chembl_id"]
+    assert len(df) == 900  # حجم Mpro المرجعي — لا هدف ببيانات شحّة
+    assert df["smiles"].notna().all() and df["pchembl_value"].notna().all()
+    assert df["mol_chembl_id"].is_unique  # جزيء واحد بقياسه الأعلى
+    assert df["pchembl_value"].between(1.0, 14.0).all()
+
+
+@pytest.mark.parametrize("tid", ["CHEMBL220", "CHEMBL203"])
+def test_expanded_datasets_meet_their_curation_floor(tid):
+    """بيانات P6 بقاعدة تخريجها الموثقة: pchembl >= 5 حصراً.
+
+    بيانات Mpro أقدم من هذه القاعدة (أدنى قيمة 4.01 موثقة) — عقدها
+    نطاق 1-14 أعلاه؛ الأهداف الجديدة لا تُقبل إلا فوق الأرضية.
+    """
+    import pandas as pd
+
+    df = pd.read_csv(TARGETS[tid].dataset_path)
+    assert df["pchembl_value"].min() >= 5.0
+
+
+@pytest.mark.parametrize("target_id", sorted(TARGETS.values(), key=lambda s: s.target_id), ids=lambda s: s.target_id)
+def test_target_dataset_smiles_all_parse(target_id):
+    """كل SMILES في بيانات أي هدف قابل للتحليل في RDKit — بلا استثناء."""
+    import pandas as pd
+    from rdkit import Chem, RDLogger
+
+    RDLogger.DisableLog("rdApp.*")
+    df = pd.read_csv(target_id.dataset_path)
+    for smi in df["smiles"]:
+        mol = Chem.MolFromSmiles(str(smi))
+        assert mol is not None and mol.GetNumAtoms() > 0, smi
+
+
+@pytest.mark.parametrize("tid", ["CHEMBL220", "CHEMBL203"])
+def test_screen_on_expanded_targets_lane_discipline(tid):
+    """الفرز على الأهداف الموسعة بنفس الانضباط: مسار واحد وUNVALIDATED لكل صف."""
+    report = run_library_screen(target_id=tid, n_estimators=50, seed=0)
+    assert report.target_id == tid
+    assert report.lane == "predicted_potency"
+    assert report.n_compounds == 17 and len(report.rows) == 17
+    assert report.n_dataset == 900
+    for row in report.rows:
+        assert row.validation_state == "UNVALIDATED"
+        assert row.lane == "predicted_potency"
+        assert 0.0 <= row.predicted_pic50 <= 15.0
+    preds = [r.predicted_pic50 for r in report.rows]
+    assert preds == sorted(preds, reverse=True)
+
+
+def test_screen_expanded_target_seed_deterministic():
+    """حتمية البذرة على الأهداف الجديدة كأي هدف — عقد الحتمية عام."""
+    a = run_library_screen(target_id="CHEMBL203", n_estimators=40, seed=7)
+    b = run_library_screen(target_id="CHEMBL203", n_estimators=40, seed=7)
+    assert a.rows == b.rows
+
+
+def test_screen_unknown_target_rejected():
+    """هدف غير مُدرَّب يُرفض في النواة — لا نموذج مُرتجل.
+
+    الفحص بمعرف الهدف و«هدف» دون تشكيل: تركيب الحركات قد يختلف بين
+    ملفين (NFC/NFD) فيفشل regex التشكيلي رغم تطابق النص بصرياً.
+    """
+    with pytest.raises(ValueError) as ei:
+        run_library_screen(target_id="CHEMBL999")
+    msg = str(ei.value)
+    assert "CHEMBL999" in msg
+    assert "هدف" in msg
+
+
+def test_screen_default_still_mpro():
+    """التوافق الخلفي: الافتراضي بلا معاملات يبقى Mpro الإنتاجي."""
+    report = run_library_screen(n_estimators=30, seed=0)
+    assert report.target_id == "CHEMBL4523582"
+    assert "mpro_sample" in report.dataset
+
+
+def test_screen_min_dataset_guard_enforced(tmp_path):
+    """لا نموذج فوق بيانات شحّة: ملف أصغر من MIN_DATASET_ROWS يُرفض."""
+    import pandas as pd
+
+    from pharma_sdl.prophetic import MIN_DATASET_ROWS, MPRO_TARGET
+
+    df = pd.read_csv(MPRO_TARGET.dataset_path).head(MIN_DATASET_ROWS - 1)
+    p = tmp_path / "small.csv"
+    df.to_csv(p, index=False)
+    with pytest.raises(ValueError, match="شحّة"):
+        run_library_screen(dataset_csv=p, n_estimators=20)

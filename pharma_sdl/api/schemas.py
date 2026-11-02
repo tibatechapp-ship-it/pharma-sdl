@@ -185,6 +185,36 @@ class LibraryOut(BaseModel):
     disclaimer_en: str
 
 
+class TibbTargetOut(BaseModel):
+    """هدف تِبّي مُدرّب واحد — معرفه واسمه وبياناته وقصة اختياره (P6).
+
+    الاسم مُسبَّق بـ Tibb تمييزاً له عن TargetOut (أهداف الـDocking بمعرفات
+    PDB) — التصادم كشفه الاختبار التكاملي وأعيدت التسمية لا الدمج.
+    """
+
+    target_id: str
+    name_ar: str
+    name_en: str
+    dataset: str
+    n_dataset: int
+    description_ar: str
+    description_en: str
+
+
+class TibbTargetsOut(BaseModel):
+    """سجل الأهداف التِبّية المُدرّبة — كلها تُفرز بنفس الكود والمسار نفسه."""
+
+    targets: list[TibbTargetOut]
+    note_ar: str
+    note_en: str
+
+
+class ScreenRequest(BaseModel):
+    """طلب فرز اختياري الجسم — target_id من TARGETS أو غيابه (Mpro)."""
+
+    target_id: str | None = None
+
+
 class ScreenRunOut(BaseModel):
     """حالة فرز المكتبة — وعند الاكتمال التقرير الكامل."""
 

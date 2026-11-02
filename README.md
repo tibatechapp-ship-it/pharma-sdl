@@ -20,6 +20,27 @@
 
 ---
 
+## 🚀 v0.7.0 — توسيع الأهداف: ثلاثة أهداف مُدرَّبة بنفس الكود (P6)
+
+> **الجديد في v0.7.0:** سجل أهداف معلن (`TARGETS`) — المركبات النبوية الـ17
+> تُفرز الآن ضد **ثلاثة أهداف**: Mpro (الأصلي) + **AChE** (CHEMBL220،
+> الفئة العصبية/الكولينية) + **EGFR** (CHEMBL203، بروتين كيناز) — كل هدف
+> بنموذجه على بياناته المُخَرَّجة بعقد Mpro نفسها (900 صف، IC50 حصراً،
+> pchembl ≥ 5 مطبق محلياً). أول فرز إنتاجي (UNVALIDATED، 300 شجرة):
+> **pinocembrin أولَاً على AChE (6.351)** و**CAPE أولَاً على EGFR (5.868)**
+> pIC50 متنبأ بها. قرار موثق (ADR-0011): AChE بدل «القنوات الأيونية»
+> حرفياً — جودة التخريج تتقدم على حرفية الفئة. وهدف جديد = بيانات
+> مُخَرَّجة + مواصفة واحدة، وحارس شحّة في النواة (`MIN_DATASET_ROWS = 300`).
+
+```bash
+# الأهداف المُدرّبة — بأحجام بياناتها وقصص اختيارها
+curl -s localhost:8000/api/v1/tibb/targets | jq '.targets[].target_id'
+# فرز المكتبة على AChE بدل الافتراضي Mpro
+curl -s -X POST localhost:8000/api/v1/tibb/screen \
+  -H "Authorization: Bearer $SCIENTIST_TOKEN" \
+  -H 'Content-Type: application/json' -d '{"target_id": "CHEMBL220"}'
+```
+
 ## 🚀 v0.6.0 — مكتبة الطب النبوي: التوثيق التراثي يلتزم عقود الصدق (P5)
 
 > **الجديد في v0.6.0:** العسل وحبة البركة والشعير — والحجامة والكاي كإجرائين
@@ -300,6 +321,7 @@ Python 3.11 | **FastAPI (منصة v0.2.0)** | Streamlit | RDKit | AutoDock Vina 
 | **P3** | التخزين الحي الحقيقي: PostgreSQL بنفس العقود (مُختبر على خادم مضمّن — لا mocks) + الحلقة المغلقة كخدمة + مقاييس صادقة + ترقية JSONL من طرف إلى طرف | ✅ [v0.4.0](CHANGELOG.md) · [ADR-0008](docs/adr/ADR-0008-live-postgres-loop-service.md) |
 | **P4** | التعلم النشط واليقين المُعايَر (حزمة Q4): حملات تُحدّث النموذج من نتائجها، أربعة معايير اختيار، Conformal Prediction بتغطية مقاسة، دليل Go/No-Go: UCB +0.51 pIC50 فوق العشوائي | ✅ [v0.5.0](CHANGELOG.md) · [ADR-0009](docs/adr/ADR-0009-active-learning-conformal.md) · [الدليل](docs/audit/ACTIVE-LEARNING-CAMPAIGN.md) |
 | **P5** | مكتبة الطب النبوي: 17 مركباً مُدقَّقاً (عسل 9 · حبة البركة 6 · شعير 2) بتخريج دقيق «متفق عليه» وطبقات دليل T0–T3 وفرز UNVALIDATED على نموذج الإنتاج — الثيموكينون في المركز الأول على MPRO | ✅ [v0.6.0](CHANGELOG.md) · [ADR-0010](docs/adr/ADR-0010-prophetic-medicine-library.md) |
+| **P6** | توسيع الأهداف: سجل TARGETS معلن — Mpro + AChE (CHEMBL220) + EGFR (CHEMBL203) بتخريج موحد (900 صف لكل هدف) وحارس شحّة في النواة وفرز ثلاثي UNVALIDATED — pinocembrin أولاً على AChE وCAPE أولاً على EGFR | ✅ [v0.7.0](CHANGELOG.md) · [ADR-0011](docs/adr/ADR-0011-multi-target-expansion.md) |
 
 ### إعادة توليد المستقبلات المُجهّزة
 ```bash

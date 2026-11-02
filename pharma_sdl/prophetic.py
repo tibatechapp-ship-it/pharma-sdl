@@ -465,8 +465,87 @@ def library_summary() -> dict:
 # الفرز الحاسوبي — نموذج الإنتاج نفسه، خط predicted_potency حصراً
 # ─────────────────────────────────────────────────────────────
 
-DATASET_CSV = Path(__file__).resolve().parent.parent / "data" / "mpro_sample.csv"
-TARGET_ID = "CHEMBL4523582"  # MPRO — الهدف الإنتاجي الوحيد المُدرَّب
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+MIN_DATASET_ROWS = 300
+"""حد أدنى لبيانات هدف — بلا نموذج فوق بيانات شحّة."""
+
+
+class TargetSpec(BaseModel):
+    """هدف مُدرَّب واحد: معرفه واسمه وبياناته وقصة اختياره."""
+
+    target_id: str  # ChEMBL target id
+    name_ar: str
+    name_en: str
+    dataset: str  # اسم ملف البيانات تحت data/
+    description_ar: str
+    description_en: str
+
+    @property
+    def dataset_path(self) -> Path:
+        return DATA_DIR / self.dataset
+
+
+MPRO_TARGET = TargetSpec(
+    target_id="CHEMBL4523582",
+    name_ar="البروتياز الرئيسي لفيروس SARS-CoV-2 (Mpro)",
+    name_en="SARS-CoV-2 main protease (Mpro)",
+    dataset="mpro_sample.csv",
+    description_ar=(
+        "هدف الإنتاج منذ P3: عينة 900 جزيء من قياسات pChEMBL (IC50) على Mpro "
+        "من ChEMBL — الحجم المرجعي الذي تُقاس عليه كل الأهداف الأخرى."
+    ),
+    description_en=(
+        "Production target since P3: a 900-molecule pChEMBL (IC50) sample on "
+        "Mpro from ChEMBL — the reference size every other target matches."
+    ),
+)
+
+ACHE_TARGET = TargetSpec(
+    target_id="CHEMBL220",
+    name_ar="أستيل كولين أستيراز البشري (AChE)",
+    name_en="Human acetylcholinesterase (AChE)",
+    dataset="ache_sample.csv",
+    description_ar=(
+        "الفئة العصبية/الكولينية من خطة توسيع الأهداف (30 يوماً): اختير بدل "
+        "القنوات الأيونية حرفياً لأن بيانات القنوات في ChEMBL لا تجتاز معيار "
+        "نقطة النهاية الواحدة المتجانسة (اختبارات وظيفية EC50/نسب تثبيط "
+        "متباينة) — والتخريج نفسه المطبق على Mpro بلا استثناء."
+    ),
+    description_en=(
+        "The neuronal/cholinergic class of the 30-day expansion plan: chosen "
+        "over literal ion channels because ChEMBL channel datasets fail the "
+        "single-clean-endpoint bar (heterogeneous functional EC50 / "
+        "percent-inhibition assays). Same curation as Mpro, no exceptions."
+    ),
+)
+
+EGFR_TARGET = TargetSpec(
+    target_id="CHEMBL203",
+    name_ar="مستقبل عامل النمو الطلائي البشري (EGFR)",
+    name_en="Human epidermal growth factor receptor (EGFR)",
+    dataset="egfr_sample.csv",
+    description_ar=(
+        "فئة بروتين كيناز المسمّاة نصاً في خطة التوسيع (30 يوماً): أكبر قياسات "
+        "IC50 نظيفة بين الكينازات، وثيموكينون المكتبة له أدبيات منشورة عن "
+        "تثبيط التكاثر في هذا المسار."
+    ),
+    description_en=(
+        "The protein-kinase class named verbatim in the expansion plan "
+        "(30 days): the cleanest large IC50 dataset among kinases, and the "
+        "library's thymoquinone has published antiproliferative literature "
+        "on this axis."
+    ),
+)
+
+TARGETS: dict[str, TargetSpec] = {
+    t.target_id: t for t in (MPRO_TARGET, ACHE_TARGET, EGFR_TARGET)
+}
+"""سجل الأهداف المُدرَّبة — هدف جديد = ملف بيانات مُخَرَّج + صف هنا."""
+
+# أسماء قديمة محفوظة للتوافق — مشتقة من مواصفة Mpro
+DATASET_CSV = MPRO_TARGET.dataset_path
+TARGET_ID = MPRO_TARGET.target_id
 
 
 class ScreenRow(BaseModel):
@@ -518,25 +597,42 @@ def _display_path(p: Path) -> str:
 def run_library_screen(
     dataset_csv: str | Path | None = None,
     *,
+    target_id: str | None = None,
     n_estimators: int = 300,
     seed: int = 0,
     registry: object | None = None,
 ) -> ScreenReport:
-    """تدريب نموذج الإنتاج على بيانات MPRO ثم فرز مكتبة الطب النبوي.
+    """تدريب نموذج الإنتاج على بيانات الهدف ثم فرز مكتبة الطب النبوي.
+
+    الهدف: `target_id` من TARGETS (افتراضياً Mpro — توافق خلفي كامل)؛
+    إن مُرّر dataset_csv صراحة فهو يتقدم على ملف المواصفة (للاختبارات).
 
     الالتزامات:
         - التمثيل نفسه (active_learning.featurize — تطابق core.ml_potency
           مُختبر تقاطعياً منذ P4).
         - التنبؤ أحادي الخيط بعد الملاءمة المتوازية — الحتمية عقد (درس ADR-0009).
         - كل صف UNVALIDATED في خط predicted_potency — لا درجة docking هنا.
+        - حد أدنى لبيانات الهدف (MIN_DATASET_ROWS) — لا نموذج فوق بيانات شحّة.
     """
     if n_estimators < 10:
         raise ValueError("n_estimators must be >= 10")
-    csv_path = Path(dataset_csv) if dataset_csv else DATASET_CSV
+    if target_id is not None and target_id not in TARGETS:
+        raise ValueError(
+            f"هدف غير مُدرّب: {target_id} — المدرّب: {', '.join(sorted(TARGETS))}"
+        )
+    spec = TARGETS[target_id] if target_id else MPRO_TARGET
+    csv_path = Path(dataset_csv) if dataset_csv else spec.dataset_path
+    if not csv_path.exists():
+        raise FileNotFoundError(f"بيانات الهدف مفقودة: {csv_path}")
     t0 = time.perf_counter()
 
     df = pd.read_csv(csv_path)
     df = df.dropna(subset=["smiles", "pchembl_value"]).reset_index(drop=True)
+    if len(df) < MIN_DATASET_ROWS:
+        raise ValueError(
+            f"بيانات {spec.target_id} شحّة ({len(df)} صفاً) — الحد الأدنى "
+            f"{MIN_DATASET_ROWS}؛ لا نموذج فوق بيانات شحّة"
+        )
     ds_smiles = df["smiles"].astype(str).tolist()
     ds_y = df["pchembl_value"].to_numpy(dtype=float)
     X_ds, ds_idx = featurize(ds_smiles)
@@ -573,7 +669,7 @@ def run_library_screen(
         )
 
     report = ScreenReport(
-        target_id=TARGET_ID,
+        target_id=spec.target_id,
         dataset=_display_path(csv_path),
         dataset_fingerprint=data_fp,
         n_dataset=len(ds_idx),
@@ -589,18 +685,18 @@ def run_library_screen(
             ExperimentRecord(
                 kind="natural_products_screen",
                 hypothesis_ar=(
-                    "مكونات مكتبة الطب النبوي لها تنبؤات فعالية على MPRO "
-                    "تستحق الأولوية التجريبية؟"
+                    f"مكونات مكتبة الطب النبوي لها تنبؤات فعالية على "
+                    f"{spec.name_ar} تستحق الأولوية التجريبية؟"
                 ),
                 hypothesis_en=(
-                    "Do Prophetic-library constituents yield MPRO potency "
-                    "predictions worth experimental triage?"
+                    f"Do Prophetic-library constituents yield {spec.name_en} "
+                    "potency predictions worth experimental triage?"
                 ),
                 question=(
                     f"ما ترتيب {len(rows)} مركباً من المكتبة النبوية على نموذج "
-                    f"الإنتاج ({n_estimators} شجرة، بذرة {seed})؟"
+                    f"{spec.name_ar} ({n_estimators} شجرة، بذرة {seed})؟"
                 ),
-                target_id=TARGET_ID,
+                target_id=spec.target_id,
                 engine_used="sklearn-rf",
                 method="prophetic_library_screen",
                 data_version=data_fp,
@@ -611,6 +707,7 @@ def run_library_screen(
                     "seed": seed,
                     "lane": "predicted_potency",
                     "oracle": "none_model_prediction_only",
+                    "target_name_en": spec.name_en,
                 },
             )
         )
@@ -625,8 +722,8 @@ def run_library_screen(
             engine_used="sklearn-rf",
             method="prophetic_library_screen",
             lesson=(
-                "فرز مكتبة الطب النبوي على نموذج MPRO الإنتاجي — تنبؤات "
-                "UNVALIDATED في خط predicted_potency؛ التوثيق التراثي لا "
+                f"فرز مكتبة الطب النبوي على نموذج {spec.name_en} الإنتاجي — "
+                "تنبؤات UNVALIDATED في خط predicted_potency؛ التوثيق التراثي لا "
                 "يُنتج درجات."
             ),
         )
@@ -635,15 +732,21 @@ def run_library_screen(
 
 
 __all__ = [
+    "ACHE_TARGET",
     "COMPOUNDS",
+    "EGFR_TARGET",
     "EVIDENCE_TIERS",
     "HADITH_GRADES",
+    "MIN_DATASET_ROWS",
+    "MPRO_TARGET",
     "PROCEDURES",
     "SOURCE_NOTES",
+    "TARGETS",
     "TIER_LABELS",
     "PropheticProcedure",
     "ScreenReport",
     "ScreenRow",
+    "TargetSpec",
     "library_summary",
     "run_library_screen",
 ]

@@ -5,8 +5,8 @@ import uuid
 import pandas as pd
 import streamlit as st
 
-from core.i18n import t
 from core import palette
+from core.i18n import t
 
 # Check RDKit availability (not available on Stlite/WASM)
 HAS_RDKIT = importlib.util.find_spec("rdkit") is not None
