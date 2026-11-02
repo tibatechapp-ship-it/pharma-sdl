@@ -27,6 +27,7 @@ from pharma_sdl.api.schemas import (
     LibraryOut,
     ScreenRequest,
     ScreenRunOut,
+    TibbQualityArtifactOut,
     TibbScreenReportOut,
     TibbTargetOut,
     TibbTargetsOut,
@@ -42,6 +43,7 @@ from pharma_sdl.prophetic import (
     library_summary,
     run_library_screen,
 )
+from pharma_sdl.quality import load_published_quality
 
 router = APIRouter(prefix="/tibb", tags=["tibb-nabawi"])
 
@@ -133,6 +135,37 @@ def get_targets() -> TibbTargetsOut:
         note_ar=_TARGETS_NOTE_AR,
         note_en=_TARGETS_NOTE_EN,
     )
+
+
+@router.get(
+    "/quality",
+    response_model=TibbQualityArtifactOut,
+    dependencies=[Depends(require_role(Role.VIEWER))],
+)
+def get_quality() -> TibbQualityArtifactOut:
+    """مقاييس صدق الأهداف — أرشيف مقاس منشور يُقرأ كما هو بلا حساب حي.
+
+    الرقم المقاس مرة واحدة ببذرة معلنة يُنشر لا يُعاد حسابه عند الطلب —
+    إعادة القياس مراجعة موثقة (سكربت + بصمة كود) لا نداء API.
+    """
+    try:
+        artifact = load_published_quality()
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "code": "tibb_quality_not_published",
+                "message_ar": (
+                    "أرشيف مقاييس الجودة غير منشور بعد — يُنتج بسكربت "
+                    "measure_tibb_quality.py ويُلزم في المستودع"
+                ),
+                "message_en": (
+                    "Quality artifact not published yet — produced by the "
+                    "measure_tibb_quality.py script and committed to the repo"
+                ),
+            },
+        )
+    return TibbQualityArtifactOut.model_validate(artifact)
 
 
 @router.post(

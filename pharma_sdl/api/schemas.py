@@ -215,6 +215,46 @@ class ScreenRequest(BaseModel):
     target_id: str | None = None
 
 
+class TibbQualityOut(BaseModel):
+    """قياس جودة واحد لهدف واحد — أرشيف منشور يُقرأ كما هو (P7)."""
+
+    target_id: str
+    name_ar: str
+    name_en: str
+    dataset: str
+    dataset_fingerprint: str
+    measured_on: str
+    code_version: str
+    n_estimators: int
+    seed: int
+    test_size: float
+    calib_size: float
+    alpha: float
+    n_rows: int
+    n_scaffolds: int
+    n_fit: int
+    n_calib: int
+    n_test: int
+    r2: float
+    mae: float
+    rmse: float
+    nominal_coverage: float
+    measured_coverage: float
+    q_hat: float
+    finite_sample_guarantee: bool
+
+
+class TibbQualityArtifactOut(BaseModel):
+    """أرشيف مقاييس الجودة المنشور — بروتوكول كامل + ملاحظة الحدود الصادقة."""
+
+    protocol: dict
+    note_ar: str
+    note_en: str
+    measured_on: str
+    code_version: str
+    targets: list[TibbQualityOut]
+
+
 class ScreenRunOut(BaseModel):
     """حالة فرز المكتبة — وعند الاكتمال التقرير الكامل."""
 
