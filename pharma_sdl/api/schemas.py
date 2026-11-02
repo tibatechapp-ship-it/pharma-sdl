@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from pharma_sdl.campaign import CampaignReport
 from pharma_sdl.experiments.registry import ExperimentRecord
 from pharma_sdl.models import AssayResult, LigandInput, ScreeningResult
+from pharma_sdl.prophetic import ScreenReport as TibbScreenReportOut
 from pharma_sdl.validation.gate import ValidationState
 
 
@@ -164,6 +165,34 @@ class CampaignRunOut(BaseModel):
     status: str
     error: str | None = None
     report: CampaignReport | None = None  # None حتى اكتمال المهمة
+    note_ar: str = ""
+    note_en: str = ""
+
+
+# ── مكتبة الطب النبوي (P5) ──
+class LibraryOut(BaseModel):
+    """المكتبة النبوية كاملة — مركبات مُدقَّقة + إجراءات + توثيق مزدوج."""
+
+    compounds: int
+    procedures: int
+    by_source: dict[str, int]
+    by_evidence_tier: dict[str, int]
+    hadith_grades: list[str]
+    items: list[dict]  # المركبات: SMILES/صيغة/CID/مصدر/طبقة دليل/توثيق تراثي
+    procedure_items: list[dict]  # الإجراءات: بلا جزيء — توثيق فقط
+    source_notes: dict[str, str]
+    disclaimer_ar: str
+    disclaimer_en: str
+
+
+class ScreenRunOut(BaseModel):
+    """حالة فرز المكتبة — وعند الاكتمال التقرير الكامل."""
+
+    job_id: str
+    kind: str = "tibb_screen"
+    status: str
+    error: str | None = None
+    report: TibbScreenReportOut | None = None  # None حتى اكتمال المهمة
     note_ar: str = ""
     note_en: str = ""
 

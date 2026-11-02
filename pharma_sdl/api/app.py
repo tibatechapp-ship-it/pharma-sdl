@@ -31,6 +31,7 @@ from pharma_sdl.api.routes import (
     metrics,
     screening,
     targets,
+    tibb,
 )
 from pharma_sdl.engines.registry import list_engines
 from pharma_sdl.errors import PlatformError
@@ -97,6 +98,7 @@ def create_app() -> FastAPI:
     app.include_router(experiments.router, prefix="/api/v1")
     app.include_router(loop.router, prefix="/api/v1")
     app.include_router(campaigns.router, prefix="/api/v1")
+    app.include_router(tibb.router, prefix="/api/v1")
     app.include_router(metrics.router, prefix="/api/v1")
 
     @app.get(
