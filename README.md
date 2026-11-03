@@ -15,10 +15,32 @@
   <img src="https://img.shields.io/badge/Streamlit-UI-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit">
   <a href="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/tests.yml"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftibatechapp-ship-it%2Fpharma-sdl%2Fmain%2Fbadges%2Ftests.json" alt="اختبارات — رقم حي يُحدّثه CI من التشغيل الفعلي"></a>
   <a href=".github/workflows/platform.yml"><img src="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/platform.yml/badge.svg" alt="Platform API"></a>
-  <img src="https://img.shields.io/badge/API-v0.11.0%20%28FastAPI%29-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.11.0 — واجهة API مبنية بFastAPI (OpenAPI version=__version__)">
+  <img src="https://img.shields.io/badge/API-v0.12.0%20%28FastAPI%29-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.12.0 — واجهة API مبنية بFastAPI (OpenAPI version=__version__)">
 </p>
 
 ---
+
+## 🚀 v0.12.0 — P11: ترقية نموذج الفعالية — A/B/C/D على البروتوكول المنشور
+
+> **الجديد في v0.12.0:** أول مرحلة من [خطة التطوير](docs/plan/) تنفَّذ بنفس
+> صدق P0: المرتكز يعيد الأرقام المنشورة **بتطابق حرفي** (`anchor_check.match=true`)
+> ثم تُقارن أربعة أذرع على **نفس** التقسيمات. النتيجة: بصمة Morgan
+> **بالتكرارات** + `max_features=0.3` ترفع R² الهيكلي **0.489 → 0.509 ± 0.090**
+> (يفوق المرتكز في كل بذرة من البذور الخمس) والعشوائي **0.436 → 0.468**،
+> وتتصلح معايرة عدم اليقين قفزةً (ρ: 0.134 → **0.327**). ونتيجتان سلبيتان
+> منشورتان بصدق: الوصف الفيزيوكيميائي وHistGB لا يفوزان على سلالة Mpro
+> المتقاربة (0.472 / 0.429) — كتلة الوصف معلّقة جاهزة لبيانات P12
+> غير المتجانسة. الهدف 0.55 يحتاج تنويع بيانات لا أشجاراً أكثر.
+> التقرير: [MODEL-UPGRADE-P11](docs/audit/MODEL-UPGRADE-P11.md).
+
+```python
+from core.ml_potency import train_default_model
+m = train_default_model()          # بصمة تكرارات + max_features=0.3 (v0.12.0)
+m.predict("CC1([C@@H]2[C@H]1[C@H](N(C2)C(=O)[C@H](C(C)(C)C)NC(=O)C(F)(F)F)C(=O)N[C@@H](C[C@@H]3CCNC3=O)C#N)C")
+# نموذج بديل بفترة كمّية فعلية:
+from core.ml_potency import train_potency_model
+m2 = train_potency_model(smiles, pic50, model_kind="histgb", include_descriptors=True)
+```
 
 ## 🚀 v0.11.0 — جهة الميدان: طبقة الأجهزة ومراقب جودة القراءات (P10)
 
@@ -431,6 +453,7 @@ Python 3.11 | **FastAPI (منصة v0.2.0)** | Streamlit | RDKit | AutoDock Vina 
 | **P8** | جسر الفيزياء: عقد دفعات REST للمختبر الحقيقي (`LabBatchClient` + `HttpLimsLab` + صندوق صادر) — التكامل الفعلي ضبطُ تهيئة لا إعادة كتابة، وعقد نتائج صارم يرفض الدفعة المخرقة كاملة — لا جهاز في CI والحد مُعلن | ✅ [v0.9.0](CHANGELOG.md) · [ADR-0013](docs/adr/ADR-0013-physical-lab-bridge.md) |
 | **P9** | الحلقة الفيزيائية: بوابة LIMS مرجعية أمينة أوامر عمل (لا تختلق رقماً — الرفع من الميدان حصراً) + مسار قياسات يعيد المقبول إلى الذاكرة الدائمة + تسوية ما بعد المقاطعة + إصلاح فجوتي P7 (انهيار كامن في التسجيل وسكربت القياس المفقود — الأرقام تتكاثر حرفياً) | ✅ [v0.10.0](CHANGELOG.md) · [ADR-0014](docs/adr/ADR-0014-physical-loop-gateway-and-measurements.md) |
 | **P10** | جهة الميدان: بروتوكول أجهزة موحد (`InstrumentDriver`) + سواقة FRET عبر SCPI/TCP + محاكي جهاز واقعي + مراقب جودة خمس طبقات (Recall=100% وFPR=0% مُقاسان على الحالات المصطنعة) + موافقة بشرية إلزامية للحقيقي + حوكمة الوكلاء (`AGENTS.md`/`HANDOFF.md`) — مؤجل بقرار: وكلاء LLM ومكدس Grafana | ✅ [v0.11.0](CHANGELOG.md) · [ADR-0015](docs/adr/ADR-0015-bench-instrument-layer-and-reading-qc.md) · [دليل التوصيل](docs/HARDWARE_HANDOFF.md) |
+| **P11** | ترقية نموذج الفعالية بصدق P0: A/B/C/D مقترن على البروتوكول المنشور — بصمة التكرارات + mf=0.3 ترفع R² الهيكلي 0.489→**0.509** والعشوائي 0.436→**0.468** ومعايرة اليقين ρ 0.134→**0.327**؛ ونتيجتان سلبيتان منشورتان (الوصف 0.472، HistGB 0.429) — هدف 0.55 يحتاج بيانات P12 لا أشجاراً | ✅ [v0.12.0](CHANGELOG.md) · [التقرير](docs/audit/MODEL-UPGRADE-P11.md) · [الخطة §5.2](docs/plan/) |
 
 ### إعادة توليد المستقبلات المُجهّزة
 ```bash

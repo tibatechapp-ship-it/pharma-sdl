@@ -1,0 +1,1154 @@
+{
+  "protocol": {
+    "dataset": "data/mpro_sample.csv (ChEMBL4523582 — SARS-CoV-2 Mpro pChEMBL)",
+    "n_total": 900,
+    "n_unique_scaffolds": 537,
+    "arms": {
+      "A_morgan_bin_rf": "Morgan ثنائي + RF300 — مرتكز P0",
+      "B_morgan_physchem_rf": "Morgan ⊕ physchem(20) + RF300 — فرضية الوصف",
+      "C_morgan_physchem_histgb": "Morgan ⊕ physchem(20) + HistGB — فرضية النموذج البديل",
+      "D_morgan_count_rf_mf03": "Morgan تكرارات + RF300(max_features=0.3) — المعتمد"
+    },
+    "rf_n_estimators": 300,
+    "histgb_params": {
+      "early_stopping": false,
+      "max_iter": 150,
+      "learning_rate": 0.08,
+      "max_leaf_nodes": 31,
+      "l2_regularization": 1.0
+    },
+    "random_seed": 42,
+    "scaffold_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "test_size": 0.2,
+    "bootstrap_resamples": 1000,
+    "target_scaffold_r2": 0.55,
+    "random_regression_tolerance": 0.02,
+    "selection_note": "المسح الاستكشافي للضبط على بذور هيكلية (0–2)؛ الأرقام المعلنة هنا على البذور الخمس (0–4) وتحمل انحياز اختيار معلناً ومحدوداً.",
+    "protocol_source": "scripts/evaluate_generalization.py (P0) — نفس الدوال مستوردة",
+    "generated_at": "2026-11-03 22:56:04 UTC",
+    "runtime_seconds": 295.0
+  },
+  "arms": {
+    "A_morgan_bin_rf": {
+      "random_split": {
+        "mae": 0.571,
+        "rmse": 0.776,
+        "r2": 0.436,
+        "n_test": 180,
+        "mae_ci95": [
+          0.489,
+          0.649
+        ],
+        "rmse_ci95": [
+          0.661,
+          0.886
+        ],
+        "r2_ci95": [
+          0.267,
+          0.58
+        ],
+        "mae_by_activity_bin": [
+          {
+            "bin": "ضعيف (<5)",
+            "n": 35,
+            "mae": 0.696
+          },
+          {
+            "bin": "متوسط (5–7)",
+            "n": 113,
+            "mae": 0.454
+          },
+          {
+            "bin": "قوي (>7)",
+            "n": 32,
+            "mae": 0.844
+          }
+        ]
+      },
+      "uncertainty_calibration": {
+        "random": {
+          "rho": 0.283,
+          "p_value": 0.000121
+        }
+      },
+      "scaffold_split": {
+        "per_seed": [
+          {
+            "mae": 0.501,
+            "rmse": 0.67,
+            "r2": 0.583,
+            "n_test": 179,
+            "mae_ci95": [
+              0.44,
+              0.572
+            ],
+            "rmse_ci95": [
+              0.579,
+              0.766
+            ],
+            "r2_ci95": [
+              0.476,
+              0.667
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 38,
+                "mae": 0.786
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 112,
+                "mae": 0.34
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 29,
+                "mae": 0.749
+              }
+            ],
+            "seed": 0
+          },
+          {
+            "mae": 0.628,
+            "rmse": 0.807,
+            "r2": 0.34,
+            "n_test": 178,
+            "mae_ci95": [
+              0.558,
+              0.703
+            ],
+            "rmse_ci95": [
+              0.716,
+              0.898
+            ],
+            "r2_ci95": [
+              0.198,
+              0.459
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 47,
+                "mae": 0.948
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 113,
+                "mae": 0.471
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 18,
+                "mae": 0.781
+              }
+            ],
+            "seed": 1
+          },
+          {
+            "mae": 0.536,
+            "rmse": 0.665,
+            "r2": 0.6,
+            "n_test": 180,
+            "mae_ci95": [
+              0.482,
+              0.591
+            ],
+            "rmse_ci95": [
+              0.601,
+              0.727
+            ],
+            "r2_ci95": [
+              0.509,
+              0.67
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 37,
+                "mae": 0.821
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 106,
+                "mae": 0.409
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 37,
+                "mae": 0.617
+              }
+            ],
+            "seed": 2
+          },
+          {
+            "mae": 0.545,
+            "rmse": 0.699,
+            "r2": 0.491,
+            "n_test": 180,
+            "mae_ci95": [
+              0.484,
+              0.613
+            ],
+            "rmse_ci95": [
+              0.611,
+              0.789
+            ],
+            "r2_ci95": [
+              0.361,
+              0.599
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 30,
+                "mae": 0.768
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 125,
+                "mae": 0.428
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 25,
+                "mae": 0.865
+              }
+            ],
+            "seed": 3
+          },
+          {
+            "mae": 0.61,
+            "rmse": 0.776,
+            "r2": 0.429,
+            "n_test": 180,
+            "mae_ci95": [
+              0.544,
+              0.683
+            ],
+            "rmse_ci95": [
+              0.695,
+              0.857
+            ],
+            "r2_ci95": [
+              0.268,
+              0.542
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 32,
+                "mae": 0.597
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 115,
+                "mae": 0.521
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 33,
+                "mae": 0.932
+              }
+            ],
+            "seed": 4
+          }
+        ],
+        "aggregate": {
+          "r2": {
+            "mean": 0.489,
+            "std": 0.097
+          },
+          "mae": {
+            "mean": 0.564,
+            "std": 0.048
+          },
+          "rmse": {
+            "mean": 0.723,
+            "std": 0.058
+          }
+        }
+      },
+      "generalization_gap": {
+        "r2_random": 0.436,
+        "r2_scaffold_mean": 0.489,
+        "gap": -0.053
+      }
+    },
+    "B_morgan_physchem_rf": {
+      "random_split": {
+        "mae": 0.596,
+        "rmse": 0.77,
+        "r2": 0.445,
+        "n_test": 180,
+        "mae_ci95": [
+          0.524,
+          0.665
+        ],
+        "rmse_ci95": [
+          0.673,
+          0.862
+        ],
+        "r2_ci95": [
+          0.296,
+          0.572
+        ],
+        "mae_by_activity_bin": [
+          {
+            "bin": "ضعيف (<5)",
+            "n": 35,
+            "mae": 0.72
+          },
+          {
+            "bin": "متوسط (5–7)",
+            "n": 113,
+            "mae": 0.505
+          },
+          {
+            "bin": "قوي (>7)",
+            "n": 32,
+            "mae": 0.785
+          }
+        ]
+      },
+      "uncertainty_calibration": {
+        "random": {
+          "rho": 0.326,
+          "p_value": 7.86e-06
+        }
+      },
+      "scaffold_split": {
+        "per_seed": [
+          {
+            "mae": 0.524,
+            "rmse": 0.672,
+            "r2": 0.581,
+            "n_test": 179,
+            "mae_ci95": [
+              0.461,
+              0.587
+            ],
+            "rmse_ci95": [
+              0.586,
+              0.757
+            ],
+            "r2_ci95": [
+              0.492,
+              0.656
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 38,
+                "mae": 0.831
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 112,
+                "mae": 0.353
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 29,
+                "mae": 0.78
+              }
+            ],
+            "seed": 0
+          },
+          {
+            "mae": 0.666,
+            "rmse": 0.824,
+            "r2": 0.313,
+            "n_test": 178,
+            "mae_ci95": [
+              0.598,
+              0.74
+            ],
+            "rmse_ci95": [
+              0.744,
+              0.907
+            ],
+            "r2_ci95": [
+              0.177,
+              0.424
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 47,
+                "mae": 0.965
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 113,
+                "mae": 0.522
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 18,
+                "mae": 0.787
+              }
+            ],
+            "seed": 1
+          },
+          {
+            "mae": 0.541,
+            "rmse": 0.68,
+            "r2": 0.582,
+            "n_test": 180,
+            "mae_ci95": [
+              0.482,
+              0.604
+            ],
+            "rmse_ci95": [
+              0.617,
+              0.743
+            ],
+            "r2_ci95": [
+              0.493,
+              0.658
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 37,
+                "mae": 0.818
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 106,
+                "mae": 0.407
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 37,
+                "mae": 0.649
+              }
+            ],
+            "seed": 2
+          },
+          {
+            "mae": 0.575,
+            "rmse": 0.728,
+            "r2": 0.447,
+            "n_test": 180,
+            "mae_ci95": [
+              0.511,
+              0.642
+            ],
+            "rmse_ci95": [
+              0.643,
+              0.813
+            ],
+            "r2_ci95": [
+              0.309,
+              0.557
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 30,
+                "mae": 0.769
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 125,
+                "mae": 0.448
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 25,
+                "mae": 0.98
+              }
+            ],
+            "seed": 3
+          },
+          {
+            "mae": 0.62,
+            "rmse": 0.771,
+            "r2": 0.436,
+            "n_test": 180,
+            "mae_ci95": [
+              0.551,
+              0.689
+            ],
+            "rmse_ci95": [
+              0.691,
+              0.847
+            ],
+            "r2_ci95": [
+              0.29,
+              0.547
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 32,
+                "mae": 0.683
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 115,
+                "mae": 0.545
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 33,
+                "mae": 0.821
+              }
+            ],
+            "seed": 4
+          }
+        ],
+        "aggregate": {
+          "r2": {
+            "mean": 0.472,
+            "std": 0.101
+          },
+          "mae": {
+            "mean": 0.585,
+            "std": 0.052
+          },
+          "rmse": {
+            "mean": 0.735,
+            "std": 0.057
+          }
+        }
+      },
+      "generalization_gap": {
+        "r2_random": 0.445,
+        "r2_scaffold_mean": 0.472,
+        "gap": -0.027
+      }
+    },
+    "C_morgan_physchem_histgb": {
+      "random_split": {
+        "mae": 0.604,
+        "rmse": 0.79,
+        "r2": 0.415,
+        "n_test": 180,
+        "mae_ci95": [
+          0.524,
+          0.675
+        ],
+        "rmse_ci95": [
+          0.683,
+          0.891
+        ],
+        "r2_ci95": [
+          0.24,
+          0.554
+        ],
+        "mae_by_activity_bin": [
+          {
+            "bin": "ضعيف (<5)",
+            "n": 35,
+            "mae": 0.681
+          },
+          {
+            "bin": "متوسط (5–7)",
+            "n": 113,
+            "mae": 0.536
+          },
+          {
+            "bin": "قوي (>7)",
+            "n": 32,
+            "mae": 0.76
+          }
+        ]
+      },
+      "uncertainty_calibration": {
+        "random": {
+          "rho": 0.175,
+          "p_value": 0.0186
+        },
+        "scaffold": {
+          "rho": 0.164,
+          "p_value": 0.028
+        }
+      },
+      "quantile_coverage": {
+        "random": {
+          "coverage_68": 0.417,
+          "mean_span": 0.932
+        },
+        "scaffold_seed0": {
+          "coverage_68": 0.425,
+          "mean_span": 0.903
+        }
+      },
+      "scaffold_split": {
+        "per_seed": [
+          {
+            "mae": 0.5,
+            "rmse": 0.663,
+            "r2": 0.592,
+            "n_test": 179,
+            "mae_ci95": [
+              0.435,
+              0.569
+            ],
+            "rmse_ci95": [
+              0.562,
+              0.767
+            ],
+            "r2_ci95": [
+              0.478,
+              0.691
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 38,
+                "mae": 0.698
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 112,
+                "mae": 0.383
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 29,
+                "mae": 0.688
+              }
+            ],
+            "seed": 0
+          },
+          {
+            "mae": 0.727,
+            "rmse": 0.888,
+            "r2": 0.2,
+            "n_test": 178,
+            "mae_ci95": [
+              0.654,
+              0.805
+            ],
+            "rmse_ci95": [
+              0.805,
+              0.973
+            ],
+            "r2_ci95": [
+              0.038,
+              0.322
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 47,
+                "mae": 0.945
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 113,
+                "mae": 0.627
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 18,
+                "mae": 0.784
+              }
+            ],
+            "seed": 1
+          },
+          {
+            "mae": 0.531,
+            "rmse": 0.683,
+            "r2": 0.578,
+            "n_test": 180,
+            "mae_ci95": [
+              0.474,
+              0.598
+            ],
+            "rmse_ci95": [
+              0.612,
+              0.758
+            ],
+            "r2_ci95": [
+              0.454,
+              0.663
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 37,
+                "mae": 0.675
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 106,
+                "mae": 0.443
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 37,
+                "mae": 0.636
+              }
+            ],
+            "seed": 2
+          },
+          {
+            "mae": 0.574,
+            "rmse": 0.727,
+            "r2": 0.449,
+            "n_test": 180,
+            "mae_ci95": [
+              0.509,
+              0.642
+            ],
+            "rmse_ci95": [
+              0.634,
+              0.818
+            ],
+            "r2_ci95": [
+              0.294,
+              0.568
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 30,
+                "mae": 0.63
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 125,
+                "mae": 0.495
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 25,
+                "mae": 0.907
+              }
+            ],
+            "seed": 3
+          },
+          {
+            "mae": 0.668,
+            "rmse": 0.844,
+            "r2": 0.324,
+            "n_test": 180,
+            "mae_ci95": [
+              0.586,
+              0.745
+            ],
+            "rmse_ci95": [
+              0.752,
+              0.934
+            ],
+            "r2_ci95": [
+              0.13,
+              0.479
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 32,
+                "mae": 0.717
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 115,
+                "mae": 0.628
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 33,
+                "mae": 0.759
+              }
+            ],
+            "seed": 4
+          }
+        ],
+        "aggregate": {
+          "r2": {
+            "mean": 0.429,
+            "std": 0.15
+          },
+          "mae": {
+            "mean": 0.6,
+            "std": 0.085
+          },
+          "rmse": {
+            "mean": 0.761,
+            "std": 0.089
+          }
+        }
+      },
+      "generalization_gap": {
+        "r2_random": 0.415,
+        "r2_scaffold_mean": 0.429,
+        "gap": -0.014
+      }
+    },
+    "D_morgan_count_rf_mf03": {
+      "random_split": {
+        "mae": 0.568,
+        "rmse": 0.754,
+        "r2": 0.468,
+        "n_test": 180,
+        "mae_ci95": [
+          0.488,
+          0.641
+        ],
+        "rmse_ci95": [
+          0.641,
+          0.858
+        ],
+        "r2_ci95": [
+          0.312,
+          0.603
+        ],
+        "mae_by_activity_bin": [
+          {
+            "bin": "ضعيف (<5)",
+            "n": 35,
+            "mae": 0.688
+          },
+          {
+            "bin": "متوسط (5–7)",
+            "n": 113,
+            "mae": 0.453
+          },
+          {
+            "bin": "قوي (>7)",
+            "n": 32,
+            "mae": 0.846
+          }
+        ]
+      },
+      "uncertainty_calibration": {
+        "random": {
+          "rho": 0.327,
+          "p_value": 7.34e-06
+        }
+      },
+      "scaffold_split": {
+        "per_seed": [
+          {
+            "mae": 0.504,
+            "rmse": 0.665,
+            "r2": 0.589,
+            "n_test": 179,
+            "mae_ci95": [
+              0.443,
+              0.57
+            ],
+            "rmse_ci95": [
+              0.582,
+              0.755
+            ],
+            "r2_ci95": [
+              0.49,
+              0.668
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 38,
+                "mae": 0.802
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 112,
+                "mae": 0.339
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 29,
+                "mae": 0.749
+              }
+            ],
+            "seed": 0
+          },
+          {
+            "mae": 0.625,
+            "rmse": 0.786,
+            "r2": 0.375,
+            "n_test": 178,
+            "mae_ci95": [
+              0.558,
+              0.693
+            ],
+            "rmse_ci95": [
+              0.701,
+              0.869
+            ],
+            "r2_ci95": [
+              0.245,
+              0.479
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 47,
+                "mae": 0.956
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 113,
+                "mae": 0.466
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 18,
+                "mae": 0.755
+              }
+            ],
+            "seed": 1
+          },
+          {
+            "mae": 0.522,
+            "rmse": 0.647,
+            "r2": 0.621,
+            "n_test": 180,
+            "mae_ci95": [
+              0.471,
+              0.581
+            ],
+            "rmse_ci95": [
+              0.587,
+              0.711
+            ],
+            "r2_ci95": [
+              0.542,
+              0.679
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 37,
+                "mae": 0.784
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 106,
+                "mae": 0.391
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 37,
+                "mae": 0.638
+              }
+            ],
+            "seed": 2
+          },
+          {
+            "mae": 0.539,
+            "rmse": 0.682,
+            "r2": 0.514,
+            "n_test": 180,
+            "mae_ci95": [
+              0.479,
+              0.604
+            ],
+            "rmse_ci95": [
+              0.604,
+              0.766
+            ],
+            "r2_ci95": [
+              0.394,
+              0.611
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 30,
+                "mae": 0.758
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 125,
+                "mae": 0.427
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 25,
+                "mae": 0.839
+              }
+            ],
+            "seed": 3
+          },
+          {
+            "mae": 0.604,
+            "rmse": 0.764,
+            "r2": 0.447,
+            "n_test": 180,
+            "mae_ci95": [
+              0.537,
+              0.677
+            ],
+            "rmse_ci95": [
+              0.686,
+              0.843
+            ],
+            "r2_ci95": [
+              0.303,
+              0.546
+            ],
+            "mae_by_activity_bin": [
+              {
+                "bin": "ضعيف (<5)",
+                "n": 32,
+                "mae": 0.652
+              },
+              {
+                "bin": "متوسط (5–7)",
+                "n": 115,
+                "mae": 0.497
+              },
+              {
+                "bin": "قوي (>7)",
+                "n": 33,
+                "mae": 0.93
+              }
+            ],
+            "seed": 4
+          }
+        ],
+        "aggregate": {
+          "r2": {
+            "mean": 0.509,
+            "std": 0.09
+          },
+          "mae": {
+            "mean": 0.559,
+            "std": 0.047
+          },
+          "rmse": {
+            "mean": 0.709,
+            "std": 0.056
+          }
+        }
+      },
+      "generalization_gap": {
+        "r2_random": 0.468,
+        "r2_scaffold_mean": 0.509,
+        "gap": -0.041
+      }
+    }
+  },
+  "baselines_reference": {
+    "1nn_tanimoto_random": {
+      "mae": 0.602,
+      "rmse": 0.851,
+      "r2": 0.322,
+      "n_test": 180,
+      "mae_ci95": [
+        0.515,
+        0.693
+      ],
+      "rmse_ci95": [
+        0.719,
+        0.991
+      ],
+      "r2_ci95": [
+        0.067,
+        0.516
+      ],
+      "mae_by_activity_bin": [
+        {
+          "bin": "ضعيف (<5)",
+          "n": 35,
+          "mae": 0.704
+        },
+        {
+          "bin": "متوسط (5–7)",
+          "n": 113,
+          "mae": 0.558
+        },
+        {
+          "bin": "قوي (>7)",
+          "n": 32,
+          "mae": 0.647
+        }
+      ]
+    },
+    "1nn_tanimoto_scaffold": {
+      "mae": 0.575,
+      "rmse": 0.799,
+      "r2": 0.408,
+      "n_test": 179,
+      "mae_ci95": [
+        0.497,
+        0.665
+      ],
+      "rmse_ci95": [
+        0.687,
+        0.915
+      ],
+      "r2_ci95": [
+        0.204,
+        0.558
+      ],
+      "mae_by_activity_bin": [
+        {
+          "bin": "ضعيف (<5)",
+          "n": 38,
+          "mae": 0.832
+        },
+        {
+          "bin": "متوسط (5–7)",
+          "n": 112,
+          "mae": 0.481
+        },
+        {
+          "bin": "قوي (>7)",
+          "n": 29,
+          "mae": 0.604
+        }
+      ]
+    }
+  },
+  "anchor_check": {
+    "published_random_r2": 0.436,
+    "reproduced_random_r2": 0.436,
+    "published_scaffold_r2_mean": 0.489,
+    "reproduced_scaffold_r2_mean": 0.489,
+    "match": true
+  },
+  "comparison": {
+    "scaffold_r2_mean": {
+      "A_morgan_bin_rf": 0.489,
+      "B_morgan_physchem_rf": 0.472,
+      "C_morgan_physchem_histgb": 0.429,
+      "D_morgan_count_rf_mf03": 0.509
+    },
+    "scaffold_r2_std": {
+      "A_morgan_bin_rf": 0.097,
+      "B_morgan_physchem_rf": 0.101,
+      "C_morgan_physchem_histgb": 0.15,
+      "D_morgan_count_rf_mf03": 0.09
+    },
+    "scaffold_mae_mean": {
+      "A_morgan_bin_rf": 0.564,
+      "B_morgan_physchem_rf": 0.585,
+      "C_morgan_physchem_histgb": 0.6,
+      "D_morgan_count_rf_mf03": 0.559
+    },
+    "random_r2": {
+      "A_morgan_bin_rf": 0.436,
+      "B_morgan_physchem_rf": 0.445,
+      "C_morgan_physchem_histgb": 0.415,
+      "D_morgan_count_rf_mf03": 0.468
+    },
+    "delta_scaffold_vs_A": {
+      "A_morgan_bin_rf": 0.0,
+      "B_morgan_physchem_rf": -0.017,
+      "C_morgan_physchem_histgb": -0.06,
+      "D_morgan_count_rf_mf03": 0.02
+    },
+    "eligible_for_adoption": [
+      "D_morgan_count_rf_mf03"
+    ],
+    "winner_by_scaffold_r2": "D_morgan_count_rf_mf03",
+    "adoption_target": 0.55,
+    "adoption_verdict": "ADOPT_PARTIAL"
+  }
+}

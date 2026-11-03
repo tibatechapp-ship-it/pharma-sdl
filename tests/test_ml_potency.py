@@ -107,3 +107,90 @@ def test_verdict_bands():
     assert verdict_for(6.5)[0] == "مثبط متوسط"
     assert verdict_for(5.5)[0] == "مثبط ضعيف"
     assert verdict_for(4.0)[0] == "خامل تقريباً في هذا الفحص"
+
+
+# ═══ P11 — ترقية التمثيل والنموذج ═══
+
+@pytest.fixture(scope="module")
+def upgraded_model():
+    """التكوين المعتمد P11: بصمة تكرارات + max_features=0.3 (عقد train_default_model)."""
+    df = load_dataset()
+    return train_potency_model(
+        df["smiles"].tolist(),
+        df["pchembl_value"].tolist(),
+        n_estimators=60,
+        count_based=True,
+        max_features=0.3,
+    )
+
+
+@pytest.fixture(scope="module")
+def histgb_model():
+    df = load_dataset()
+    return train_potency_model(
+        df["smiles"].tolist(),
+        df["pchembl_value"].tolist(),
+        n_estimators=40,
+        model_kind="histgb",
+        include_descriptors=True,
+    )
+
+
+def test_featurize_count_based():
+    """بصمة التكرارات: نفس الشكل، قيم عددية ≥ الثنائي ببت-ببت."""
+    X_bin, idx_b = featurize([ASPIRIN, NIRMATRELVIR])
+    X_cnt, idx_c = featurize([ASPIRIN, NIRMATRELVIR], count_based=True)
+    assert idx_b == idx_c == [0, 1]
+    assert X_cnt.shape == X_bin.shape == (2, 2048)
+    assert (X_cnt >= 0).all()
+    assert (X_cnt.astype(int) >= X_bin.astype(int)).all()  # التكرار يشمل الوجود
+    assert X_cnt.sum() > X_bin.sum()  # التكرارات تحمل معلومة إضافية
+
+
+def test_featurize_descriptors_contract():
+    X, idx = featurize([ASPIRIN, BAD_SMILES, NIRMATRELVIR], include_descriptors=True)
+    assert X.shape == (2, 2048 + 20)
+    assert idx == [0, 2]
+
+
+def test_featurize_empty_with_flags():
+    X, idx = featurize([BAD_SMILES], include_descriptors=True, count_based=True)
+    assert X.shape == (0, 2048 + 20)
+    assert idx == []
+
+
+def test_upgraded_model_contract(upgraded_model):
+    """النموذج المعتمد v0.12.0: نفس عقد التنبؤ + بصمة معلنة في المقاييس."""
+    assert upgraded_model.count_based is True
+    assert upgraded_model.metrics["count_based"] is True
+    assert upgraded_model.metrics["max_features"] == 0.3
+    res = upgraded_model.predict(NIRMATRELVIR)
+    assert 5.0 <= res["pic50"] <= 10.0
+    assert res["ci95"][0] < res["pic50"] < res["ci95"][1]
+    assert res["ic50_nm"] > 0
+
+
+def test_upgraded_model_drops_invalid(upgraded_model):
+    assert upgraded_model.predict_many([NIRMATRELVIR, BAD_SMILES])[1] is None
+    with pytest.raises(ValueError, match="SMILES غير صالح"):
+        upgraded_model.predict(BAD_SMILES)
+
+
+def test_histgb_smoke_contract(histgb_model):
+    """HistGB + الوصف: عقد تنبؤ سليم — النقطة داخل الفترة الكمّية."""
+    assert histgb_model.model_kind == "histgb"
+    assert histgb_model.ci_low is not None and histgb_model.ci_high is not None
+    m = histgb_model.metrics
+    assert m["n_train"] + m["n_test"] == m["n_total"]
+    res = histgb_model.predict(NIRMATRELVIR)
+    assert 4.0 <= res["pic50"] <= 11.0
+    assert res["ci95"][0] <= res["pic50"] <= res["ci95"][1]
+    assert res["ci95"][1] > res["ci95"][0]
+
+
+def test_unknown_model_kind_raises():
+    df = load_dataset()
+    with pytest.raises(ValueError, match="model_kind غير معروف"):
+        train_potency_model(
+            df["smiles"].tolist()[:50], df["pchembl_value"].tolist()[:50], model_kind="xgboost"
+        )
