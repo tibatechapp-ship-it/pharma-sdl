@@ -96,6 +96,34 @@ STRINGS: dict[str, dict[str, str]] = {
         ),
         "admet_col_value": "القيمة",
         "admet_col_verdict": "الحكم",
+        # ── ADMET-AI (P13) ──
+        "admet_engine": "المحرك",
+        "admet_engine_ersilia": "🌐 Ersilia — خادم محلي (نموذجان)",
+        "admet_engine_admetai": "🤖 ADMET-AI — محلي (41 نقطة نهاية)",
+        "admetai_caption": (
+            "ADMET-AI (هارفارد، رخصة MIT): مجموعة من 5 طيّات لنموذجَين متعددَي المهام "
+            "مُدرّبَين على بيانات TDC — 41 نقطة نهاية (31 تصنيف + 10 انحدار) "
+            "+ 3 إنذارات بنيوية + مئينات مقابل الأدوية المعتمدة في DrugBank. "
+            "يعمل محلياً على CPU بلا شبكة."
+        ),
+        "admetai_lesson_title": "📖 وضع الدرس — ADMET-AI: من نموذجين إلى 41 نقطة نهاية",
+        "admetai_btn": "🧪 تنبؤ ADMET-AI (41 نقطة)",
+        "admetai_not_available": (
+            "حزمة admet-ai غير مثبّتة في هذه البيئة — النتائج الحية تتطلب التثبيت، "
+            "ولا تُخمَّن قيم من خارج النموذج."
+        ),
+        "admetai_install_hint": "كيف أثبّت ADMET-AI؟",
+        "admetai_results_title": "🧾 النتائج — 🤖 ADMET-AI محلي",
+        "admetai_no_rows": "لم تُنتج الحزمة نتائج — أعد المحاولة أو تحقق من التثبيت.",
+        "admetai_col_task": "نقطة النهاية",
+        "admetai_col_family": "العائلة",
+        "admetai_col_value": "القيمة",
+        "admetai_col_unit": "الوحدة",
+        "admetai_col_pct": "المئين (DrugBank)",
+        "admetai_col_verdict": "الحكم",
+        "admetai_family_filter": "تصفية بالعائلة",
+        "admetai_family_all": "الكل",
+        "admetai_physchem_title": "🧮 الوصفات الفيزيوكيميائية (من الحزمة نفسها)",
         # ── التصنيف الدوائي (S10) ──
         "tab_classes": "🗂️ التصنيف الدوائي",
         "cls_title": "🗂️ دليل المجموعات الدوائية — المعيار العالمي ATC",
@@ -352,6 +380,34 @@ STRINGS: dict[str, dict[str, str]] = {
         ),
         "admet_col_value": "Value",
         "admet_col_verdict": "Verdict",
+        # ── ADMET-AI (P13) ──
+        "admet_engine": "Engine",
+        "admet_engine_ersilia": "🌐 Ersilia — local server (2 models)",
+        "admet_engine_admetai": "🤖 ADMET-AI — local (41 endpoints)",
+        "admetai_caption": (
+            "ADMET-AI (Harvard, MIT): a 5-fold ensemble of two multitask models "
+            "trained on TDC data — 41 endpoints (31 classification + 10 "
+            "regression) + 3 structural alerts + percentiles vs approved "
+            "DrugBank drugs. Runs locally on CPU, no network."
+        ),
+        "admetai_lesson_title": "📖 Lesson mode — ADMET-AI: from two models to 41 endpoints",
+        "admetai_btn": "🧪 Predict with ADMET-AI (41 endpoints)",
+        "admetai_not_available": (
+            "The admet-ai package is not installed in this environment — live "
+            "predictions require installation; no out-of-model estimates."
+        ),
+        "admetai_install_hint": "How to install ADMET-AI?",
+        "admetai_results_title": "🧾 Results — 🤖 local ADMET-AI",
+        "admetai_no_rows": "The package returned no results — retry or check installation.",
+        "admetai_col_task": "Endpoint",
+        "admetai_col_family": "Family",
+        "admetai_col_value": "Value",
+        "admetai_col_unit": "Unit",
+        "admetai_col_pct": "Percentile (DrugBank)",
+        "admetai_col_verdict": "Verdict",
+        "admetai_family_filter": "Filter by family",
+        "admetai_family_all": "All",
+        "admetai_physchem_title": "🧮 Physicochemical descriptors (from the same package)",
         # ── Drug classification (S10) ──
         "tab_classes": "🗂️ Drug Classes",
         "cls_title": "🗂️ Drug class guide — the global ATC standard",

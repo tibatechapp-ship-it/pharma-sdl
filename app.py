@@ -1094,48 +1094,48 @@ def _ersilia_cached(smiles_tuple: tuple[str, ...], model_id: str) -> list:
     return rows
 
 
-# ═══ Tab 12: ADMET Hub — Ersilia Model Hub ═══
-with g_reports[1]:
-    st.subheader(t(LANG, "admet_title"))
-    st.caption(t(LANG, "admet_caption"))
+ADMET_PRESETS: dict[str, str] = {
+    "أسبرين — مرجعية تاريخية": "CC(=O)OC1=CC=CC=C1C(=O)O",
+    "باراسيتامول — ذوبان جيد": "CC(=O)NC1=CC=C(C=C1)O",
+    "تيرفينادين — سُحب بسبب hERG": (
+        "CC(C)(C)C1=CC=C(C=C1)C(CCCN2CCC(CC2)C(C3=CC=CC=C3)"
+        "(C4=CC=CC=C4)O)O"
+    ),
+    "إيتراكونازول — ضعيف الذوبان": (
+        "CCC(C)N1C(=O)N(C=N1)C2=CC=C(C=C2)N3CCN(CC3)C4=CC=C(C=C4)"
+        "OCC5COC(O5)(CN6C=NC=N6)C7=C(C=C(C=C7)Cl)Cl"
+    ),
+}
+
+
+def _render_ersilia_engine(lang: str, presets: dict[str, str]) -> None:
+    """مسار Ersilia — نموذجان حيان عبر خادم محلي."""
     try:
         from core.clients import ersilia_client as ers
 
-        with st.expander(t(LANG, "admet_lesson_title"), expanded=False):
+        with st.expander(t(lang, "admet_lesson_title"), expanded=False):
             st.markdown(
-                ers.ADMET_LESSON.get(LANG, ers.ADMET_LESSON["ar"]).format(
+                ers.ADMET_LESSON.get(lang, ers.ADMET_LESSON["ar"]).format(
                     hlow="0.1", hhigh="0.3", sgood="-2", sbad="-4"
                 )
             )
 
         model_opts = {
-            (m.name_ar if LANG == "ar" else m.name_en): mid
+            (m.name_ar if lang == "ar" else m.name_en): mid
             for mid, m in ers.MODELS.items()
         }
-        model_label = st.selectbox(t(LANG, "admet_model"), list(model_opts), key="admet_model")
+        model_label = st.selectbox(t(lang, "admet_model"), list(model_opts), key="admet_model")
         model_id = model_opts[model_label]
 
-        presets = {
-            "أسبرين — مرجعية تاريخية": "CC(=O)OC1=CC=CC=C1C(=O)O",
-            "باراسيتامول — ذوبان جيد": "CC(=O)NC1=CC=C(C=C1)O",
-            "تيرفينادين — سُحب بسبب hERG": (
-                "CC(C)(C)C1=CC=C(C=C1)C(CCCN2CCC(CC2)C(C3=CC=CC=C3)"
-                "(C4=CC=CC=C4)O)O"
-            ),
-            "إيتراكونازول — ضعيف الذوبان": (
-                "CCC(C)N1C(=O)N(C=N1)C2=CC=C(C=C2)N3CCN(CC3)C4=CC=C(C=C4)"
-                "OCC5COC(O5)(CN6C=NC=N6)C7=C(C=C(C=C7)Cl)Cl"
-            ),
-        }
         if "admet_input" not in st.session_state:
             st.session_state["admet_input"] = "\n".join(presets.values())
-        if st.button(t(LANG, "admet_preset"), key="admet_fill"):
+        if st.button(t(lang, "admet_preset"), key="admet_fill"):
             st.session_state["admet_input"] = "\n".join(presets.values())
         smi_text = st.text_area(
-            t(LANG, "admet_input"), key="admet_input", height=140
+            t(lang, "admet_input"), key="admet_input", height=140
         )
 
-        if st.button(t(LANG, "admet_btn"), type="primary", key="admet_btn"):
+        if st.button(t(lang, "admet_btn"), type="primary", key="admet_btn"):
             raw = [s.strip() for s in smi_text.splitlines() if s.strip()]
             valid: list[str] = []
             invalid: list[str] = []
@@ -1151,10 +1151,10 @@ with g_reports[1]:
                 valid = raw
             if invalid:
                 st.warning(
-                    t(LANG, "admet_invalid").format(bad=", ".join(invalid[:3]))
+                    t(lang, "admet_invalid").format(bad=", ".join(invalid[:3]))
                 )
             if not valid:
-                st.info(t(LANG, "admet_empty"))
+                st.info(t(lang, "admet_empty"))
             else:
                 # تدقيق UX (P-2): النتائج تبقى بعد أي إعادة رسم
                 st.session_state["admet_rows"] = _ersilia_cached(tuple(valid), model_id)
@@ -1162,14 +1162,14 @@ with g_reports[1]:
         if "admet_rows" in st.session_state:
             rows = st.session_state["admet_rows"]
             if rows:
-                st.markdown(f"#### {t(LANG, 'admet_table_title')}")
+                st.markdown(f"#### {t(lang, 'admet_table_title')}")
                 df = pd.DataFrame(
                     [
                         {
                             "SMILES": r.smiles,
-                            t(LANG, "admet_col_value"): round(r.value, 3),
-                            t(LANG, "admet_col_verdict"): (
-                                r.verdict_ar if LANG == "ar" else r.verdict_en
+                            t(lang, "admet_col_value"): round(r.value, 3),
+                            t(lang, "admet_col_verdict"): (
+                                r.verdict_ar if lang == "ar" else r.verdict_en
                             ),
                         }
                         for r in rows
@@ -1177,23 +1177,170 @@ with g_reports[1]:
                 )
                 st.dataframe(df, hide_index=True, width="stretch")
             else:
-                st.info(t(LANG, "admet_no_server"))
-                with st.expander(t(LANG, "admet_server_hint"), expanded=False):
+                st.info(t(lang, "admet_no_server"))
+                with st.expander(t(lang, "admet_server_hint"), expanded=False):
                     st.markdown(
-                        ers.SERVER_HINT_AR if LANG == "ar" else ers.SERVER_HINT_EN
+                        ers.SERVER_HINT_AR if lang == "ar" else ers.SERVER_HINT_EN
                     )
-                st.markdown(f"#### {t(LANG, 'admet_ref_title')}")
+                st.markdown(f"#### {t(lang, 'admet_ref_title')}")
                 st.dataframe(
-                    pd.DataFrame(ers.fallback_reference_df(model_id, LANG)),
+                    pd.DataFrame(ers.fallback_reference_df(model_id, lang)),
                     hide_index=True,
                     width="stretch",
                 )
 
         st.warning(
-            ers.DISCLAIMER_AR if LANG == "ar" else ers.DISCLAIMER_EN
+            ers.DISCLAIMER_AR if lang == "ar" else ers.DISCLAIMER_EN
         )
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في ADMET: {e}")
+
+
+def _render_admetai_engine(lang: str, presets: dict[str, str]) -> None:
+    """محرك ADMET-AI المحلي (P13) — 41 نقطة نهاية + مئينات DrugBank بلا شبكة."""
+    try:
+        from core.clients import admet_ai_client as aic
+
+        st.caption(t(lang, "admetai_caption"))
+        with st.expander(t(lang, "admetai_lesson_title"), expanded=False):
+            st.markdown(
+                aic.ADMET_AI_LESSON.get(lang, aic.ADMET_AI_LESSON["ar"]).format(
+                    n=aic.N_ML_TASKS
+                )
+            )
+
+        if not aic.is_available():
+            st.info(t(lang, "admetai_not_available"))
+            with st.expander(t(lang, "admetai_install_hint"), expanded=False):
+                st.markdown(
+                    aic.INSTALL_HINT_AR if lang == "ar" else aic.INSTALL_HINT_EN
+                )
+            return
+
+        presets3 = list(presets.values())[:3]
+        if "admetai_input" not in st.session_state:
+            st.session_state["admetai_input"] = "\n".join(presets3)
+        if st.button(t(lang, "admet_preset"), key="admetai_fill"):
+            st.session_state["admetai_input"] = "\n".join(presets3)
+        smi_text = st.text_area(
+            t(lang, "admet_input"), key="admetai_input", height=140
+        )
+
+        if st.button(t(lang, "admetai_btn"), type="primary", key="admetai_btn"):
+            raw = [s.strip() for s in smi_text.splitlines() if s.strip()]
+            valid: list[str] = []
+            invalid: list[str] = []
+            if HAS_RDKIT:
+                from rdkit import Chem
+
+                for s in raw:
+                    if Chem.MolFromSmiles(s) is not None:
+                        valid.append(s)
+                    else:
+                        invalid.append(s)
+            else:
+                valid = raw
+            if invalid:
+                st.warning(
+                    t(lang, "admet_invalid").format(bad=", ".join(invalid[:3]))
+                )
+            if not valid:
+                st.info(t(lang, "admet_empty"))
+            else:
+                with st.spinner(t(lang, "admet_status")):
+                    st.session_state["admetai_results"] = aic.predict_admet_ai_batch(valid)
+
+        if "admetai_results" not in st.session_state:
+            return
+        results = st.session_state["admetai_results"]
+        if not results:
+            st.info(t(lang, "admetai_no_rows"))
+            return
+
+        st.markdown(f"#### {t(lang, 'admetai_results_title')}")
+        families = sorted(
+            {(t_.family_ar if lang == "ar" else t_.family_en) for t_ in aic.TASKS.values()}
+        )
+        fam_all = t(lang, "admetai_family_all")
+        fam_choice = st.selectbox(
+            t(lang, "admetai_family_filter"),
+            [fam_all] + families,
+            key="admetai_family",
+        )
+
+        for idx, res in enumerate(results, 1):
+            label = (
+                f"🧬 جزيء {idx}/{len(results)} — {res.smiles[:42]}"
+                if lang == "ar"
+                else f"🧬 Molecule {idx}/{len(results)} — {res.smiles[:42]}"
+            )
+            with st.expander(label, expanded=(idx == 1)):
+                ml_rows: list[dict] = []
+                ph_rows: list[dict] = []
+                for tid, val in res.values.items():
+                    task = aic.TASKS.get(tid)
+                    if task is None:
+                        continue  # عمود مجهول — لا تزييف تفسير
+                    if task.kind == aic.KIND_PHYSCHEM:
+                        ph_rows.append(
+                            {
+                                t(lang, "admetai_col_task"): (
+                                    task.name_ar if lang == "ar" else task.name_en
+                                ),
+                                t(lang, "admetai_col_value"): round(val, 3),
+                                t(lang, "admetai_col_unit"): (
+                                    task.unit_ar if lang == "ar" else task.unit_en
+                                ),
+                            }
+                        )
+                        continue
+                    fam = task.family_ar if lang == "ar" else task.family_en
+                    if fam_choice != fam_all and fam != fam_choice:
+                        continue
+                    pct = res.get_percentile(tid)
+                    ml_rows.append(
+                        {
+                            t(lang, "admetai_col_task"): (
+                                task.name_ar if lang == "ar" else task.name_en
+                            ),
+                            t(lang, "admetai_col_family"): fam,
+                            t(lang, "admetai_col_value"): round(val, 3),
+                            t(lang, "admetai_col_unit"): (
+                                task.unit_ar if lang == "ar" else task.unit_en
+                            ),
+                            t(lang, "admetai_col_pct"): (
+                                round(pct, 1) if pct is not None else "—"
+                            ),
+                            t(lang, "admetai_col_verdict"): aic.verdict(tid, val, lang),
+                        }
+                    )
+                st.dataframe(pd.DataFrame(ml_rows), hide_index=True, width="stretch")
+                st.markdown(f"**{t(lang, 'admetai_physchem_title')}**")
+                st.dataframe(pd.DataFrame(ph_rows), hide_index=True, width="stretch")
+
+        st.warning(
+            aic.DISCLAIMER_AR if lang == "ar" else aic.DISCLAIMER_EN
+        )
+    except Exception as e:  # noqa: BLE001
+        st.error(f"خطأ في ADMET-AI: {e}")
+
+
+# ═══ Tab 12: ADMET Hub — Ersilia / ADMET-AI ═══
+with g_reports[1]:
+    st.subheader(t(LANG, "admet_title"))
+    st.caption(t(LANG, "admet_caption"))
+
+    engine_label_admetai = t(LANG, "admet_engine_admetai")
+    engine = st.radio(
+        t(LANG, "admet_engine"),
+        [t(LANG, "admet_engine_ersilia"), engine_label_admetai],
+        horizontal=True,
+        key="admet_engine",
+    )
+    if engine == engine_label_admetai:
+        _render_admetai_engine(LANG, ADMET_PRESETS)
+    else:
+        _render_ersilia_engine(LANG, ADMET_PRESETS)
 
 # ═══ Tab 13: التصنيف الدوائي — المعيار العالمي ATC (S10) ═══
 with g_reports[2]:
