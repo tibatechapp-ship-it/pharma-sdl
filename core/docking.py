@@ -249,13 +249,18 @@ def dock_ligand(
     receptor: ReceptorInfo,
     n_poses: int = 5,
     exhaustiveness: int = 8,
+    random_seed: int | None = None,
 ) -> DockingResult:
-    """ربط كامل: تجهيز الليغاند ثم Vina داخل صندوق المستقبل الجاهز."""
+    """ربط كامل: تجهيز الليغاند ثم Vina داخل صندوق المستقبل الجاهز.
+
+    random_seed: بذرة اختيارية للتكرارية الحرفية في التجميد المنشور
+    (P14) — None يترك سلوك Vina الافتراضي كما في الإصدارات السابقة.
+    """
     if not (HAS_VINA and HAS_MEEKO):  # pragma: no cover
         raise RuntimeError("vina/meeko غير متاحين — استخدم جسر Cheng-Prusoff في هذه الحالة")
 
     lig_pdbqt, _mol = prepare_ligand(smiles)
-    v = Vina(sf_name="vina")
+    v = Vina(sf_name="vina", seed=int(random_seed)) if random_seed is not None else Vina(sf_name="vina")
     v.set_receptor(str(RECEPTORS_DIR / receptor.receptor_file))
     v.compute_vina_maps(center=list(receptor.center), box_size=list(receptor.box_size))
     v.set_ligand_from_string(lig_pdbqt)

@@ -1,0 +1,204 @@
+{
+  "schema": "pharma-sdl.three-tier-p14.v1",
+  "protocol": {
+    "date_utc": "2026-11-04 12:34:01",
+    "target": {
+      "chembl_id": "CHEMBL4523582",
+      "pdb_reference": "7VH8",
+      "receptor_id": "7VH8_A",
+      "self_dock_reference_kcal": -8.28
+    },
+    "tiers": {
+      "tier1": "ML — train_default_model() v0.12.0 (Morgan counts 2048 r=2, RF 300, max_features=0.3, seed 42)",
+      "tier2": "Vina — dock_ligand() على 7VH8_A (exhaustiveness=8, random_seed=42) → pIC50 عبر Cheng-Prusoff العكسي (ΔG=−1.3642·pIC50)",
+      "tier3": "Boltz-2 — بيان مجمّد من labs/lab08_boltz2_co_folding.ipynb (Colab GPU) عبر core/clients/boltz2_client.py"
+    },
+    "agreement_bands": "≤1.0 اتفاق كمّي · 1–2 اتفاق تقريبي · >2 تعارض (pIC50)",
+    "anchor_rule": "سجلات ChEMBL حقيقية بمعرّفاتها — وسيط IC50 الإنزيمية لمرجل متعدد السجلات",
+    "boltz_manifest": {
+      "path": "data/boltz2/lab08-manifest.json",
+      "schema": "pharma-sdl.boltz2-affinity.v1",
+      "status": "unavailable_offline"
+    }
+  },
+  "environment": {
+    "python": "3.12.16",
+    "rdkit": "2026.09.1",
+    "sklearn": "1.5.2",
+    "vina_available": true,
+    "meeko_available": true,
+    "platform": "Linux-5.10.134-013.15.kangaroo.al8.x86_64-x86_64-with-glibc2.41"
+  },
+  "rows": [
+    {
+      "smiles": "CC(C)C[C@H](NC(=O)[C@H](Cc1cncs1)NC(=O)C(F)(F)F)C(=O)N[C@H](C(=O)N1CC[C@H](C#N)C1)C(C)(C)C",
+      "name_ar": "نيرماتريلڤير (PF-07321332)",
+      "name_en": "Nirmatrelvir (Paxlovid)",
+      "anchor": {
+        "molecule_chembl_id": "CHEMBL4802135",
+        "target_chembl_id": "CHEMBL4523582",
+        "rule": "وسيط سجلات IC50 الإنزيمية على CHEMBL4523582 — قاعدة معلنة",
+        "ic50_nm": 31.0,
+        "pic50": 7.51,
+        "ic50_spread_nm": [
+          0.79,
+          75.0
+        ],
+        "records": [
+          {
+            "assay_chembl_id": "CHEMBL5106611",
+            "value_nm": 75.0
+          },
+          {
+            "assay_chembl_id": "CHEMBL5112747",
+            "value_nm": 0.79
+          },
+          {
+            "assay_chembl_id": "CHEMBL5118373",
+            "value_nm": 66.0
+          },
+          {
+            "assay_chembl_id": "CHEMBL5142713",
+            "value_nm": 31.0
+          },
+          {
+            "assay_chembl_id": "CHEMBL5145885",
+            "value_nm": 11.2
+          }
+        ],
+        "ki_context": [
+          {
+            "assay_chembl_id": "CHEMBL5140442",
+            "value_nm": 3.0
+          },
+          {
+            "assay_chembl_id": "CHEMBL5140699",
+            "value_nm": 3.11
+          }
+        ],
+        "queried_at": "2026-11-04",
+        "source": "ChEMBL REST API (www.ebi.ac.uk/chembl)"
+      },
+      "out_of_sample": true,
+      "nearest_train_tanimoto": 0.294,
+      "tier1_ml": {
+        "tier": 1,
+        "engine": "rf-morgan-counts (v0.12.0 config)",
+        "status": "ok",
+        "pic50": 5.94,
+        "ci95": [
+          3.63,
+          8.26
+        ],
+        "pic50_std": 1.181,
+        "ic50_nm": 1140.0,
+        "unit": "pIC50"
+      },
+      "tier2_vina": {
+        "tier": 2,
+        "engine": "vina (7VH8_A, exhaustiveness=8, seed=42)",
+        "status": "ok",
+        "dg_kcal": -7.75,
+        "pic50": 5.68,
+        "n_poses": 5,
+        "unit": "pIC50 (جسر Cheng-Prusoff من ΔG)",
+        "self_dock_reference_kcal": -8.28
+      },
+      "tier3_boltz2": {
+        "tier": 3,
+        "engine": "boltz-2",
+        "status": "unavailable_offline",
+        "note": "الطبقة الثالثة تعمل على Colab GPU فقط — شغّل labs/lab08_boltz2_co_folding.ipynb ثم أعد سكربت التجميد",
+        "unit": "log10(IC50[μM])"
+      },
+      "agreement_vs_anchor": {
+        "ml": "اتفاق تقريبي (1 < |ΔpIC50| ≤ 2)",
+        "vina": "اتفاق تقريبي (1 < |ΔpIC50| ≤ 2)"
+      },
+      "closest_to_anchor": {
+        "closest_tier": 1,
+        "gaps": {
+          "1": 1.57,
+          "2": 1.83
+        }
+      }
+    },
+    {
+      "smiles": "CC(C)[C@H](NC(=O)[C@H](CC1CCCCC1)NC(=O)C(F)(F)F)C(=O)N[C@H]1CC[C@@H]2[C@@H](NC(=N)N)C(=O)N2C1",
+      "name_ar": "PF-00835231 (الليغاند المشتبك في 7VH8)",
+      "name_en": "PF-00835231 (7VH8 co-crystal ligand)",
+      "anchor": {
+        "molecule_chembl_id": "CHEMBL4777223",
+        "target_chembl_id": "CHEMBL4523582",
+        "rule": "سجل IC50 واحد مباشر على CHEMBL4523582",
+        "ic50_nm": 8.0,
+        "pic50": 8.1,
+        "ic50_spread_nm": [
+          8.0,
+          8.0
+        ],
+        "records": [
+          {
+            "assay_chembl_id": "CHEMBL4810314",
+            "value_nm": 8.0
+          }
+        ],
+        "ki_context": [],
+        "queried_at": "2026-11-04",
+        "source": "ChEMBL REST API (www.ebi.ac.uk/chembl)"
+      },
+      "out_of_sample": true,
+      "nearest_train_tanimoto": 0.28,
+      "tier1_ml": {
+        "tier": 1,
+        "engine": "rf-morgan-counts (v0.12.0 config)",
+        "status": "ok",
+        "pic50": 5.9,
+        "ci95": [
+          3.68,
+          8.12
+        ],
+        "pic50_std": 1.131,
+        "ic50_nm": 1250.0,
+        "unit": "pIC50"
+      },
+      "tier2_vina": {
+        "tier": 2,
+        "engine": "vina (7VH8_A, exhaustiveness=8, seed=42)",
+        "status": "ok",
+        "dg_kcal": -8.77,
+        "pic50": 6.43,
+        "n_poses": 5,
+        "unit": "pIC50 (جسر Cheng-Prusoff من ΔG)",
+        "self_dock_reference_kcal": -8.28
+      },
+      "tier3_boltz2": {
+        "tier": 3,
+        "engine": "boltz-2",
+        "status": "unavailable_offline",
+        "note": "الطبقة الثالثة تعمل على Colab GPU فقط — شغّل labs/lab08_boltz2_co_folding.ipynb ثم أعد سكربت التجميد",
+        "unit": "log10(IC50[μM])"
+      },
+      "agreement_vs_anchor": {
+        "ml": "تعارض (|ΔpIC50| > 2)",
+        "vina": "اتفاق تقريبي (1 < |ΔpIC50| ≤ 2)"
+      },
+      "closest_to_anchor": {
+        "closest_tier": 2,
+        "gaps": {
+          "1": 2.2,
+          "2": 1.67
+        }
+      }
+    }
+  ],
+  "lesson": {
+    "trust_rules_ar": {
+      "tier1_ml": "ترتيب آلاف المرشحين داخل السلالة — لا قيم مطلقة خارجها (قياس P12 الخارجي)",
+      "tier2_vina": "موضع الربط وطاقة خشنة، بمرجع إعادة ربط ذاتي −8.28 kcal/mol",
+      "tier3_boltz2": "الحكم المرجعي على العشرات الناجية — بنية + قرابة في ~20 ثانية GPU (MIT)",
+      "funnel_rule": "الآلاف ← المئات ← العشرات ← التجربة؛ كل طبقة تسبق أغلى منها ولا تتجاوز حكمها"
+    }
+  },
+  "runtime_seconds": 167.3
+}
