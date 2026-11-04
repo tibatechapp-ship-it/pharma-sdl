@@ -1,0 +1,13 @@
+{
+  "source": "Therapeutics Data Commons \u2014 ADMET Group official benchmark splits (PyTDC 1.0.0)",
+  "downloaded_utc": "2026-11-04",
+  "origin_urls": [
+    "https://tdcommons.ai/benchmark/admet_group/overview"
+  ],
+  "files": {
+    "lipophilicity_astrazeneca/test.csv": "69f3870c9b6f2cec79a992a31d59d2e940962f7e2c4b27dabaed1fe1e767e2d8",
+    "lipophilicity_astrazeneca/train_val.csv": "a54636f85cf31eb4c914ea15e2c3a15364b0b8b51986262ea229203637e08f31",
+    "solubility_aqsoldb/test.csv": "18cd02deec4e06c611a6e7e38fb44a1731bc0c0a96bc5d4ded098ff29da645fe",
+    "solubility_aqsoldb/train_val.csv": "adbee092423fe0cb0f4219520f2f93730b6ba5bb1d0ef8dd7764c2d32b3393b9"
+  }
+}

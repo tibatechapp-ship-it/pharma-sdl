@@ -15,10 +15,29 @@
   <img src="https://img.shields.io/badge/Streamlit-UI-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit">
   <a href="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/tests.yml"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftibatechapp-ship-it%2Fpharma-sdl%2Fmain%2Fbadges%2Ftests.json" alt="اختبارات — رقم حي يُحدّثه CI من التشغيل الفعلي"></a>
   <a href=".github/workflows/platform.yml"><img src="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/platform.yml/badge.svg" alt="Platform API"></a>
-  <img src="https://img.shields.io/badge/API-v0.12.0%20%28FastAPI%29-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.12.0 — واجهة API مبنية بFastAPI (OpenAPI version=__version__)">
+  <img src="https://img.shields.io/badge/API-v0.13.0%20%28FastAPI%29-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.13.0 — واجهة API مبنية بFastAPI (OpenAPI version=__version__)">
 </p>
 
 ---
+
+## 🚀 v0.13.0 — P12: القياس الخارجي الرسمي — المختبر السابع على TDC
+
+> **الجديد في v0.13.0:** أول مرة يقاس فيها المشروع على مرجع **لا نملكه**:
+> مهمتا انحدار من المجموعة المرجعية الرسمية `admet_group` في Therapeutics
+> Data Commons — بتقسيمها الرسمي المثبّت، وبذور لوحتها [1..5]، والنتيجة
+> كما تحسبها دالة التقييم الرسمية `evaluate_many` لا حسبتنا. خط v0.12.0
+> المعتمد (بصمة تكرارات + RF300/mf=0.3) حلّ على **Solubility** (9,982 جزيء)
+> بـ MAE **1.031 ± 0.024** — المرتبة 16/18، متقدماً على خط أساس البصمات
+> المنشور (Morgan+MLP: 1.203) بفارق **0.172** — وعلى **Lipophilicity**
+> (4,200 جزيء) بـ MAE **0.709 ± 0.006** تحت المدخلات الـ19 كلها؛ فجوة
+> **+0.25…+0.29** عن الأفضل هي سقف فئة «بصمة+RF» مقاساً الآن لا مُخمَّناً،
+> والذراع التشخيصية تبرئ إعداد P11 (sqrt أسوأ في المهمتين). التقرير:
+> [MODEL-BENCHMARK-TDC-P12](docs/audit/MODEL-BENCHMARK-TDC-P12.md).
+
+```bash
+pip install PyTDC --no-deps && pip install 'setuptools<81'
+python3 scripts/evaluate_tdc_p12.py   # يعمل دون شبكة من النسخة المجمدة
+```
 
 ## 🚀 v0.12.0 — P11: ترقية نموذج الفعالية — A/B/C/D على البروتوكول المنشور
 
@@ -454,6 +473,7 @@ Python 3.11 | **FastAPI (منصة v0.2.0)** | Streamlit | RDKit | AutoDock Vina 
 | **P9** | الحلقة الفيزيائية: بوابة LIMS مرجعية أمينة أوامر عمل (لا تختلق رقماً — الرفع من الميدان حصراً) + مسار قياسات يعيد المقبول إلى الذاكرة الدائمة + تسوية ما بعد المقاطعة + إصلاح فجوتي P7 (انهيار كامن في التسجيل وسكربت القياس المفقود — الأرقام تتكاثر حرفياً) | ✅ [v0.10.0](CHANGELOG.md) · [ADR-0014](docs/adr/ADR-0014-physical-loop-gateway-and-measurements.md) |
 | **P10** | جهة الميدان: بروتوكول أجهزة موحد (`InstrumentDriver`) + سواقة FRET عبر SCPI/TCP + محاكي جهاز واقعي + مراقب جودة خمس طبقات (Recall=100% وFPR=0% مُقاسان على الحالات المصطنعة) + موافقة بشرية إلزامية للحقيقي + حوكمة الوكلاء (`AGENTS.md`/`HANDOFF.md`) — مؤجل بقرار: وكلاء LLM ومكدس Grafana | ✅ [v0.11.0](CHANGELOG.md) · [ADR-0015](docs/adr/ADR-0015-bench-instrument-layer-and-reading-qc.md) · [دليل التوصيل](docs/HARDWARE_HANDOFF.md) |
 | **P11** | ترقية نموذج الفعالية بصدق P0: A/B/C/D مقترن على البروتوكول المنشور — بصمة التكرارات + mf=0.3 ترفع R² الهيكلي 0.489→**0.509** والعشوائي 0.436→**0.468** ومعايرة اليقين ρ 0.134→**0.327**؛ ونتيجتان سلبيتان منشورتان (الوصف 0.472، HistGB 0.429) — هدف 0.55 يحتاج بيانات P12 لا أشجاراً | ✅ [v0.12.0](CHANGELOG.md) · [التقرير](docs/audit/MODEL-UPGRADE-P11.md) · [الخطة §5.2](docs/plan/) |
+| **P12** | القياس الخارجي الرسمي (TDC `admet_group`): أول قياس على مرجع لا نملكه — تقسيم Scaffold الرسمي المثبّت وبذور اللوحة [1..5] ومقياس `evaluate_many` الرسمي — خط v0.12.0 المعتمد: **Solubility MAE 1.031 ± 0.024** (مرتبة 16/18، يتفوق على خط أساس البصمات المنشور Morgan+MLP 1.203 بفارق 0.172) و**Lipophilicity MAE 0.709 ± 0.006**؛ فجوة +0.25…+0.29 عن الأفضل = سقف فئة «بصمة+RF» مقاساً لا مُخمَّناً — البيانات الرسمية مجمدة بـSHA256 والقياس دون شبكة | ✅ [v0.13.0](CHANGELOG.md) · [التقرير](docs/audit/MODEL-BENCHMARK-TDC-P12.md) · [الخطة §3](docs/plan/) |
 
 ### إعادة توليد المستقبلات المُجهّزة
 ```bash

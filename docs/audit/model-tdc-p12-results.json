@@ -1,0 +1,847 @@
+{
+  "tasks": {
+    "lipophilicity_astrazeneca": {
+      "task": "lipophilicity_astrazeneca",
+      "label": "Lipophilicity_AstraZeneca (TDC.Lipophilicity_AstraZeneca)",
+      "unit": "log-ratio",
+      "n_total": 4200,
+      "metric": "MAE",
+      "official_split": "Scaffold 20% test (TDC)",
+      "leaderboard_url": "https://tdcommons.ai/benchmark/admet_group/05lipo",
+      "leaderboard_reference": {
+        "MiniMol": [
+          0.456,
+          0.008
+        ],
+        "Chemprop-RDKit": [
+          0.467,
+          0.006
+        ],
+        "Chemprop": [
+          0.47,
+          0.009
+        ],
+        "BaseBoosting (Huang)": [
+          0.479,
+          0.007
+        ],
+        "ADMETrix": [
+          0.512,
+          0.01
+        ],
+        "CMPNN": [
+          0.515,
+          0.008
+        ],
+        "MapLight + GNN": [
+          0.525,
+          0.003
+        ],
+        "ContextPred": [
+          0.535,
+          0.012
+        ],
+        "StackingRegressor (DeepMol)": [
+          0.538,
+          0.001
+        ],
+        "MapLight": [
+          0.539,
+          0.002
+        ],
+        "GCN": [
+          0.541,
+          0.011
+        ],
+        "AttrMasking": [
+          0.547,
+          0.024
+        ],
+        "NeuralFP": [
+          0.563,
+          0.023
+        ],
+        "AttentiveFP": [
+          0.572,
+          0.007
+        ],
+        "RDKit2D + MLP (DeepPurpose)": [
+          0.574,
+          0.017
+        ],
+        "Basic ML (Boral)": [
+          0.617,
+          0.003
+        ],
+        "Euclia ML model": [
+          0.621,
+          0.005
+        ],
+        "CFA": [
+          0.626,
+          0.013
+        ],
+        "DeepMol (AutoML)": [
+          0.656,
+          0.012
+        ]
+      },
+      "arms": {
+        "adopted": {
+          "task": "lipophilicity_astrazeneca",
+          "arm": "adopted",
+          "arm_label": "المعتمد v0.12.0 (mf=0.3)",
+          "max_features": 0.3,
+          "label": "Lipophilicity_AstraZeneca (TDC.Lipophilicity_AstraZeneca)",
+          "unit": "log-ratio",
+          "n_total": 4200,
+          "n_train_val": 3360,
+          "n_test": 840,
+          "metric": "MAE",
+          "our_mae_mean": 0.709,
+          "our_mae_std": 0.006,
+          "per_seed": [
+            {
+              "seed": 1,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.7048,
+              "r2": 0.4329,
+              "seconds": 26.3
+            },
+            {
+              "seed": 2,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.7145,
+              "r2": 0.4222,
+              "seconds": 27.0
+            },
+            {
+              "seed": 3,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.7093,
+              "r2": 0.4211,
+              "seconds": 22.4
+            },
+            {
+              "seed": 4,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.7153,
+              "r2": 0.4129,
+              "seconds": 24.1
+            },
+            {
+              "seed": 5,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.699,
+              "r2": 0.4385,
+              "seconds": 25.6
+            }
+          ],
+          "our_r2_mean": 0.4255,
+          "leaderboard_rank_of_ours": 20,
+          "n_leaderboard_entries": 19,
+          "leaderboard_best": {
+            "model": "MiniMol",
+            "mae": 0.456,
+            "std": 0.008
+          },
+          "gap_to_best": 0.253,
+          "fingerprint_baseline_note": null,
+          "leaderboard_url": "https://tdcommons.ai/benchmark/admet_group/05lipo",
+          "leaderboard_reference": {
+            "MiniMol": [
+              0.456,
+              0.008
+            ],
+            "Chemprop-RDKit": [
+              0.467,
+              0.006
+            ],
+            "Chemprop": [
+              0.47,
+              0.009
+            ],
+            "BaseBoosting (Huang)": [
+              0.479,
+              0.007
+            ],
+            "ADMETrix": [
+              0.512,
+              0.01
+            ],
+            "CMPNN": [
+              0.515,
+              0.008
+            ],
+            "MapLight + GNN": [
+              0.525,
+              0.003
+            ],
+            "ContextPred": [
+              0.535,
+              0.012
+            ],
+            "StackingRegressor (DeepMol)": [
+              0.538,
+              0.001
+            ],
+            "MapLight": [
+              0.539,
+              0.002
+            ],
+            "GCN": [
+              0.541,
+              0.011
+            ],
+            "AttrMasking": [
+              0.547,
+              0.024
+            ],
+            "NeuralFP": [
+              0.563,
+              0.023
+            ],
+            "AttentiveFP": [
+              0.572,
+              0.007
+            ],
+            "RDKit2D + MLP (DeepPurpose)": [
+              0.574,
+              0.017
+            ],
+            "Basic ML (Boral)": [
+              0.617,
+              0.003
+            ],
+            "Euclia ML model": [
+              0.621,
+              0.005
+            ],
+            "CFA": [
+              0.626,
+              0.013
+            ],
+            "DeepMol (AutoML)": [
+              0.656,
+              0.012
+            ]
+          }
+        },
+        "sqrt_diagnostic": {
+          "task": "lipophilicity_astrazeneca",
+          "arm": "sqrt_diagnostic",
+          "arm_label": "تشخيصي sqrt (الافتراضي القياسي للبصمات)",
+          "max_features": "sqrt",
+          "label": "Lipophilicity_AstraZeneca (TDC.Lipophilicity_AstraZeneca)",
+          "unit": "log-ratio",
+          "n_total": 4200,
+          "n_train_val": 3360,
+          "n_test": 840,
+          "metric": "MAE",
+          "our_mae_mean": 0.748,
+          "our_mae_std": 0.004,
+          "per_seed": [
+            {
+              "seed": 1,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.7488,
+              "r2": 0.3786,
+              "seconds": 5.7
+            },
+            {
+              "seed": 2,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.7512,
+              "r2": 0.3647,
+              "seconds": 5.7
+            },
+            {
+              "seed": 3,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.7486,
+              "r2": 0.3741,
+              "seconds": 5.8
+            },
+            {
+              "seed": 4,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.7492,
+              "r2": 0.3661,
+              "seconds": 6.2
+            },
+            {
+              "seed": 5,
+              "n_train": 2940,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 840,
+              "n_test_dropped_unparseable_imputed": 0,
+              "mae": 0.7402,
+              "r2": 0.3858,
+              "seconds": 6.8
+            }
+          ],
+          "our_r2_mean": 0.3739,
+          "leaderboard_rank_of_ours": 20,
+          "n_leaderboard_entries": 19,
+          "leaderboard_best": {
+            "model": "MiniMol",
+            "mae": 0.456,
+            "std": 0.008
+          },
+          "gap_to_best": 0.292,
+          "fingerprint_baseline_note": null,
+          "leaderboard_url": "https://tdcommons.ai/benchmark/admet_group/05lipo",
+          "leaderboard_reference": {
+            "MiniMol": [
+              0.456,
+              0.008
+            ],
+            "Chemprop-RDKit": [
+              0.467,
+              0.006
+            ],
+            "Chemprop": [
+              0.47,
+              0.009
+            ],
+            "BaseBoosting (Huang)": [
+              0.479,
+              0.007
+            ],
+            "ADMETrix": [
+              0.512,
+              0.01
+            ],
+            "CMPNN": [
+              0.515,
+              0.008
+            ],
+            "MapLight + GNN": [
+              0.525,
+              0.003
+            ],
+            "ContextPred": [
+              0.535,
+              0.012
+            ],
+            "StackingRegressor (DeepMol)": [
+              0.538,
+              0.001
+            ],
+            "MapLight": [
+              0.539,
+              0.002
+            ],
+            "GCN": [
+              0.541,
+              0.011
+            ],
+            "AttrMasking": [
+              0.547,
+              0.024
+            ],
+            "NeuralFP": [
+              0.563,
+              0.023
+            ],
+            "AttentiveFP": [
+              0.572,
+              0.007
+            ],
+            "RDKit2D + MLP (DeepPurpose)": [
+              0.574,
+              0.017
+            ],
+            "Basic ML (Boral)": [
+              0.617,
+              0.003
+            ],
+            "Euclia ML model": [
+              0.621,
+              0.005
+            ],
+            "CFA": [
+              0.626,
+              0.013
+            ],
+            "DeepMol (AutoML)": [
+              0.656,
+              0.012
+            ]
+          }
+        }
+      }
+    },
+    "solubility_aqsoldb": {
+      "task": "solubility_aqsoldb",
+      "label": "Solubility_AqSolDB (TDC.Solubility_AqSolDB)",
+      "unit": "log mol/L",
+      "n_total": 9982,
+      "metric": "MAE",
+      "official_split": "Scaffold 20% test (TDC)",
+      "leaderboard_url": "https://tdcommons.ai/benchmark/admet_group/06aqsol",
+      "leaderboard_reference": {
+        "MiniMol": [
+          0.741,
+          0.013
+        ],
+        "Chemprop-RDKit": [
+          0.761,
+          0.025
+        ],
+        "DeepMol (AutoML)": [
+          0.775,
+          0.006
+        ],
+        "AttentiveFP": [
+          0.776,
+          0.008
+        ],
+        "MapLight + GNN": [
+          0.789,
+          0.003
+        ],
+        "MapLight": [
+          0.792,
+          0.002
+        ],
+        "CMPNN": [
+          0.796,
+          0.038
+        ],
+        "RDKit2D + MLP (DeepPurpose)": [
+          0.827,
+          0.047
+        ],
+        "Basic ML (Boral)": [
+          0.828,
+          0.002
+        ],
+        "Chemprop": [
+          0.829,
+          0.022
+        ],
+        "GCN": [
+          0.907,
+          0.02
+        ],
+        "CFA": [
+          0.939,
+          0.03
+        ],
+        "NeuralFP": [
+          0.947,
+          0.016
+        ],
+        "CNN (DeepPurpose)": [
+          1.023,
+          0.023
+        ],
+        "AttrMasking": [
+          1.026,
+          0.02
+        ],
+        "ContextPred": [
+          1.04,
+          0.045
+        ],
+        "Euclia ML model": [
+          1.076,
+          0.016
+        ],
+        "Morgan + MLP (DeepPurpose)": [
+          1.203,
+          0.019
+        ]
+      },
+      "arms": {
+        "adopted": {
+          "task": "solubility_aqsoldb",
+          "arm": "adopted",
+          "arm_label": "المعتمد v0.12.0 (mf=0.3)",
+          "max_features": 0.3,
+          "label": "Solubility_AqSolDB (TDC.Solubility_AqSolDB)",
+          "unit": "log mol/L",
+          "n_total": 9982,
+          "n_train_val": 7985,
+          "n_test": 1997,
+          "metric": "MAE",
+          "our_mae_mean": 1.031,
+          "our_mae_std": 0.024,
+          "per_seed": [
+            {
+              "seed": 1,
+              "n_train": 6986,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.0249,
+              "r2": 0.6312,
+              "seconds": 75.5
+            },
+            {
+              "seed": 2,
+              "n_train": 6986,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.0715,
+              "r2": 0.6105,
+              "seconds": 73.8
+            },
+            {
+              "seed": 3,
+              "n_train": 6986,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.0413,
+              "r2": 0.6251,
+              "seconds": 76.4
+            },
+            {
+              "seed": 4,
+              "n_train": 6986,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.0172,
+              "r2": 0.633,
+              "seconds": 76.6
+            },
+            {
+              "seed": 5,
+              "n_train": 5045,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.0008,
+              "r2": 0.6451,
+              "seconds": 50.6
+            }
+          ],
+          "our_r2_mean": 0.629,
+          "leaderboard_rank_of_ours": 16,
+          "n_leaderboard_entries": 18,
+          "leaderboard_best": {
+            "model": "MiniMol",
+            "mae": 0.741,
+            "std": 0.013
+          },
+          "gap_to_best": 0.29,
+          "fingerprint_baseline_note": {
+            "model": "Morgan + MLP (DeepPurpose)",
+            "mae": 1.203,
+            "std": 0.019
+          },
+          "leaderboard_url": "https://tdcommons.ai/benchmark/admet_group/06aqsol",
+          "leaderboard_reference": {
+            "MiniMol": [
+              0.741,
+              0.013
+            ],
+            "Chemprop-RDKit": [
+              0.761,
+              0.025
+            ],
+            "DeepMol (AutoML)": [
+              0.775,
+              0.006
+            ],
+            "AttentiveFP": [
+              0.776,
+              0.008
+            ],
+            "MapLight + GNN": [
+              0.789,
+              0.003
+            ],
+            "MapLight": [
+              0.792,
+              0.002
+            ],
+            "CMPNN": [
+              0.796,
+              0.038
+            ],
+            "RDKit2D + MLP (DeepPurpose)": [
+              0.827,
+              0.047
+            ],
+            "Basic ML (Boral)": [
+              0.828,
+              0.002
+            ],
+            "Chemprop": [
+              0.829,
+              0.022
+            ],
+            "GCN": [
+              0.907,
+              0.02
+            ],
+            "CFA": [
+              0.939,
+              0.03
+            ],
+            "NeuralFP": [
+              0.947,
+              0.016
+            ],
+            "CNN (DeepPurpose)": [
+              1.023,
+              0.023
+            ],
+            "AttrMasking": [
+              1.026,
+              0.02
+            ],
+            "ContextPred": [
+              1.04,
+              0.045
+            ],
+            "Euclia ML model": [
+              1.076,
+              0.016
+            ],
+            "Morgan + MLP (DeepPurpose)": [
+              1.203,
+              0.019
+            ]
+          }
+        },
+        "sqrt_diagnostic": {
+          "task": "solubility_aqsoldb",
+          "arm": "sqrt_diagnostic",
+          "arm_label": "تشخيصي sqrt (الافتراضي القياسي للبصمات)",
+          "max_features": "sqrt",
+          "label": "Solubility_AqSolDB (TDC.Solubility_AqSolDB)",
+          "unit": "log mol/L",
+          "n_total": 9982,
+          "n_train_val": 7985,
+          "n_test": 1997,
+          "metric": "MAE",
+          "our_mae_mean": 1.102,
+          "our_mae_std": 0.036,
+          "per_seed": [
+            {
+              "seed": 1,
+              "n_train": 6986,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.1128,
+              "r2": 0.6037,
+              "seconds": 17.0
+            },
+            {
+              "seed": 2,
+              "n_train": 6986,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.1528,
+              "r2": 0.5825,
+              "seconds": 15.8
+            },
+            {
+              "seed": 3,
+              "n_train": 6986,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.1121,
+              "r2": 0.6094,
+              "seconds": 15.7
+            },
+            {
+              "seed": 4,
+              "n_train": 6986,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.0868,
+              "r2": 0.619,
+              "seconds": 16.2
+            },
+            {
+              "seed": 5,
+              "n_train": 5045,
+              "n_train_dropped_unparseable": 0,
+              "n_test": 1997,
+              "n_test_dropped_unparseable_imputed": 2,
+              "mae": 1.0429,
+              "r2": 0.6464,
+              "seconds": 11.7
+            }
+          ],
+          "our_r2_mean": 0.6122,
+          "leaderboard_rank_of_ours": 18,
+          "n_leaderboard_entries": 18,
+          "leaderboard_best": {
+            "model": "MiniMol",
+            "mae": 0.741,
+            "std": 0.013
+          },
+          "gap_to_best": 0.361,
+          "fingerprint_baseline_note": {
+            "model": "Morgan + MLP (DeepPurpose)",
+            "mae": 1.203,
+            "std": 0.019
+          },
+          "leaderboard_url": "https://tdcommons.ai/benchmark/admet_group/06aqsol",
+          "leaderboard_reference": {
+            "MiniMol": [
+              0.741,
+              0.013
+            ],
+            "Chemprop-RDKit": [
+              0.761,
+              0.025
+            ],
+            "DeepMol (AutoML)": [
+              0.775,
+              0.006
+            ],
+            "AttentiveFP": [
+              0.776,
+              0.008
+            ],
+            "MapLight + GNN": [
+              0.789,
+              0.003
+            ],
+            "MapLight": [
+              0.792,
+              0.002
+            ],
+            "CMPNN": [
+              0.796,
+              0.038
+            ],
+            "RDKit2D + MLP (DeepPurpose)": [
+              0.827,
+              0.047
+            ],
+            "Basic ML (Boral)": [
+              0.828,
+              0.002
+            ],
+            "Chemprop": [
+              0.829,
+              0.022
+            ],
+            "GCN": [
+              0.907,
+              0.02
+            ],
+            "CFA": [
+              0.939,
+              0.03
+            ],
+            "NeuralFP": [
+              0.947,
+              0.016
+            ],
+            "CNN (DeepPurpose)": [
+              1.023,
+              0.023
+            ],
+            "AttrMasking": [
+              1.026,
+              0.02
+            ],
+            "ContextPred": [
+              1.04,
+              0.045
+            ],
+            "Euclia ML model": [
+              1.076,
+              0.016
+            ],
+            "Morgan + MLP (DeepPurpose)": [
+              1.203,
+              0.019
+            ]
+          }
+        }
+      }
+    }
+  },
+  "phase": "P12 — Lab07: القياس الخارجي الرسمي (TDC admet_group)",
+  "generated_utc": "2026-11-04T00:32:51+00:00",
+  "what_is_measured": "خط أنابيب v0.12.0 المعتمد (Morgan تكرارات 2048 + RF300, max_features=0.3) بوصفه فئة خطوط انحدار SMILES→قيمة على مرجع لا نملكه — وليس نموذج Mpro الفعالية (لا مهمة pIC50-Mpro في TDC)",
+  "protocol": {
+    "group": "TDC admet_group (المرجعية الرسمية للوحة الصدارة)",
+    "test_set": "Scaffold split رسمي مثبت 20% (يأتي من TDC ولا يُلمس)",
+    "train_valid": "create_scaffold_split الرسمية على train_val بنسبة 0.875/0.125 لكل بذرة",
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "metric": "MAE كما تحسبه group.evaluate_many الرسمية (متوسط ± انحراف)",
+    "model_seed_fixed": 42,
+    "arms": {
+      "adopted": {
+        "max_features": 0.3,
+        "label": "المعتمد v0.12.0 (mf=0.3)"
+      },
+      "sqrt_diagnostic": {
+        "max_features": "sqrt",
+        "label": "تشخيصي sqrt (الافتراضي القياسي للبصمات)"
+      }
+    },
+    "pipeline": {
+      "featurizer": "Morgan count-based r=2, 2048bit (v0.12.0 المعتمد)",
+      "model": "RandomForest 300 trees"
+    }
+  },
+  "environment": {
+    "python": "3.12.16",
+    "PyTDC": "1.0.0",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.5.2",
+    "rdkit": "2026.9.1",
+    "pandas": "2.2.3"
+  },
+  "frozen_data": {
+    "dir": "data/external/admet_group/ (تصميم ذاكرة TDC الأصلي — يعمل دون شبكة)",
+    "sha256": {
+      "lipophilicity_astrazeneca/test.csv": "69f3870c9b6f2cec79a992a31d59d2e940962f7e2c4b27dabaed1fe1e767e2d8",
+      "lipophilicity_astrazeneca/train_val.csv": "a54636f85cf31eb4c914ea15e2c3a15364b0b8b51986262ea229203637e08f31",
+      "solubility_aqsoldb/test.csv": "18cd02deec4e06c611a6e7e38fb44a1731bc0c0a96bc5d4ded098ff29da645fe",
+      "solubility_aqsoldb/train_val.csv": "adbee092423fe0cb0f4219520f2f93730b6ba5bb1d0ef8dd7764c2d32b3393b9"
+    }
+  },
+  "leaderboard_reference_accessed": "2026-11-04"
+}
