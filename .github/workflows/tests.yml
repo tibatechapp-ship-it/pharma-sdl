@@ -6,8 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+# مبدأ أقل صلاحية (P16): الجناح كله قراءة فقط — الكتابة (contents: write)
+# حصراً في job الشارة المنفصل الذي يُشغَّل على push إلى main.
 permissions:
-  contents: write  # لخطوة نشر شارة الاختبارات الديناميكية فقط
+  contents: read
 
 jobs:
   test:
@@ -38,8 +40,45 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: pytest -m integration -v --no-cov --junitxml=/tmp/junit-int.xml
 
-      - name: Compute dynamic test badge (count from real run, not a static claim)
+      - name: Upload test results (input for the badge job)
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
+        with:
+          name: junit-xml
+          path: /tmp/junit-*.xml
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Upload coverage HTML
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: htmlcov/
+          retention-days: 7
+
+  badge:
+    name: Dynamic test badge
+    runs-on: ubuntu-latest
+    needs: test
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 5
+    # الكتابة هنا وحدها — ولحصر غرض معلن: تحديث badges/tests.json
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download test results
+        uses: actions/download-artifact@v7
+        with:
+          name: junit-xml
+          path: /tmp/junit
+
+      - name: Compute dynamic test badge (count from real run, not a static claim)
+        continue-on-error: true
         run: |
           python - <<'PYEOF'
           import json
@@ -47,11 +86,8 @@ jobs:
           from pathlib import Path
 
           totals = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
-          for f in ("/tmp/junit-unit.xml", "/tmp/junit-int.xml"):
-              p = Path(f)
-              if not p.exists():
-                  continue  # جناح التكامل لا يعمل إلا على push إلى main
-              for s in ET.parse(p).getroot().iter("testsuite"):
+          for f in sorted(Path("/tmp/junit").glob("junit-*.xml")):
+              for s in ET.parse(f).getroot().iter("testsuite"):
                   for k in totals:
                       totals[k] += int(s.get(k, 0))
           passed = totals["tests"] - totals["failures"] - totals["errors"] - totals["skipped"]
@@ -70,7 +106,6 @@ jobs:
           PYEOF
 
       - name: Publish badge (commit back to main, no CI retrigger)
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         continue-on-error: true  # فشل نشر الشارة لا يُخضّر/يُحمرّ الجناح — الشارة ليست حكماً على الاختبارات
         run: |
           git config user.name "github-actions[bot]"
@@ -82,11 +117,3 @@ jobs:
             git commit -m "chore(ci): تحديث شارة الاختبارات من التشغيل الفعلي [skip ci]"
             git push
           fi
-
-      - name: Upload coverage HTML
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage-report
-          path: htmlcov/
-          retention-days: 7

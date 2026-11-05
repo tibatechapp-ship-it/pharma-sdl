@@ -1,30 +1,39 @@
-# Pharma SDL v0.14.0 — خدمتان من صورة واحدة + PostgreSQL اختياري (P3):
-#   api       : بوابة المنصة API-First (FastAPI/Uvicorn) — OpenAPI على /docs
+# Pharma SDL v0.17.0 — خدمات المنصة + PostgreSQL الاختياري (P3) بحوكمة نشر صادقة (P16):
+#   api       : بوابة المنصة API-First (FastAPI/Uvicorn) — OpenAPI على /docs (تطوير: sqlite)
 #   dashboard : لوحة Streamlit التعليمية القائمة (تبقى تعمل كما هي)
 #   postgres  : خلفية التخزين الحية (P3) — تُفعَّل بملف التعريف "pg" فقط
+#   api-pg    : نفس بوابة api لكن موصولة فعلياً بـpostgres (P16) — تُصغى مع ملف التعريف "pg"
 #
-# تشغيل:  docker compose up --build
+# تشغيل التطوير:            docker compose up --build
 # مع PostgreSQL الحي (P3):  docker compose --profile pg up --build
+#   ← service api-pg (منفذ 8001) يستخدم postgres فعلياً (STORE=postgres + DSN داخلي + انتظار الجاهزية)،
+#     بينما يبقى api على sqlite للتطوير — لا ادعاء اتصال بلا خدمة (ADR-0008).
 # Boltz-2 (اختياري):  PHARMA_SDL_BOLTZ2_ENDPOINT=https://... docker compose up api
+#
+# مصدر وسم الصورة واحد (P16): PHARMA_SDL_IMAGE_TAG — القيمة الافتراضية تطابق pyproject.toml.
+# الإنتاج (P16): ‏PHARMA_SDL_ENV=production يفرض مفاتيح API — اضبطها قبل الإقلاع وإلا رفض المصنع البدء.
 
 services:
   api:
     build: .
-    image: pharma-sdl:0.5.0
+    image: pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.17.0}
     ports:
       - "8000:8000"
     environment:
       PHARMA_SDL_ENGINE_FALLBACK: "1"
       PHARMA_SDL_BOLTZ2_ENDPOINT: ${PHARMA_SDL_BOLTZ2_ENDPOINT:-}
-      # ── P2: المصادقة ووضع العرض والمهام الدائمة ──
-      # مفاتيح API بصيغة id:key:role — فارغ = وضع مفتوح (تطوير فقط! النشر يستوجب مفاتيح)
+      # ── P2/P16: المصادقة ووضع العرض والمهام الدائمة ──
+      # مفاتيح API بصيغة id:key:role — فارغ = وضع مفتوح (development فقط!
+      # الإنتاج يرفض الإقلاع بلا مفاتيح — بوابة create_app في P16).
+      PHARMA_SDL_ENV: ${PHARMA_SDL_ENV:-development}
       PHARMA_SDL_API_KEYS: ${PHARMA_SDL_API_KEYS:-}
       # وضع العرض العام المحدود: حد معدل + قفل محركات + سقوف أدنى
       PHARMA_SDL_DEMO_MODE: ${PHARMA_SDL_DEMO_MODE:-"0"}
       PHARMA_SDL_RATE_LIMIT: ${PHARMA_SDL_RATE_LIMIT:-"0"}
+      # هل نقف خلف بروكسي موثوق يعيد كتابة X-Forwarded-For؟ (P16 — افتراضياً لا)
+      PHARMA_SDL_TRUST_PROXY: ${PHARMA_SDL_TRUST_PROXY:-"0"}
       # التخزين الدائم: تثبيت مجلد البيانات يحفظ التجارب والمهام عبر إعادة النشر
       PHARMA_SDL_DATA_DIR: /app/data
-      # ── P3: التخزين الحي — يُفعَّل تلقائياً حين تعمل خدمة postgres (ملف التعريف pg) ──
       PHARMA_SDL_STORE: ${PHARMA_SDL_STORE:-sqlite}
       PHARMA_SDL_PG_DSN: ${PHARMA_SDL_PG_DSN:-}
     volumes:
@@ -36,12 +45,47 @@ services:
       retries: 3
     restart: unless-stopped
 
+  api-pg:
+    build: .
+    image: pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.17.0}
+    profiles: ["pg"]
+    ports:
+      - "8001:8000"
+    environment:
+      PHARMA_SDL_ENGINE_FALLBACK: "1"
+      PHARMA_SDL_BOLTZ2_ENDPOINT: ${PHARMA_SDL_BOLTZ2_ENDPOINT:-}
+      PHARMA_SDL_ENV: ${PHARMA_SDL_ENV:-development}
+      PHARMA_SDL_API_KEYS: ${PHARMA_SDL_API_KEYS:-}
+      PHARMA_SDL_DEMO_MODE: ${PHARMA_SDL_DEMO_MODE:-"0"}
+      PHARMA_SDL_RATE_LIMIT: ${PHARMA_SDL_RATE_LIMIT:-"0"}
+      PHARMA_SDL_TRUST_PROXY: ${PHARMA_SDL_TRUST_PROXY:-"0"}
+      PHARMA_SDL_DATA_DIR: /app/data
+      # ── P16: التوصيل الفعلي لا الادعاء — التخزين postgres هنا حصراً ──
+      PHARMA_SDL_STORE: postgres
+      PHARMA_SDL_PG_DSN: postgresql://pharma:${POSTGRES_PASSWORD:-pharma-local-change-me}@postgres:5432/pharma_sdl
+    volumes:
+      - pharma-data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,json;d=json.load(urllib.request.urlopen('http://localhost:8000/api/v1/health'));assert d['store_backend']=='postgres'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
   dashboard:
-    image: pharma-sdl:0.5.0
+    image: pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.17.0}
     build: .
     command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
     ports:
       - "8501:8501"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8501/_stcore/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   postgres:

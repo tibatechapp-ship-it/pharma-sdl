@@ -1,4 +1,5 @@
-# Pharma SDL v0.2.0 — صورة واحدة للمنصة: بوابة API + لوحة Streamlit
+# Pharma SDL v0.17.0 — صورة واحدة للمنصة: بوابة API + لوحة Streamlit
+# (P16: الحاوية تعمل بمستخدم غير root — أي اختراق للحاوية يصطدم بصلاحيات محدودة)
 FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
@@ -17,6 +18,12 @@ COPY core/ ./core/
 COPY pharma_sdl/ ./pharma_sdl/
 COPY data/ ./data/
 COPY app.py ./
+
+# مستخدم تشغيل غير root + ملكية مجلد البيانات الدائم (الأحجام المركبة ترثها)
+RUN useradd --create-home --uid 10001 appuser \
+    && mkdir -p /app/data \
+    && chown -R appuser:appuser /app
+USER appuser
 
 EXPOSE 8000
 

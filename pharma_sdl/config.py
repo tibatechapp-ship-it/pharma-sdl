@@ -2,6 +2,12 @@
 
 كل ما يخص التشغيل (المنفذ، المحرك الافتراضي، السقوف، البوابات الخارجية)
 يمر عبر Settings — لا أرقام سحرية مبعثرة في الكود.
+
+التحصين (P16): قيمة بيئة غير صالحة **توقف الإقلاع برسالة واضحة تسمّي
+المتغير** — التخمين الصامت في الإعدادات الحرجة أخطر من الفشل نفسه
+(مشغّل يظن الحد 100 وهو يعمل بـ30 = حادثة بلا سجل). و`validate()`
+يفحص الحدود المنطقية بعد القراءة — بما فيها: postgres بلا DSN = رفض
+(لا ترقية صامتة)، والإنتاج بلا مفاتيح يُرفض في بوابة التطبيق (app.py).
 """
 
 from __future__ import annotations
@@ -12,12 +18,26 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
+# قيم البيئة المقبولة لـ PHARMA_SDL_ENV — أي شيء آخر يوقف الإقلاع.
+KNOWN_ENVS = frozenset({"development", "production"})
+# قيم الثنائيات المقبولة — خارجها خطأ نشر لا صمت ("1"/"0" وحدها كانت تكفي سابقاً).
+_TRUTHY = frozenset({"1", "true", "yes", "on"})
+_FALSY = frozenset({"0", "false", "no", "off"})
+
 
 def _env_bool(name: str, default: bool) -> bool:
     raw = os.getenv(name)
-    if raw is None:
+    if raw is None or not raw.strip():
         return default
-    return raw.strip().lower() in {"1", "true", "yes", "on"}
+    value = raw.strip().lower()
+    if value in _TRUTHY:
+        return True
+    if value in _FALSY:
+        return False
+    raise ValueError(
+        f"قيمة غير مقبولة لـ {name}: {raw!r} — المقبول: 1/true/yes/on أو 0/false/no/off",
+        f"Invalid value for {name}: {raw!r} — accepted: 1/true/yes/on or 0/false/no/off",
+    )
 
 
 def _env_int(name: str, default: int) -> int:
@@ -26,8 +46,13 @@ def _env_int(name: str, default: int) -> int:
         return default
     try:
         return int(raw.strip())
-    except ValueError:
-        return default
+    except ValueError as exc:
+        raise ValueError(
+            f"قيمة غير رقمية لـ {name}: {raw!r} — أصلحها أو احذف المتغير كلياً "
+            f"لتطابق الافتراضي {default}",
+            f"Non-numeric value for {name}: {raw!r} — fix it or unset it "
+            f"to use the default {default}",
+        ) from exc
 
 
 def _env_float(name: str, default: float) -> float:
@@ -36,8 +61,13 @@ def _env_float(name: str, default: float) -> float:
         return default
     try:
         return float(raw.strip())
-    except ValueError:
-        return default
+    except ValueError as exc:
+        raise ValueError(
+            f"قيمة غير رقمية لـ {name}: {raw!r} — أصلحها أو احذف المتغير كلياً "
+            f"لتطابق الافتراضي {default}",
+            f"Non-numeric value for {name}: {raw!r} — fix it or unset it "
+            f"to use the default {default}",
+        ) from exc
 
 
 def _env_str(name: str, default: str) -> str:
@@ -104,6 +134,13 @@ class Settings:
     instrument_port: int = 10001
     instrument_simulated: bool = True
     instrument_timeout_s: float = 30.0
+    # ── P16: تحصين النشر ──
+    # بيئة التشغيل: development (الافتراضي) أو production — الإنتاج يفرض
+    # مفاتيح API (البوابة ترفض الإقلاع بلاها، app.py) ويُعلن في /health.
+    env: str = "development"
+    # هل نقف خلف بروكسي موثوق يعيد كتابة X-Forwarded-For؟ صادق افتراضياً:
+    # False يقرأ IP المباشر فقط — الترويسة المزوّرة لا تتحايل على حد المعدل.
+    trust_proxy: bool = False
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -160,7 +197,53 @@ class Settings:
             instrument_port=_env_int("PHARMA_SDL_INSTRUMENT_PORT", 10001),
             instrument_simulated=_env_bool("PHARMA_SDL_INSTRUMENT_SIMULATED", True),
             instrument_timeout_s=_env_float("PHARMA_SDL_INSTRUMENT_TIMEOUT", 30.0),
+            env=_env_str("PHARMA_SDL_ENV", "development").lower(),
+            trust_proxy=_env_bool("PHARMA_SDL_TRUST_PROXY", False),
         )
+        settings.validate()
+        return settings
+
+    def validate(self) -> None:
+        """حدود منطقية بعد القراءة — خطأ النشر يظهر عند الإقلاع لا في الإنتاج."""
+        if self.env not in KNOWN_ENVS:
+            raise ValueError(
+                f"PHARMA_SDL_ENV غير معروف: {self.env!r} — المقبول: development/production"
+            )
+        if not 1 <= self.port <= 65535:
+            raise ValueError(f"PHARMA_SDL_PORT خارج المجال (1..65535): {self.port}")
+        if self.max_ligands_per_run < 1:
+            raise ValueError(f"PHARMA_SDL_MAX_LIGANDS يجب أن يكون ≥ 1: {self.max_ligands_per_run}")
+        if self.default_top_n < 1:
+            raise ValueError(f"PHARMA_SDL_TOP_N يجب أن يكون ≥ 1: {self.default_top_n}")
+        if self.rate_limit_per_min < 0:
+            raise ValueError(f"PHARMA_SDL_RATE_LIMIT لا يقبل سالباً: {self.rate_limit_per_min}")
+        if self.job_ttl_seconds < 1:
+            raise ValueError(f"PHARMA_SDL_JOB_TTL يجب أن يكون ≥ 1 ثانية: {self.job_ttl_seconds}")
+        if self.vina_exhaustiveness < 1:
+            raise ValueError(f"PHARMA_SDL_VINA_EXHAUSTIVENESS يجب أن يكون ≥ 1: {self.vina_exhaustiveness}")
+        if self.demo_max_ligands < 1 or self.demo_max_top_n < 1:
+            raise ValueError(
+                "سقوف وضع العرض يجب أن تكون ≥ 1 "
+                f"(ligands={self.demo_max_ligands}, top_n={self.demo_max_top_n})"
+            )
+        if self.store_backend not in {"sqlite", "postgres"}:
+            raise ValueError(
+                f"PHARMA_SDL_STORE غير معروف: {self.store_backend!r} — المقبول: sqlite/postgres"
+            )
+        if self.store_backend == "postgres" and not self.pg_dsn:
+            raise ValueError(
+                "PHARMA_SDL_STORE=postgres يستوجب PHARMA_SDL_PG_DSN صريحاً — "
+                "لا ترقية صامتة ولا ادعاء تخزين بلا خدمة (ADR-0008)"
+            )
+        if self.lims_timeout_s <= 0 or self.lims_poll_interval_s <= 0 or self.lims_max_polls < 1:
+            raise ValueError(
+                "إعدادات LIMS يجب أن تكون موجبة "
+                f"(timeout={self.lims_timeout_s}, poll={self.lims_poll_interval_s}, max_polls={self.lims_max_polls})"
+            )
+        if not 1 <= self.instrument_port <= 65535:
+            raise ValueError(f"PHARMA_SDL_INSTRUMENT_PORT خارج المجال (1..65535): {self.instrument_port}")
+        if self.instrument_timeout_s <= 0:
+            raise ValueError(f"PHARMA_SDL_INSTRUMENT_TIMEOUT يجب أن يكون موجباً: {self.instrument_timeout_s}")
 
 
 _settings: Settings | None = None

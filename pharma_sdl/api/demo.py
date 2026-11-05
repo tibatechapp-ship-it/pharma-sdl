@@ -25,26 +25,50 @@ from pharma_sdl.errors import RateLimitError
 
 
 class TokenBucketLimiter:
-    """دلو رموز لكل هوية (IP) — معدل ثابت، ذاكرة خفيفة، قفل واحد صادق.
+    """دلو رموز لكل هوية (IP) — معدل ثابت، ذاكرة محدودة، قفل واحد صادق.
 
     الساعة قابلة للحقن (clock) — للاختبارات الحتمية بلا انتظار حقيقي.
+    الذاكرة ليست بلا سقف (P16): الهويات ذات الدلو الممتلئ تُنسى بأمان،
+    وسقف صارم يُخلّي الأقدم نشاطاً قبل تجاوزه — التحويل عبر هويات مزيفة
+    يضغط السقف بدل أن يهضم الذاكرة (والاعتماد على IP موثوق في trust_proxy).
     """
 
-    def __init__(self, rate_per_min: int, clock=None) -> None:
+    def __init__(
+        self,
+        rate_per_min: int,
+        clock=None,
+        max_identities: int = 10_000,
+    ) -> None:
         import time as _time
 
         self.rate = max(1, int(rate_per_min))
         self.capacity = float(self.rate)
         self.refill_per_sec = self.rate / 60.0
+        # ثوانٍ حتى امتلاء دلو كامل — ما وراءها نسيان الهوية آمن (حالتها = السعة)
+        self._full_refill_s = self.capacity / self.refill_per_sec
+        self.max_identities = max(1, int(max_identities))
         self._clock = clock or _time.monotonic
         self._tokens: dict[str, float] = {}
         self._updated: dict[str, float] = {}
         self._lock = threading.Lock()
 
+    def _prune(self, now: float) -> None:
+        """تنظيف داخل القفل: المنتهية أولاً، ثم إخلاء الأقدم حتى تحت السقف."""
+        horizon = now - self._full_refill_s
+        stale = [k for k, last in self._updated.items() if last < horizon]
+        for key in stale:
+            self._tokens.pop(key, None)
+            self._updated.pop(key, None)
+        while len(self._updated) >= self.max_identities:
+            oldest = min(self._updated, key=self._updated.__getitem__)
+            self._tokens.pop(oldest, None)
+            self._updated.pop(oldest, None)
+
     def allow(self, identity: str) -> tuple[bool, int, int]:
         """(مسموح؟، رموز متبقية، ثوانٍ حتى إعادة ملء كاملة)."""
         now = self._clock()
         with self._lock:
+            self._prune(now)
             tokens = self._tokens.get(identity, self.capacity)
             last = self._updated.get(identity, now)
             tokens = min(self.capacity, tokens + (now - last) * self.refill_per_sec)
@@ -83,10 +107,18 @@ def reset_limiter() -> None:
 
 
 def _identity(request: Request) -> str:
-    """هوية المتصل — IP المباشر (خلف بروكسي معروف يُقرأ X-Forwarded-For الأول)."""
-    fwd = request.headers.get("x-forwarded-for")
-    if fwd:
-        return fwd.split(",")[0].strip()
+    """هوية المتصل — IP المباشر حصراً افتراضياً.
+
+    X-Forwarded-For لا يُقرأ إلا خلف بروكسي موثوق (PHARMA_SDL_TRUST_PROXY=1)
+    يعيد كتابة الترويسة بنفسه — وإلا فأي عميل يستطيع تزويرها لتجاوز الحد
+    بهوية جديدة لكل طلب. هذا الترتيب هو النموذج الموثق في ADR-0016.
+    """
+    from pharma_sdl.api.deps import app_settings
+
+    if app_settings().trust_proxy:
+        fwd = request.headers.get("x-forwarded-for")
+        if fwd:
+            return fwd.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
 
 

@@ -63,8 +63,18 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app() -> FastAPI:
-    """مصنع التطبيق — يعيد نسخة جديدة كاملة (صديقة للاختبارات والتشغيل المتعدد)."""
+    """مصنع التطبيق — يعيد نسخة جديدة كاملة (صديقة للاختبارات والتشغيل المتعدد).
+
+    بوابة الإنتاج (P16): ‏PHARMA_SDL_ENV=production بلا مفاتيح API = رفض
+    إقلاع صريح — الوضع المفتوح حق محجوز للتطوير المحلي لا للنشر العام.
+    """
     settings = app_settings()
+    if settings.env == "production" and not settings.api_keys.strip():
+        raise RuntimeError(
+            "رفض إقلاع: PHARMA_SDL_ENV=production يفرض مفاتيح API — "
+            "اضبط PHARMA_SDL_API_KEYS بصيغة id:key:role (مفصولة بفواصل) "
+            "أو أعد PHARMA_SDL_ENV=development للتطوير المحلي حصراً"
+        )
     app = FastAPI(
         title="Pharma SDL Platform API",
         version=__version__,
