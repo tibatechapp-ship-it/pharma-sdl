@@ -1,0 +1,250 @@
+{
+  "phase": "P15 — global health integration (Ersilia: malaria + tuberculosis)",
+  "frozen_at_utc": "2026-11-05T00:26:11+00:00",
+  "protocol": {
+    "client_contract": "POST {base}/run body=[{input: <smiles>}] — ersilia/serve/standard_api.py",
+    "degradation": "network/server failure → None → status unavailable_offline (never fabricated)",
+    "funnel": "stage1 pathogen score → stage2 ADMET gate (hERG + logS) → stage3 wet lab (MIC/PK-PD)"
+  },
+  "verification_evidence": {
+    "eos4zfy": {
+      "title": "maip-malaria",
+      "source": "https://github.com/ersilia-os/eos4zfy",
+      "verified_at": "2026-11-05",
+      "output_columns": [
+        {
+          "name": "maip_score",
+          "type": "float",
+          "direction": "high",
+          "description": "Score of the antimalarial potential of small molecules against the blood stage of Plasmodium falciparum"
+        }
+      ],
+      "license": {
+        "package": "GPL-3.0",
+        "model": "MIT"
+      },
+      "provenance": "surrogate of MAIP (Bosc et al. 2021) — blood-stage antimalarial activity",
+      "our_endpoint": "maip_score",
+      "our_verdict_thresholds": {
+        "MAIP_STRONG": 2.0,
+        "MAIP_ACTIVE": 0.0,
+        "note": "educational convention declared by us — the platform is best used for ranking"
+      }
+    },
+    "eos8d8a": {
+      "title": "Mycobacterium tuberculosis membrane permeability of drugs",
+      "source": "https://github.com/ersilia-os/eos8d8a",
+      "verified_at": "2026-11-05",
+      "output_columns": [
+        {
+          "name": "mycpermcheck",
+          "type": "float",
+          "direction": "high",
+          "description": "Probability of permeability in Mtb"
+        }
+      ],
+      "license": {
+        "package": "GPL-3.0",
+        "model": "MIT"
+      },
+      "provenance": "MycPermCheck — trained on compounds active against M.tb (MIC < 10 uM, MW < 500 Da)",
+      "our_endpoint": "mtb_permeability_prob",
+      "our_verdict_thresholds": {
+        "PERM_GOOD": 0.6,
+        "PERM_BAD": 0.4,
+        "note": "probability in [0,1]; grey zone declares generalization limits"
+      }
+    },
+    "eos2ta5": {
+      "title": "CardioToxNet-hERG",
+      "source": "https://github.com/ersilia-os/eos2ta5",
+      "verified_at": "2026-10-29 (original P5 verification)",
+      "output_columns": [
+        {
+          "name": "score",
+          "type": "float",
+          "direction": "high"
+        }
+      ],
+      "license": {
+        "package": "GPL-3.0",
+        "model": "MIT"
+      },
+      "provenance": "hERG blockade probability (12,620 compounds)",
+      "our_endpoint": "hERG_blockade_prob"
+    },
+    "eos6oli": {
+      "title": "SolTranNet",
+      "source": "https://github.com/ersilia-os/eos6oli",
+      "verified_at": "2026-10-29 (original P5 verification)",
+      "output_columns": [
+        {
+          "name": "value",
+          "type": "float",
+          "direction": "high"
+        }
+      ],
+      "license": {
+        "package": "GPL-3.0",
+        "model": "MIT"
+      },
+      "provenance": "aqueous solubility logS (AqSolDB)",
+      "our_endpoint": "logS_mol_per_L"
+    }
+  },
+  "who_burden": {
+    "malaria": {
+      "cases": "263 مليون",
+      "deaths": "597 ألف",
+      "year": "2023",
+      "source_ar": "تقرير الملاريا العالمي 2024 (منظمة الصحة العالمية)",
+      "source_en": "World Malaria Report 2024 (WHO)",
+      "note_ar": "نحو 11 مليون حالة أكثر من 2022 — التقدم توقف والفجوة التمويلية تتسع.",
+      "note_en": "About 11 million more cases than 2022 — progress has stalled and the funding gap widens."
+    },
+    "tuberculosis": {
+      "cases": "10.8 مليون",
+      "deaths": "1.25 مليون",
+      "year": "2023",
+      "source_ar": "التقرير العالمي عن السل 2024 (منظمة الصحة العالمية)",
+      "source_en": "Global Tuberculosis Report 2024 (WHO)",
+      "note_ar": "عاد عام 2023 القاتل المعدني الأول عالمياً متجاوزاً كوفيد-19.",
+      "note_en": "In 2023 it returned to being the world's leading infectious killer, surpassing COVID-19."
+    }
+  },
+  "panel_checks": {
+    "tolerance_mw": 0.5,
+    "all_pass": true,
+    "checks": [
+      {
+        "label": "أرتيميسينين — أساس علاج الملاريا (CID 68827)",
+        "smiles": "C[C@@H]1CC[C@H]2[C@H](C(=O)O[C@H]3[C@@]24[C@H]1CC[C@](O3)(OO4)C)C",
+        "parses": true,
+        "mw_computed": 282.34,
+        "mw_reference": 282.33,
+        "ok": true
+      },
+      {
+        "label": "كلوروكين — نشط تاريخياً (مقاومة) (CID 2726)",
+        "smiles": "CCN(CC)CCCC(C)NC1=C2C=CC(=CC2=NC=C1)Cl",
+        "parses": true,
+        "mw_computed": 319.88,
+        "mw_reference": 319.9,
+        "ok": true
+      },
+      {
+        "label": "باراسيتامول — مرجعية سالبة (لا مضاد للملاريا) (CID 1983)",
+        "smiles": "CC(=O)NC1=CC=C(C=C1)O",
+        "parses": true,
+        "mw_computed": 151.16,
+        "mw_reference": 151.16,
+        "ok": true
+      },
+      {
+        "label": "إيزونيازيد — أول خط لعلاج السل (CID 3767)",
+        "smiles": "C1=CN=CC=C1C(=O)NN",
+        "parses": true,
+        "mw_computed": 137.14,
+        "mw_reference": 137.14,
+        "ok": true
+      },
+      {
+        "label": "بيرازيناميد — أول خط لعلاج السل (CID 1042)",
+        "smiles": "C1=CN=C(C=N1)C(=O)N",
+        "parses": true,
+        "mw_computed": 123.11,
+        "mw_reference": 123.11,
+        "ok": true
+      }
+    ]
+  },
+  "live_status": {
+    "malaria": {
+      "model_id": "eos4zfy",
+      "status": "unavailable_offline",
+      "rows": [
+        {
+          "smiles": "C[C@@H]1CC[C@H]2[C@H](C(=O)O[C@H]3[C@@]24[C@H]1CC[C@](O3)(OO4)C)C",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        },
+        {
+          "smiles": "CCN(CC)CCCC(C)NC1=C2C=CC(=CC2=NC=C1)Cl",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        },
+        {
+          "smiles": "CC(=O)NC1=CC=C(C=C1)O",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        },
+        {
+          "smiles": "C1=CN=CC=C1C(=O)NN",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        },
+        {
+          "smiles": "C1=CN=C(C=N1)C(=O)N",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        }
+      ]
+    },
+    "tuberculosis": {
+      "model_id": "eos8d8a",
+      "status": "unavailable_offline",
+      "rows": [
+        {
+          "smiles": "C[C@@H]1CC[C@H]2[C@H](C(=O)O[C@H]3[C@@]24[C@H]1CC[C@](O3)(OO4)C)C",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        },
+        {
+          "smiles": "CCN(CC)CCCC(C)NC1=C2C=CC(=CC2=NC=C1)Cl",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        },
+        {
+          "smiles": "CC(=O)NC1=CC=C(C=C1)O",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        },
+        {
+          "smiles": "C1=CN=CC=C1C(=O)NN",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        },
+        {
+          "smiles": "C1=CN=C(C=N1)C(=O)N",
+          "value": null,
+          "status": "unavailable_offline",
+          "verdict_ar": "خادم Ersilia غير متاح — لا قيمة مختلقة",
+          "verdict_en": "Ersilia server unavailable — no fabricated value"
+        }
+      ]
+    }
+  },
+  "environment": {
+    "python": "3.12.16",
+    "platform": "Linux-5.10.134-013.15.kangaroo.al8.x86_64-x86_64-with-glibc2.41",
+    "ersilia_base": "http://localhost:7860"
+  }
+}

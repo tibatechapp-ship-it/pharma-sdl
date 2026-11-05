@@ -152,6 +152,7 @@ g_labs = st.tabs([
     "🎯 PROTAC Lab",
     "🧫 CYP2C19",
     t(LANG, "tab_pgx"),
+    t(LANG, "tab_global"),
 ])
 
 st.caption(t(LANG, "group_tools"))
@@ -173,6 +174,7 @@ g_reports = st.tabs([
 #   4 MIC→labs[0] · 5 PROTAC Lab→labs[1] · 6 PubChem→tools[0] · 7 CYP→labs[2]
 #   8 Predict→tools[1] · 9 Capstone→reports[0] · 10 Docking→tools[2]
 #  11 PGx→labs[3] · 12 ADMET→reports[1] · 13 Classes (ATC/S10)→reports[2]
+#  + P15: Global Health→labs[4]
 
 # ═══ Tab 0: Make ═══
 with g_pipeline[0]:
@@ -1077,6 +1079,124 @@ with g_labs[3]:
         st.warning(DISCLAIMER_AR if LANG == "ar" else DISCLAIMER_EN)
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في PGx: {e}")
+
+
+# ═══ Tab: Global Health (P15) ═══
+with g_labs[4]:
+    st.subheader(t(LANG, "gh_title"))
+    st.caption(t(LANG, "gh_caption"))
+    try:
+        from core import global_health as gh
+        from core.clients import ersilia_client as ers
+
+        card_opts = {
+            (c.name_ar if LANG == "ar" else c.name_en): pid
+            for pid, c in gh.PATHOGENS.items()
+        }
+        card_label = st.selectbox(
+            t(LANG, "gh_pathogen"), list(card_opts), key="gh_pathogen"
+        )
+        card = gh.PATHOGENS[card_opts[card_label]]
+        model = ers.MODELS[card.model_id]
+
+        st.info(
+            t(LANG, "gh_burden").format(
+                year=card.who_year,
+                cases=card.who_cases,
+                deaths=card.who_deaths,
+                source=(card.who_source_ar if LANG == "ar" else card.who_source_en),
+            ),
+            icon="🌍",
+        )
+
+        with st.expander(t(LANG, "gh_lesson_title"), expanded=False):
+            st.markdown(gh.trust_lesson(LANG))
+        with st.expander(
+            f"🧬 {t(LANG, 'gh_model_card')} — {card.model_id}", expanded=False
+        ):
+            st.markdown(
+                f"- **{t(LANG, 'gh_pathogen')}:** "
+                f"{card.agent_ar if LANG == 'ar' else card.agent_en}\n"
+                f"- **{model.endpoint}:** `{card.endpoint}` — "
+                f"{model.unit_ar if LANG == 'ar' else model.unit_en}\n"
+                f"- **License:** GPL-3.0 (package) · MIT (model)"
+            )
+
+        if "gh_input" not in st.session_state:
+            st.session_state["gh_input"] = "\n".join(gh.GLOBAL_PRESETS.values())
+        if st.button(t(LANG, "gh_preset"), key="gh_fill"):
+            st.session_state["gh_input"] = "\n".join(gh.GLOBAL_PRESETS.values())
+        gh_smi_text = st.text_area(t(LANG, "gh_input"), key="gh_input", height=140)
+
+        if st.button(t(LANG, "gh_btn"), type="primary", key="gh_btn"):
+            gh_raw = [s.strip() for s in gh_smi_text.splitlines() if s.strip()]
+            gh_valid: list[str] = []
+            gh_invalid: list[str] = []
+            if HAS_RDKIT:
+                from rdkit import Chem
+
+                for s in gh_raw:
+                    if Chem.MolFromSmiles(s) is not None:
+                        gh_valid.append(s)
+                    else:
+                        gh_invalid.append(s)
+            else:
+                gh_valid = gh_raw
+            if gh_invalid:
+                st.warning(
+                    t(LANG, "gh_invalid").format(bad=", ".join(gh_invalid[:3]))
+                )
+            if not gh_valid:
+                st.info(t(LANG, "gh_empty"))
+            else:
+                # تدقيق UX (P-2): النتائج تبقى بعد أي إعادة رسم
+                st.session_state["gh_rows"] = [
+                    gh.assess_candidate(s, card.pathogen_id) for s in gh_valid
+                ]
+
+        if "gh_rows" in st.session_state:
+            gh_rows = st.session_state["gh_rows"]
+            gh_live = [r for r in gh_rows if r.status == "live"]
+            if not gh_live:
+                st.info(t(LANG, "gh_no_server"))
+                with st.expander(t(LANG, "gh_server_hint"), expanded=False):
+                    st.text(
+                        ers.SERVER_HINT_AR if LANG == "ar" else ers.SERVER_HINT_EN
+                    )
+                st.markdown(f"#### {t(LANG, 'gh_ref_title')}")
+                st.dataframe(
+                    pd.DataFrame(ers.fallback_reference_df(card.model_id, LANG)),
+                    hide_index=True,
+                    width="stretch",
+                )
+            st.markdown(f"#### {t(LANG, 'gh_table_title')}")
+            st.dataframe(
+                pd.DataFrame(gh.panel_df(gh_rows, LANG)),
+                hide_index=True,
+                width="stretch",
+            )
+
+            # ── القمع: نشاط الممرض + بوابة ADMET الحية من نفس الخادم ──
+            gh_verdicts = []
+            for r in gh_rows:
+                herg_v = logs_v = None
+                if r.status == "live":
+                    h = ers.predict_admet(r.smiles, "eos2ta5")
+                    herg_v = h.value if h else None
+                    l = ers.predict_admet(r.smiles, "eos6oli")
+                    logs_v = l.value if l else None
+                gh_verdicts.append(
+                    gh.funnel_decision(card.pathogen_id, r.value, herg_v, logs_v)
+                )
+            st.markdown(f"#### {t(LANG, 'gh_funnel_title')}")
+            st.caption(t(LANG, "gh_funnel_caption"))
+            st.dataframe(
+                pd.DataFrame(gh.funnel_df(gh_verdicts, LANG)),
+                hide_index=True,
+                width="stretch",
+            )
+    except Exception as e:  # noqa: BLE001
+        st.error(f"خطأ في الصحة العالمية: {e}")
 
 
 def _ersilia_cached(smiles_tuple: tuple[str, ...], model_id: str) -> list:

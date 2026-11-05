@@ -10,6 +10,15 @@ docs/INTEGRATION-ROADMAP.md: «لا تبنِ إنتاجاً قبل خطوة تح
            من غير الذائبة في تحدي التنبؤ بالذوبانية)
 كلاهما Status: Ready، Deployment: Local (خادم محلي عبر `ersilia serve`).
 
+خطوة التحقق الثانية (P15 — 2026-11-05، مستودعات ersilia-os الرسمية):
+- eos4zfy  MAIP            Output: ["maip_score"] درجة النشاط ضد المرحلة
+           الدموية من Plasmodium falciparum (مكافئ منصة MAIP، Bosc et al.
+           2021) — float باتجاه high، المقياس غير محدود (درجة ترتيبية)
+- eos8d8a  MycPermCheck    Output: ["mycpermcheck"] احتمال نفاذية غلاف
+           M. tuberculosis الخلوي — float في [0,1] باتجاه high، مُدرَّب
+           على مركبات نشطة (MIC < 10 µM، MW < 500)
+كلاهما License: الحزمة GPL-3.0 والنموذج MIT — نفس عقد النداء أدناه.
+
 عقد النداء الموثَّق من ersilia/serve/standard_api.py (فرع master):
     POST {base}/run   body: [{"input": "<smiles>"}, ...]
     الاستجابة: [{"input": "<smiles>", "<output_col>": value}, ...]
@@ -78,6 +87,34 @@ MODELS: dict[str, ErsiliaModel] = {
         unit_en="mol/L (log scale)",
         low_good=False,
     ),
+    "eos4zfy": ErsiliaModel(
+        model_id="eos4zfy",
+        name_ar="النشاط المضاد للملاريا (MAIP)",
+        name_en="Antimalarial activity (MAIP)",
+        endpoint="maip_score",
+        endpoint_ar=(
+            "درجة النشاط ضد المرحلة الدموية من Plasmodium falciparum"
+        ),
+        endpoint_en=(
+            "Blood-stage P. falciparum activity score"
+        ),
+        column_hint="maip_score",
+        unit_ar="درجة غير محدودة (ترتيبية — الأعلى أنشط)",
+        unit_en="unbounded score (higher = more predicted activity)",
+        low_good=False,
+    ),
+    "eos8d8a": ErsiliaModel(
+        model_id="eos8d8a",
+        name_ar="نفاذية غلاف M. tuberculosis (MycPermCheck)",
+        name_en="M. tuberculosis permeability (MycPermCheck)",
+        endpoint="mtb_permeability_prob",
+        endpoint_ar="احتمال اختراق غلاف M. tuberculosis الخلوي",
+        endpoint_en="Probability of crossing the Mtb cell envelope",
+        column_hint="mycpermcheck",
+        unit_ar="احتمال بين 0 و 1",
+        unit_en="probability in [0, 1]",
+        low_good=False,
+    ),
 }
 
 
@@ -100,6 +137,12 @@ class AdmetRow:
 # حدود الأحكام إرشادية تعليمية (وليست عتبات تنظيمية) — موثّقة في وضع الدرس
 HERG_LOW, HERG_HIGH = 0.1, 0.3
 SOL_GOOD, SOL_BAD = -2.0, -4.0
+# عتبتا MAIP (eos4zfy): الدرجة غير محدودة، فالعتبتين اتفاق تعليمي معلن
+# ليسان من الورقة الأصلية — الاستخدام الأصح ترتيبي لا قطعي
+MAIP_STRONG, MAIP_ACTIVE = 2.0, 0.0
+# عتبتا MycPermCheck (eos8d8a): احتمال في [0,1] — عتبة 0.5 طبيعية
+# للتصنيف الاحتمالي، والنطاق الرمادي يقرّ بحدود التعميم
+PERM_GOOD, PERM_BAD = 0.6, 0.4
 
 
 def verdict(model_id: str, value: float, lang: str = "ar") -> str:
@@ -117,6 +160,18 @@ def verdict(model_id: str, value: float, lang: str = "ar") -> str:
         if value >= SOL_BAD:
             return "ذوبان متوسط" if ar else "Moderate solubility"
         return "ذوبان ضعيف — عقبة تطوير" if ar else "Poor solubility — development risk"
+    if model_id == "eos4zfy":
+        if value > MAIP_STRONG:
+            return "مرشح قوي — رتّبه في المقدمة" if ar else "Strong candidate — rank it high"
+        if value >= MAIP_ACTIVE:
+            return "منطقة رمادية — قارن بالترتيب النسبي" if ar else "Grey zone — compare by ranking"
+        return "نشاط متوقع ضعيف" if ar else "Weak predicted activity"
+    if model_id == "eos8d8a":
+        if value > PERM_GOOD:
+            return "نفاذية متوقعة" if ar else "Predicted permeable"
+        if value >= PERM_BAD:
+            return "منطقة رمادية — تحقق تجريبياً" if ar else "Grey zone — verify experimentally"
+        return "نفاذية ضعيفة متوقعة" if ar else "Weak permeability predicted"
     raise ValueError(f"unknown model_id: {model_id}")
 
 
@@ -138,7 +193,62 @@ class ReferenceRow:
 
 # قيم/أحكام موثّقة من الأدبيات: تيرفينادين وسيزابريد سُحِبا/قيّدا بسبب
 # إطالة QT عبر hERG؛ الإيتراكونازول عملياً غير ذائب؛ الباراسيتامول جيد الذوبان.
+# أمثلة P15 (نمط الوثيقة نفسه: أحكام فئوية من أدبيات معروفة، بلا أرقام مزيفة)
+# eos4zfy: الأرتيميسينين (نوبل 2015، أساس ACT) والكلوروكين (المقاومة درس الأشهر)
+# eos8d8a: الإيزونيازيد (أساس العلاج منذ 1952) والدابتومايسين (خارج مجال MW<500)
 FALLBACK_REFERENCE: dict[str, list[ReferenceRow]] = {
+    "eos4zfy": [
+        ReferenceRow(
+            "الأرتيميسينين", "Artemisinin",
+            "نشط — أساس العلاج", "Active — first-line backbone",
+            "من عشبة الأفسنتين الصينية، جائزة نوبل 2015، وأساس المعالجة التركيبية ACT ضد الملاريا.",
+            "From sweet wormwood; Nobel Prize 2015; the backbone of ACT therapy against malaria.",
+        ),
+        ReferenceRow(
+            "الكلوروكين", "Chloroquine",
+            "نشط تاريخياً — مقاومة واسعة", "Historically active — widespread resistance",
+            "أول علاج فموي واسع للملاريا؛ أخرجته المقاومة من الخط الأول في معظم المناطق — درس كيف تفقد الأدوية فعاليتها.",
+            "The first broad oral antimalarial; resistance removed it from first line in most regions — the classic lesson of a lost drug.",
+        ),
+        ReferenceRow(
+            "الباراسيتامول", "Paracetamol",
+            "غير مضاد للملاريا", "Not antimalarial",
+            "يُستخدم لتخفيف حمى الملاريا لكنه لا يقتل الطفيل — مرجعية سالبة مفيدة.",
+            "Used to relieve malaria fever but kills no parasite — a useful negative control.",
+        ),
+        ReferenceRow(
+            "الإيزونيازيد", "Isoniazid",
+            "دواء سل لا ملاريا", "A TB drug, not antimalarial",
+            "تخصص المضادات الجرثومية مرتبط بالكائن المستهدف؛ نموذج الملاريا يجب أن يمنحه درجة منخفضة.",
+            "Antimicrobial specificity is organism-bound; an antimalarial model should score it low.",
+        ),
+    ],
+    "eos8d8a": [
+        ReferenceRow(
+            "الإيزونيازيد", "Isoniazid",
+            "نفاذية متوقعة — أول خط", "Predicted permeable — first line",
+            "يعبر غلاف M. tuberculosis ويُفعّل داخلياً بإنزيم KatG — حجر أساس علاج السل منذ 1952.",
+            "Crosses the Mtb envelope and is activated inside by KatG — the TB backbone since 1952.",
+        ),
+        ReferenceRow(
+            "البيرازيناميد", "Pyrazinamide",
+            "فعّال داخل الوسط الحامضي", "Effective in acidic milieu",
+            "يهاجم العصيات الكامنة داخل الوسائط الحامضية للحبيبات — لا يعمل تقريباً إلا داخل الخلية.",
+            "Attacks persistent bacilli inside the acidic granuloma milieu — almost inactive outside the cell.",
+        ),
+        ReferenceRow(
+            "البيداكيلين", "Bedaquiline",
+            "دواء جيل جديد", "New-generation drug",
+            "أول دواء بآلية جديدة للسل المقاوم (ATP synthase) في أكثر من 40 عاماً (2012).",
+            "First new-mechanism TB drug in over 40 years (ATP synthase, 2012), for resistant TB.",
+        ),
+        ReferenceRow(
+            "الدابتومايسين", "Daptomycin",
+            "خارج مجال النموذج", "Outside model domain",
+            "جزيء شحومي ضخم (‏MW > 1600) والنموذج بُني على MW < 500 — حكمه هنا بلا معنى (درس حدود التعميم).",
+            "A huge lipopeptide (MW > 1600) while the model was built on MW < 500 — its verdict is meaningless here (domain limits).",
+        ),
+    ],
     "eos2ta5": [
         ReferenceRow(
             "تيرفينادين", "Terfenadine",

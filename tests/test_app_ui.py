@@ -32,8 +32,9 @@ def test_boot_without_exception(at):
     assert not at.exception, f"boot exception: {at.exception}"
 
 
-def test_fourteen_tabs(at):
-    assert len(at.tabs) == 14
+def test_fifteen_tabs(at):
+    """14 تبويباً + الصحة العالمية (P15) = 15."""
+    assert len(at.tabs) == 15
 
 
 def test_sidebar_language_switcher_defaults_to_arabic(at):

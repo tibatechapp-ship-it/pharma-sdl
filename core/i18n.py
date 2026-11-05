@@ -124,6 +124,37 @@ STRINGS: dict[str, dict[str, str]] = {
         "admetai_family_filter": "تصفية بالعائلة",
         "admetai_family_all": "الكل",
         "admetai_physchem_title": "🧮 الوصفات الفيزيوكيميائية (من الحزمة نفسها)",
+        # ── الصحة العالمية (P15) ──
+        "tab_global": "🌍 الصحة العالمية",
+        "gh_title": "🌍 الصحة العالمية — نماذج مفتوحة للأمراض المهملة",
+        "gh_caption": (
+            "مرضان يهملهما السوق وتحملهما المنصات المفتوحة: الملاريا (نموذج MAIP "
+            "eos4zfy — درجة النشاط ضد المرحلة الدموية) والسل (MycPermCheck "
+            "eos8d8a — احتمال اختراق الغلاف الشمعي للعصية). القمع ثلاثي المراحل: "
+            "درجة المرضى ← بوابة ADMET ← المختبر الرطب. كل قيمة حية من خادم "
+            "Ersilia، وغيابه لا يولّد أي رقم مختلق أبداً."
+        ),
+        "gh_pathogen": "الممرض",
+        "gh_input": "الجزيئات — SMILES واحد في كل سطر",
+        "gh_preset": "اللوحة المرجعية (5 جزيئات موثّقة من PubChem)",
+        "gh_btn": "🌍 قيّم ضد الممرض",
+        "gh_funnel_title": "⚖️ قرار القمع — ما التالي؟",
+        "gh_lesson_title": "📖 وضع الدرس — لماذا الصحة العالمية؟",
+        "gh_table_title": "🧾 النتائج — 🌐 Ersilia حي",
+        "gh_no_server": (
+            "لم يصل ردّ من خادم Ersilia — تُعرض مرجعية تعليمية مدمجة موثّقة "
+            "بدل تنبؤات، ولا يُعاد تقدير قيم من خارج النموذج."
+        ),
+        "gh_server_hint": "كيف أشغّل خادم Ersilia؟",
+        "gh_ref_title": "📚 مرجعية مدمجة — أحكام موثّقة من الأدبيات",
+        "gh_burden": "العبء العالمي ({year}): {cases} حالة و{deaths} وفاة — {source}",
+        "gh_invalid": "أجزاء غير صالحة استُبعدت: {bad}",
+        "gh_empty": "أدخل SMILES صالحاً واحداً على الأقل.",
+        "gh_funnel_caption": (
+            "القرار مبني على القيم الحية للمرحلتين الأوليين (النشاط ضد الممرض "
+            "+ hERG/الذوبان) — القيم الغائبة توقف القمع بصدق ولا تُخمَّن."
+        ),
+        "gh_model_card": "بطاقة النموذج",
         # ── التصنيف الدوائي (S10) ──
         "tab_classes": "🗂️ التصنيف الدوائي",
         "cls_title": "🗂️ دليل المجموعات الدوائية — المعيار العالمي ATC",
@@ -408,6 +439,39 @@ STRINGS: dict[str, dict[str, str]] = {
         "admetai_family_filter": "Filter by family",
         "admetai_family_all": "All",
         "admetai_physchem_title": "🧮 Physicochemical descriptors (from the same package)",
+        # ── Global health (P15) ──
+        "tab_global": "🌍 Global Health",
+        "gh_title": "🌍 Global Health — open models for neglected diseases",
+        "gh_caption": (
+            "Two diseases neglected by the market, carried by open platforms: "
+            "malaria (MAIP eos4zfy — blood-stage activity score) and tuberculosis "
+            "(MycPermCheck eos8d8a — probability of crossing the waxy mycobacterial "
+            "envelope). The three-stage funnel: pathogen score ← ADMET gate ← wet "
+            "lab. Every live value comes from a local Ersilia server; its absence "
+            "never fabricates a number."
+        ),
+        "gh_pathogen": "Pathogen",
+        "gh_input": "Molecules — one SMILES per line",
+        "gh_preset": "Reference panel (5 molecules documented via PubChem)",
+        "gh_btn": "🌍 Assess against pathogen",
+        "gh_funnel_title": "⚖️ Funnel decision — what's next?",
+        "gh_lesson_title": "📖 Lesson mode — why global health?",
+        "gh_table_title": "🧾 Results — 🌐 live Ersilia",
+        "gh_no_server": (
+            "No response from the Ersilia server — a documented built-in "
+            "educational reference is shown instead; no out-of-model estimates."
+        ),
+        "gh_server_hint": "How to run the Ersilia server?",
+        "gh_ref_title": "📚 Built-in reference — verdicts documented from the literature",
+        "gh_burden": "Global burden ({year}): {cases} cases and {deaths} deaths — {source}",
+        "gh_invalid": "Invalid parts excluded: {bad}",
+        "gh_empty": "Enter at least one valid SMILES.",
+        "gh_funnel_caption": (
+            "The decision uses live values of the first two stages (pathogen "
+            "activity + hERG/solubility) — missing values stop the funnel "
+            "honestly and are never guessed."
+        ),
+        "gh_model_card": "Model card",
         # ── Drug classification (S10) ──
         "tab_classes": "🗂️ Drug Classes",
         "cls_title": "🗂️ Drug class guide — the global ATC standard",
