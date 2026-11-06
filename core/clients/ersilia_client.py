@@ -245,7 +245,7 @@ FALLBACK_REFERENCE: dict[str, list[ReferenceRow]] = {
         ReferenceRow(
             "الدابتومايسين", "Daptomycin",
             "خارج مجال النموذج", "Outside model domain",
-            "جزيء شحومي ضخم (‏MW > 1600) والنموذج بُني على MW < 500 — حكمه هنا بلا معنى (درس حدود التعميم).",
+            "جزيء شحومي ضخم (MW > 1600) والنموذج بُني على MW < 500 — حكمه هنا بلا معنى (درس حدود التعميم).",
             "A huge lipopeptide (MW > 1600) while the model was built on MW < 500 — its verdict is meaningless here (domain limits).",
         ),
     ],

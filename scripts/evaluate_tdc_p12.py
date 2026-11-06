@@ -35,7 +35,7 @@ import importlib.metadata as im
 import json
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
@@ -110,7 +110,7 @@ def env_report() -> dict:
     for p in pkgs:
         try:
             versions[p] = im.version(p)
-        except Exception:
+        except Exception:  # noqa: BLE001 — البيانات الوصفية تتسامح مع حزم غير متاحة
             versions[p] = "غير متوفر"
     return {"python": sys.version.split()[0], **versions}
 
@@ -186,9 +186,9 @@ def run_task(group, task: str, spec: dict, arm: str) -> dict:
         ss_tot = float(np.sum((test_y - test_y.mean()) ** 2))
         per_seed.append({
             "seed": seed,
-            "n_train": int(len(train)) - n_tr_fail,
+            "n_train": len(train) - n_tr_fail,
             "n_train_dropped_unparseable": int(n_tr_fail),
-            "n_test": int(len(test)),
+            "n_test": len(test),
             "n_test_dropped_unparseable_imputed": int(n_te_fail),
             "mae": round(mae, 4),
             "r2": round(1.0 - ss_res / ss_tot, 4),
@@ -223,8 +223,8 @@ def run_task(group, task: str, spec: dict, arm: str) -> dict:
         "label": spec["label"],
         "unit": spec["unit"],
         "n_total": spec["n_total"],
-        "n_train_val": int(len(train_val)),
-        "n_test": int(len(test)),
+        "n_train_val": len(train_val),
+        "n_test": len(test),
         "metric": "MAE",
         "our_mae_mean": round(official_mae, 4),
         "our_mae_std": round(official_std, 4),
@@ -267,11 +267,11 @@ def main() -> int:
     if out_path.exists():
         try:
             out = json.loads(out_path.read_text(encoding="utf-8"))
-        except Exception:
+        except Exception:  # noqa: BLE001 — استئناف تقييم متسامح: ملف تالف يعني البدء من جديد
             out = {}
     out.setdefault("tasks", {})
     out["phase"] = "P12 — Lab07: القياس الخارجي الرسمي (TDC admet_group)"
-    out["generated_utc"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    out["generated_utc"] = datetime.now(UTC).isoformat(timespec="seconds")
     out["what_is_measured"] = (
         "خط أنابيب v0.12.0 المعتمد (Morgan تكرارات 2048 + RF300, "
         "max_features=0.3) بوصفه فئة خطوط انحدار SMILES→قيمة على مرجع "

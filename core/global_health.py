@@ -127,7 +127,7 @@ PATHOGEN_FUNNEL: tuple[FunnelStage, ...] = (
         3,
         "المختبر الرطب — MIC ثم PK/PD",
         "Wet lab — MIC then PK/PD",
-        "مختبر MIC في تبويب MIC Lab: ‏Cmax/MIC وfT>MIC وAUC/MIC",
+        "مختبر MIC في تبويب MIC Lab: Cmax/MIC وfT>MIC وAUC/MIC",
         "MIC Lab tab: Cmax/MIC, fT>MIC and AUC/MIC indices",
         "أيام إلى أسابيع — التجربة الحقيقية تحكم",
         "Days to weeks — the real experiment decides",

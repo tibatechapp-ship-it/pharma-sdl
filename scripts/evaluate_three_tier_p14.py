@@ -36,7 +36,7 @@ sys.path.insert(0, str(REPO))
 from rdkit import Chem, DataStructs, RDLogger
 from rdkit.Chem import AllChem
 
-from core.clients.boltz2_client import Boltz2Client, MANIFEST_SCHEMA
+from core.clients.boltz2_client import MANIFEST_SCHEMA, Boltz2Client
 from core.docking import HAS_MEEKO, HAS_VINA
 from core.ml_potency import train_default_model
 from core.three_tier import TierPanelEntry, build_panel
@@ -150,7 +150,7 @@ def main() -> int:
 
     # الطبقة 1: النموذج الافتراضي المعتمد (بذرة ثابتة)
     model = train_default_model(random_state=42)
-    print(f"[1/3] نموذج ML v0.12.0 مدرَّب (n=900، بذرة 42)")
+    print("[1/3] نموذج ML v0.12.0 مدرَّب (n=900، بذرة 42)")
 
     # الطبقة 3: بيان Boltz-2 إن وُجد
     client = Boltz2Client.load(args.boltz_manifest)

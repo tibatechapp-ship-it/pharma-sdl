@@ -15,6 +15,18 @@ class PlatformError(Exception):
         self.message_en = message_en or message_ar
 
 
+class ConfigError(PlatformError, ValueError):
+    """خطأ إعداد منصة (P16/ADR-0016) — خطأ قيمة وخطأ منصة في آن واحد.
+
+    الوراثة المزدوجة مقصودة عقداً: طبقة الإعداد تلتقطه كـ ValueError
+    (حدود منطقية عند القراءة)، وطبقة النشر/API تلتقطه كـ PlatformError
+    فتترجمه إلى رمز HTTP صادق بدل انهيار صامت أو 500 مجهول.
+    """
+
+    http_status = 500
+    code = "config_error"
+
+
 class ValidationError(PlatformError):
     """إدخال غير صالح من المستدعي."""
 

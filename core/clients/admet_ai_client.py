@@ -6,13 +6,13 @@
 - ADMET-AI v2.0.1 (Harvard/AP-BSL، swansonk14/admet_ai) — رخصة MIT للكود.
   مُدرَّب على بيانات ADMET من Therapeutics Data Commons بمجموعة من 5 طيّات
   لنموذجين متعددي المهام (تصنيف + انحدار) — النماذج مضمّنة في الحزمة نفسها
-  (‏~13MB) فلا حاجة لشبكة عند أول استخدام، والاستدلال CPU كافٍ.
+  (~13MB) فلا حاجة لشبكة عند أول استخدام، والاستدلال CPU كافٍ.
 - عقد المخرجات الموثَّق من كود الحزمة (admet_ai/admet_model.py):
   predict(smiles=...) يُرجع dict لجزيء واحد أو DataFrame لأكثر من جزيء،
   أعمدته: 41 مهمة ML (31 تصنيف [0..1] + 10 انحدار بوحداتها الرسمية)
   + 3 إنذارات بنيوية قاعدية (PAINS/BRENK/NIH) + 8 وصفات فيزيوكيميائية
   + عمود مئين مقابل الأدوية المعتمدة في DrugBank لكل ما سبق
-  (‏"<task>_drugbank_approved_percentile").
+  ("<task>_drugbank_approved_percentile").
 - القياس الحي في بيئة المشروع موثّق ومجمَّد في
   docs/audit/model-admet-ai-p13-results.json (لوحة أدوية مرجعية).
 
@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
@@ -226,7 +227,7 @@ def _to_float(x) -> float | None:
         f = float(x)
     except (TypeError, ValueError):
         return None
-    if f != f:  # NaN
+    if math.isnan(f):  # NaN — لا قيمة قابلة للعرض
         return None
     return f
 
@@ -269,7 +270,7 @@ def predict_admet_ai_batch(smiles_list: list[str]) -> list[AdmetAIResult]:
             df_rows = [df]
         else:
             df_rows = df.to_dict(orient="records")
-    except Exception:  # noqa: BLE001 — عقد الواجهة: لا استثناءات للعرض
+    except Exception:  # عقد الواجهة: لا استثناءات للعرض
         logger.warning("ADMET-AI prediction failed", exc_info=True)
         return []
     results: list[AdmetAIResult] = []
@@ -302,7 +303,7 @@ def verdict(task_id: str, value: float, lang: str = "ar") -> str:
     ar = lang == "ar"
     t = TASKS.get(task_id)
     if t is None:
-        return "—" if ar else "—"
+        return "—"
 
     if t.kind == KIND_CLASSIFICATION:
         if task_id == "hERG":
@@ -329,7 +330,7 @@ def verdict(task_id: str, value: float, lang: str = "ar") -> str:
             if value < ABS_BAD:
                 return "لا يتجاوز غالباً" if ar else "Unlikely to cross"
             return "منطقة رمادية" if ar else "Grey zone"
-        return "—" if ar else "—"
+        return "—"
 
     if t.kind == KIND_ALERT:
         return "بلا إنذار" if value == 0 else (f"⚠️ {int(value)} إنذار" if ar else f"⚠️ {int(value)} alert(s)")
@@ -342,7 +343,7 @@ def verdict(task_id: str, value: float, lang: str = "ar") -> str:
             return "ذوبان متوسط" if ar else "Moderate solubility"
         return "ذوبان ضعيف — عقبة تطوير" if ar else "Poor solubility — development risk"
 
-    return "—" if ar else "—"
+    return "—"
 
 
 # ─────────────────────────────────────────────────────────────

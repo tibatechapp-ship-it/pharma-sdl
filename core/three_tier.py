@@ -20,16 +20,15 @@
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
-from rdkit import Chem, DataStructs
-from rdkit.Chem import AllChem
-from rdkit import RDLogger
+from rdkit import Chem, RDLogger
 
+from core.clients.boltz2_client import Boltz2Client
 from core.docking import RT_KCAL, dock_ligand, load_receptors
 from core.ml_potency import PotencyModel
-from core.clients.boltz2_client import Boltz2Client, Boltz2AffinityRecord
 
 RDLogger.DisableLog("rdApp.*")
 

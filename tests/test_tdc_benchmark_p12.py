@@ -63,7 +63,8 @@ class TestAdoptedPipelineHelpers:
 
     def test_fit_and_predict_on_external_split(self):
         from scripts.evaluate_tdc_p12 import (
-            fit_adopted_pipeline, predict_adopted_pipeline,
+            fit_adopted_pipeline,
+            predict_adopted_pipeline,
         )
 
         train = ["CCO", "c1ccccc1O", "CC(=O)Oc1ccccc1C(=O)O", "CCCCN",
@@ -76,7 +77,6 @@ class TestAdoptedPipelineHelpers:
         assert np.isfinite(preds).all()
 
     def test_invalid_smiles_are_dropped_not_crashing(self):
-        from scripts.evaluate_tdc_p12 import predict_adopted_pipeline
         from core.ml_potency import featurize
 
         X, idx = featurize(["CCO", "ليس-سمايلز", "CCC"], count_based=True)

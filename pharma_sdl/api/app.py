@@ -65,7 +65,7 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     """مصنع التطبيق — يعيد نسخة جديدة كاملة (صديقة للاختبارات والتشغيل المتعدد).
 
-    بوابة الإنتاج (P16): ‏PHARMA_SDL_ENV=production بلا مفاتيح API = رفض
+    بوابة الإنتاج (P16): PHARMA_SDL_ENV=production بلا مفاتيح API = رفض
     إقلاع صريح — الوضع المفتوح حق محجوز للتطوير المحلي لا للنشر العام.
     """
     settings = app_settings()

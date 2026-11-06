@@ -54,7 +54,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 # نفس دوال البروتوكول المنشور — مصدر حقيقة واحد، لا نسخ
 from core.ml_potency import featurize, load_dataset
-from scripts.evaluate_generalization import (  # noqa: E402
+from scripts.evaluate_generalization import (
     RANDOM_SEED,
     TEST_SIZE,
     knn_baseline_predict,

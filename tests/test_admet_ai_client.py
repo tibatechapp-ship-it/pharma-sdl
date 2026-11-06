@@ -3,7 +3,7 @@
 الاختبار الحي (يحتاج admet-ai مثبّتة) موسوم ويتخطى تلقائياً في CI.
 """
 import sys
-from types import ModuleType, SimpleNamespace
+from types import ModuleType
 
 import pytest
 
@@ -316,8 +316,8 @@ def test_live_aspirin_predictions():
         assert herg is not None and 0.0 <= herg <= 1.0
         # تيرفينادين (المسحوب بسبب hERG) أعلى من الأسبرين — المرجعية الدوائية
         ter = predict_admet_ai_batch([
-            "CC(C)(C)C1=CC=C(C=C1)C(CCCN2CCC(CC2)C(C3=CC=CC=C3)"
-            "(C4=CC=CC=C4)O)O"
+            ("CC(C)(C)C1=CC=C(C=C1)C(CCCN2CCC(CC2)C(C3=CC=CC=C3)"
+             "(C4=CC=CC=C4)O)O")
         ])
         assert ter and (ter[0].get("hERG") or 0.0) > herg
     finally:

@@ -114,7 +114,7 @@ class Boltz2Client:
     # ── البناء ──
 
     @classmethod
-    def load(cls, manifest_path: Path | str) -> "Boltz2Client | None":
+    def load(cls, manifest_path: Path | str) -> Boltz2Client | None:
         """تحميل البيان؛ None عند الغياب أو الفساد (حالة صادقة لا استثناء)."""
         path = Path(manifest_path)
         if not path.exists():
@@ -234,7 +234,7 @@ def _canonical_or_none(smiles: str) -> str | None:
 
         mol = Chem.MolFromSmiles(smiles)
         return Chem.MolToSmiles(mol) if mol is not None else None
-    except Exception:  # pragma: no cover - rdkit غائب فقط في بيئات شاذة
+    except Exception:  # noqa: BLE001 — rdkit غائب فقط في بيئات شاذة، يُعاد None كإشارة عدم توفر
         return None
 
 

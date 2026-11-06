@@ -16,6 +16,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from pharma_sdl.errors import ConfigError
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # قيم البيئة المقبولة لـ PHARMA_SDL_ENV — أي شيء آخر يوقف الإقلاع.
@@ -144,7 +146,7 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> Settings:
-        return cls(
+        settings = cls(
             host=_env_str("PHARMA_SDL_HOST", "0.0.0.0"),
             port=_env_int("PHARMA_SDL_PORT", 8000),
             default_engine=_env_str("PHARMA_SDL_DEFAULT_ENGINE", "simulation"),
@@ -204,46 +206,53 @@ class Settings:
         return settings
 
     def validate(self) -> None:
-        """حدود منطقية بعد القراءة — خطأ النشر يظهر عند الإقلاع لا في الإنتاج."""
+        """حدود منطقية بعد القراءة — خطأ النشر يظهر عند الإقلاع لا في الإنتاج.
+
+        تُرفع ConfigError (PlatformError ⋂ ValueError): الاختبارات وطبقة
+        الإعداد تتعامل معها كـ ValueError، وطبقة النشر كـ PlatformError
+        تُترجم إلى رمز HTTP صادق (ADR-0016).
+        """
         if self.env not in KNOWN_ENVS:
-            raise ValueError(
+            raise ConfigError(
                 f"PHARMA_SDL_ENV غير معروف: {self.env!r} — المقبول: development/production"
             )
         if not 1 <= self.port <= 65535:
-            raise ValueError(f"PHARMA_SDL_PORT خارج المجال (1..65535): {self.port}")
+            raise ConfigError(f"PHARMA_SDL_PORT خارج المجال (1..65535): {self.port}")
         if self.max_ligands_per_run < 1:
-            raise ValueError(f"PHARMA_SDL_MAX_LIGANDS يجب أن يكون ≥ 1: {self.max_ligands_per_run}")
+            raise ConfigError(f"PHARMA_SDL_MAX_LIGANDS يجب أن يكون ≥ 1: {self.max_ligands_per_run}")
         if self.default_top_n < 1:
-            raise ValueError(f"PHARMA_SDL_TOP_N يجب أن يكون ≥ 1: {self.default_top_n}")
+            raise ConfigError(f"PHARMA_SDL_TOP_N يجب أن يكون ≥ 1: {self.default_top_n}")
         if self.rate_limit_per_min < 0:
-            raise ValueError(f"PHARMA_SDL_RATE_LIMIT لا يقبل سالباً: {self.rate_limit_per_min}")
+            raise ConfigError(f"PHARMA_SDL_RATE_LIMIT لا يقبل سالباً: {self.rate_limit_per_min}")
         if self.job_ttl_seconds < 1:
-            raise ValueError(f"PHARMA_SDL_JOB_TTL يجب أن يكون ≥ 1 ثانية: {self.job_ttl_seconds}")
+            raise ConfigError(f"PHARMA_SDL_JOB_TTL يجب أن يكون ≥ 1 ثانية: {self.job_ttl_seconds}")
         if self.vina_exhaustiveness < 1:
-            raise ValueError(f"PHARMA_SDL_VINA_EXHAUSTIVENESS يجب أن يكون ≥ 1: {self.vina_exhaustiveness}")
+            raise ConfigError(f"PHARMA_SDL_VINA_EXHAUSTIVENESS يجب أن يكون ≥ 1: {self.vina_exhaustiveness}")
         if self.demo_max_ligands < 1 or self.demo_max_top_n < 1:
-            raise ValueError(
+            raise ConfigError(
                 "سقوف وضع العرض يجب أن تكون ≥ 1 "
                 f"(ligands={self.demo_max_ligands}, top_n={self.demo_max_top_n})"
             )
         if self.store_backend not in {"sqlite", "postgres"}:
-            raise ValueError(
+            raise ConfigError(
                 f"PHARMA_SDL_STORE غير معروف: {self.store_backend!r} — المقبول: sqlite/postgres"
             )
         if self.store_backend == "postgres" and not self.pg_dsn:
-            raise ValueError(
+            raise ConfigError(
                 "PHARMA_SDL_STORE=postgres يستوجب PHARMA_SDL_PG_DSN صريحاً — "
-                "لا ترقية صامتة ولا ادعاء تخزين بلا خدمة (ADR-0008)"
+                "لا ترقية صامتة ولا ادعاء تخزين بلا خدمة (ADR-0008)",
+                "PHARMA_SDL_STORE=postgres requires an explicit PHARMA_SDL_PG_DSN — "
+                "no silent upgrade, no claimed storage without a service (ADR-0008)",
             )
         if self.lims_timeout_s <= 0 or self.lims_poll_interval_s <= 0 or self.lims_max_polls < 1:
-            raise ValueError(
+            raise ConfigError(
                 "إعدادات LIMS يجب أن تكون موجبة "
                 f"(timeout={self.lims_timeout_s}, poll={self.lims_poll_interval_s}, max_polls={self.lims_max_polls})"
             )
         if not 1 <= self.instrument_port <= 65535:
-            raise ValueError(f"PHARMA_SDL_INSTRUMENT_PORT خارج المجال (1..65535): {self.instrument_port}")
+            raise ConfigError(f"PHARMA_SDL_INSTRUMENT_PORT خارج المجال (1..65535): {self.instrument_port}")
         if self.instrument_timeout_s <= 0:
-            raise ValueError(f"PHARMA_SDL_INSTRUMENT_TIMEOUT يجب أن يكون موجباً: {self.instrument_timeout_s}")
+            raise ConfigError(f"PHARMA_SDL_INSTRUMENT_TIMEOUT يجب أن يكون موجباً: {self.instrument_timeout_s}")
 
 
 _settings: Settings | None = None

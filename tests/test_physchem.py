@@ -1,6 +1,5 @@
 """اختبارات كتلة الوصف الفيزيوكيميائي — P11 (حتمية، محلية، بلا شبكة)."""
 import numpy as np
-import pytest
 
 from core.physchem import DESCRIPTOR_NAMES, physchem_matrix, physchem_vector
 

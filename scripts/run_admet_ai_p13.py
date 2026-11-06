@@ -12,13 +12,13 @@ from __future__ import annotations
 import json
 import platform
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from core.clients import admet_ai_client as ai  # noqa: E402
+from core.clients import admet_ai_client as ai
 
 OUT = REPO / "docs" / "audit" / "model-admet-ai-p13-results.json"
 
@@ -154,7 +154,7 @@ def main() -> int:
     payload = {
         "phase": "P13",
         "title": "قياس حي مجمّد — عميل ADMET-AI على لوحة أدوية مرجعية",
-        "measured_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "measured_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "environment": {
             "python": platform.python_version(),
             "platform": platform.platform(),

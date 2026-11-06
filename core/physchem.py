@@ -18,7 +18,13 @@ from __future__ import annotations
 
 import numpy as np
 from rdkit import Chem
-from rdkit.Chem import Crippen, Descriptors, GraphDescriptors, Lipinski, rdMolDescriptors
+from rdkit.Chem import (
+    Crippen,
+    Descriptors,
+    GraphDescriptors,
+    Lipinski,
+    rdMolDescriptors,
+)
 
 # الترتيب عقد ثابت — لا تُضِف ولا تُرتبِ إلا بترقية إصدار التمثيل
 DESCRIPTOR_NAMES: tuple[str, ...] = (
