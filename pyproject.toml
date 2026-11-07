@@ -42,7 +42,7 @@ dependencies = [
 
 [project.optional-dependencies]
 pg = [
-    "psycopg[binary]==3.2.3",
+    "psycopg[binary]==3.3.7",
 ]
 # محرك ADMET-AI المحلي (P13) — اختياري بسبب torch؛ النماذج مضمّنة في الحزمة
 # ملاحظة: إصدار rdkit يُحلّ عبر سلسلة admet-ai (cuik_molmaker مرتبط ببناء محدد)
@@ -54,7 +54,7 @@ dev = [
     "pytest-cov==7.0.0",
     "ruff==0.17.3",
     "httpx==0.28.1",
-    "psycopg[binary]==3.2.3",
+    "psycopg[binary]==3.3.7",
     "pgserver==0.1.4",
 ]
 

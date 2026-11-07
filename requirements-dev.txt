@@ -5,5 +5,5 @@ pytest-cov==7.0.0
 ruff==0.17.3
 httpx==0.28.1  # TestClient لاختبارات واجهة الـAPI
 pyyaml==6.0.3  # P16: اختبارات التحصين تقرأ docker-compose.yml و workflows بصيغة YAML
-psycopg[binary]==3.2.3  # P3: اختبارات المخازن الحية فوق PostgreSQL (pgserver)
+psycopg[binary]==3.3.7  # P3: اختبارات المخازن الحية فوق PostgreSQL (pgserver)
 pgserver==0.1.4  # P3: خادم PostgreSQL مضمّن للاختبارات — لا mocks
