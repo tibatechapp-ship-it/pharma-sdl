@@ -69,13 +69,13 @@ curl -s localhost:8000/api/v1/screening/runs/<job_id> | python3 -m json.tool
 curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 ```
 
-> 🖥️ **الواجهة التفاعلية**: `streamlit run app.py` — 16 مختبراً تفاعلياً بالعربية.
+> 🖥️ **الواجهة التفاعلية**: `streamlit run app.py` — 15 مختبراً تفاعلياً بالعربية في 4 مجموعات.
 > 🌐 **دليل المنصة (GitHub Pages)**: <https://tibatechapp-ship-it.github.io/pharma-sdl/>
 > 📣 **Live Demo عام**: قيد النشر — بانتظار قرار النشر (كل شيء جاهز: `PHARMA_SDL_ENV=production` يفرض مفاتيح API تلقائياً).
 
 ---
 
-## 🖥️ مختبرات المنصة — 16 تبويباً في 4 مجموعات
+## 🖥️ مختبرات المنصة — 15 تبويباً في 4 مجموعات
 
 | المجموعة | التبويبات |
 |----------|-----------|
