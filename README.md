@@ -17,7 +17,7 @@
   <a href=".github/workflows/platform.yml"><img src="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/platform.yml/badge.svg" alt="Platform API"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white" alt="Python 3.11 | 3.12">
-  <img src="https://img.shields.io/badge/API-v0.17.1%20%28FastAPI%29-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.17.1 — واجهة API مبنية بFastAPI">
+  <img src="https://img.shields.io/badge/API-v0.17.1-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.17.1 — واجهة API مبنية بFastAPI">
 </p>
 
 ---
