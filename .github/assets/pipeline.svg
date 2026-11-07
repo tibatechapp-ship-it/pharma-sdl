@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-label="معمارية خط اكتشاف الدواء في Pharma SDL">
+  <defs>
+    <linearGradient id="pbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12101f"/>
+      <stop offset="1" stop-color="#1c1540"/>
+    </linearGradient>
+    <linearGradient id="boxfill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#667eea" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#667eea" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="loopfill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00b8a9" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#00b8a9" stop-opacity="0.05"/>
+    </linearGradient>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9d8fff"/>
+    </marker>
+    <marker id="arwLoop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#00b8a9"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="430" rx="16" fill="url(#pbg)"/>
+  <text x="1160" y="46" text-anchor="end" font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">خط الاكتشاف الكامل — من الهدف إلى القرار</text>
+  <text x="1160" y="72" text-anchor="end" font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="14" fill="#8f88c9">كل صندوق كود مُختبَر في هذا المستودع — التدفق من اليمين إلى اليسار</text>
+
+  <!-- الصف الأول: البيانات ← الفرز ← الفعالية ← الفيزياء -->
+  <g font-family="Segoe UI, Tahoma, Arial, sans-serif">
+    <rect x="895" y="100" width="250" height="86" rx="12" fill="url(#boxfill)" stroke="#667eea" stroke-opacity="0.55" stroke-width="1.4"/>
+    <text x="1140" y="128" text-anchor="end" font-size="17" font-weight="700" fill="#ffffff">١ · الهدف والتنقية</text>
+    <text x="1140" y="152" text-anchor="end" font-size="13" fill="#b3ace8">ChEMBL · PDB · تنقية موثقة</text>
+    <text x="1140" y="172" text-anchor="end" font-size="12.5" fill="#8f88c9">3 أهداف: Mpro · AChE · EGFR</text>
+
+    <line x1="880" y1="143" x2="838" y2="143" stroke="#9d8fff" stroke-width="2.2" marker-end="url(#arw)"/>
+
+    <rect x="585" y="100" width="250" height="86" rx="12" fill="url(#boxfill)" stroke="#667eea" stroke-opacity="0.55" stroke-width="1.4"/>
+    <text x="830" y="128" text-anchor="end" font-size="17" font-weight="700" fill="#ffffff">٢ · الفرز الافتراضي</text>
+    <text x="830" y="152" text-anchor="end" font-size="13" fill="#b3ace8">جلسات دائمة · SQLite/Postgres</text>
+    <text x="830" y="172" text-anchor="end" font-size="12.5" fill="#8f88c9">حدود معلنة · وضع عرض عام</text>
+
+    <line x1="570" y1="143" x2="528" y2="143" stroke="#9d8fff" stroke-width="2.2" marker-end="url(#arw)"/>
+
+    <rect x="275" y="100" width="250" height="86" rx="12" fill="url(#boxfill)" stroke="#667eea" stroke-opacity="0.55" stroke-width="1.4"/>
+    <text x="520" y="128" text-anchor="end" font-size="17" font-weight="700" fill="#ffffff">٣ · الفعالية (ML)</text>
+    <text x="520" y="152" text-anchor="end" font-size="13" fill="#b3ace8">Morgan تكرارات + Random Forest</text>
+    <text x="520" y="172" text-anchor="end" font-size="12.5" fill="#8f88c9">R² هيكلي 0.509 ± 0.090 — منشور</text>
+
+    <line x1="260" y1="143" x2="218" y2="143" stroke="#9d8fff" stroke-width="2.2" marker-end="url(#arw)"/>
+
+    <rect x="55" y="100" width="160" height="86" rx="12" fill="url(#boxfill)" stroke="#667eea" stroke-opacity="0.55" stroke-width="1.4"/>
+    <text x="210" y="128" text-anchor="end" font-size="17" font-weight="700" fill="#ffffff">٤ · الفيزياء</text>
+    <text x="210" y="152" text-anchor="end" font-size="13" fill="#b3ace8">Vina + محلل البوزات</text>
+    <text x="210" y="172" text-anchor="end" font-size="12.5" fill="#8f88c9">Boltz-2 اختياري بمفتاحك</text>
+  </g>
+
+  <!-- صعود الصف الثاني -->
+  <path d="M 135 186 L 135 230" fill="none" stroke="#9d8fff" stroke-width="2.2" marker-end="url(#arw)"/>
+
+  <!-- الصف الثاني: ADMET ← PGx ← القرار ← التقرير -->
+  <g font-family="Segoe UI, Tahoma, Arial, sans-serif">
+    <rect x="895" y="240" width="250" height="86" rx="12" fill="url(#boxfill)" stroke="#667eea" stroke-opacity="0.55" stroke-width="1.4"/>
+    <text x="1140" y="268" text-anchor="end" font-size="17" font-weight="700" fill="#ffffff">٥ · ADMET</text>
+    <text x="1140" y="292" text-anchor="end" font-size="13" fill="#b3ace8">ADMET-AI محلي (41 مهمة) + Ersilia حي</text>
+    <text x="1140" y="312" text-anchor="end" font-size="12.5" fill="#8f88c9">مئينات مقابل DrugBank · بلا مفاتيح</text>
+
+    <line x1="880" y1="283" x2="838" y2="283" stroke="#9d8fff" stroke-width="2.2" marker-end="url(#arw)"/>
+
+    <rect x="585" y="240" width="250" height="86" rx="12" fill="url(#boxfill)" stroke="#667eea" stroke-opacity="0.55" stroke-width="1.4"/>
+    <text x="830" y="268" text-anchor="end" font-size="17" font-weight="700" fill="#ffffff">٦ · PGx السريري</text>
+    <text x="830" y="292" text-anchor="end" font-size="13" fill="#b3ace8">CPIC حي بكاش 24 ساعة</text>
+    <text x="830" y="312" text-anchor="end" font-size="12.5" fill="#8f88c9">5 جينات: CYP2D6 · TPMT · UGT1A1…</text>
+
+    <line x1="570" y1="283" x2="528" y2="283" stroke="#9d8fff" stroke-width="2.2" marker-end="url(#arw)"/>
+
+    <rect x="275" y="240" width="250" height="86" rx="12" fill="url(#boxfill)" stroke="#667eea" stroke-opacity="0.55" stroke-width="1.4"/>
+    <text x="520" y="268" text-anchor="end" font-size="17" font-weight="700" fill="#ffffff">٧ · قرار PK/PD</text>
+    <text x="520" y="292" text-anchor="end" font-size="13" fill="#b3ace8">C90 من Hill مقابل Cmax فموي</text>
+    <text x="520" y="312" text-anchor="end" font-size="12.5" fill="#8f88c9">أعلام صادقة لا أرقام اختراعية</text>
+
+    <line x1="260" y1="283" x2="218" y2="283" stroke="#9d8fff" stroke-width="2.2" marker-end="url(#arw)"/>
+
+    <rect x="55" y="240" width="160" height="86" rx="12" fill="#00b8a9" fill-opacity="0.12" stroke="#00b8a9" stroke-opacity="0.6" stroke-width="1.4"/>
+    <text x="210" y="268" text-anchor="end" font-size="17" font-weight="700" fill="#ffffff">٨ · التقرير</text>
+    <text x="210" y="292" text-anchor="end" font-size="13" fill="#b3ace8">PDF عربي (Tajawal)</text>
+    <text x="210" y="312" text-anchor="end" font-size="12.5" fill="#8f88c9">إخلاء مسؤولية في كل مخرج</text>
+  </g>
+
+  <!-- شريط الحلقة المغلقة -->
+  <rect x="55" y="356" width="1090" height="52" rx="12" fill="url(#loopfill)" stroke="#00b8a9" stroke-opacity="0.5" stroke-width="1.3"/>
+  <path d="M 1100 356 C 1100 340, 600 336, 600 348" fill="none" stroke="#00b8a9" stroke-width="1.6" stroke-dasharray="5 4" opacity="0.7"/>
+  <text x="1120" y="388" text-anchor="end" font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="15" font-weight="700" fill="#d8fffb">الحلقة المغلقة: ذاكرة تجارب ← تعلم نشط معايَر ← مختبر فيزيائي (LIMS + QC) ← فرضية أفضل</text>
+  <path d="M 135 356 L 135 330" fill="none" stroke="#00b8a9" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arwLoop)"/>
+
+  <rect x="0" y="426" width="1200" height="4" fill="url(#loopfill)"/>
+</svg>

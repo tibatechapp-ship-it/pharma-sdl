@@ -1,30 +1,83 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="Pharma SDL banner">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="Pharma SDL — مختبر الفارما الذاتي — من الكتاب إلى الكود">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#667eea"/><stop offset="1" stop-color="#764ba2"/>
+      <stop offset="0" stop-color="#0f0e1f"/>
+      <stop offset="0.55" stop-color="#1a1440"/>
+      <stop offset="1" stop-color="#2a1a52"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0.85" cy="0.2" r="0.9">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.14"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00b8a9"/>
+      <stop offset="1" stop-color="#667eea"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0.82" cy="0.15" r="0.75">
+      <stop offset="0" stop-color="#667eea" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#667eea" stop-opacity="0"/>
     </radialGradient>
+    <radialGradient id="glow2" cx="0.08" cy="0.9" r="0.7">
+      <stop offset="0" stop-color="#00b8a9" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#00b8a9" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="chip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.05"/>
+    </linearGradient>
   </defs>
-  <rect width="1200" height="300" fill="#12101f"/>
-  <rect width="1200" height="300" fill="url(#bg)" opacity="0.92"/>
-  <rect width="1200" height="300" fill="url(#glow)"/>
-  <g opacity="0.16" stroke="#ffffff" stroke-width="1">
-    <path d="M0 240 Q 300 190 600 240 T 1200 240" fill="none"/>
-    <path d="M0 260 Q 300 210 600 260 T 1200 260" fill="none"/>
-    <path d="M0 220 Q 300 170 600 220 T 1200 220" fill="none"/>
+
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <rect width="1200" height="300" fill="url(#glow1)"/>
+  <rect width="1200" height="300" fill="url(#glow2)"/>
+
+  <!-- بنية جزيئية زخرفية -->
+  <g stroke="#667eea" stroke-opacity="0.35" fill="none" stroke-width="2">
+    <path d="M 1050 60 L 1098 88 L 1098 144 L 1050 172 L 1002 144 L 1002 88 Z"/>
+    <path d="M 1098 88 L 1146 60 M 1098 144 L 1146 172 M 1002 116 L 954 116"/>
+    <circle cx="1050" cy="60" r="5" fill="#667eea" fill-opacity="0.55" stroke="none"/>
+    <circle cx="1098" cy="144" r="5" fill="#00b8a9" fill-opacity="0.55" stroke="none"/>
+    <circle cx="1146" cy="172" r="4" fill="#764ba2" fill-opacity="0.6" stroke="none"/>
+    <circle cx="954" cy="116" r="4" fill="#764ba2" fill-opacity="0.6" stroke="none"/>
   </g>
-  <circle cx="1045" cy="86" r="46" fill="#ffffff" opacity="0.10"/>
-  <circle cx="1045" cy="86" r="30" fill="#ffffff" opacity="0.14"/>
-  <text x="60" y="118" font-family="'Segoe UI','Noto Sans Arabic',system-ui,sans-serif" font-size="58" font-weight="800" fill="#ffffff" text-anchor="start">فارما SDL <tspan font-size="44" opacity="0.92">Pharma SDL</tspan></text>
-  <text x="62" y="166" font-family="'Segoe UI','Noto Sans Arabic',system-ui,sans-serif" font-size="24" fill="#ffffff" opacity="0.94" text-anchor="start">من الكتاب إلى الكود — منصة عربية لتعليم واكتشاف الأدوية بالذكاء الاصطناعي</text>
-  <g font-family="'Segoe UI',system-ui,sans-serif" font-size="16" font-weight="600">
-    <rect x="60" y="196" rx="16" ry="16" width="69" height="32" fill="#0b1220" opacity="0.45"/><text x="94.5" y="217" fill="#ffffff" text-anchor="middle">RDKit</text>
-    <rect x="235" y="196" rx="16" ry="16" width="157" height="32" fill="#0b1220" opacity="0.45"/><text x="313.5" y="217" fill="#ffffff" text-anchor="middle">AutoDock Vina</text>
-    <rect x="420" y="196" rx="16" ry="16" width="124" height="32" fill="#0b1220" opacity="0.45"/><text x="482.0" y="217" fill="#ffffff" text-anchor="middle">ML Predict</text>
-    <rect x="625" y="196" rx="16" ry="16" width="135" height="32" fill="#0b1220" opacity="0.45"/><text x="692.5" y="217" fill="#ffffff" text-anchor="middle">PDF Reports</text>
+  <g stroke="#00b8a9" stroke-opacity="0.22" fill="none" stroke-width="1.6">
+    <path d="M 90 230 L 130 208 L 170 230 L 170 274 L 130 296 L 90 274 Z"/>
+    <path d="M 170 230 L 210 208 M 90 274 L 50 296"/>
   </g>
-  <text x="60" y="272" font-family="'Segoe UI',system-ui,sans-serif" font-size="15" fill="#ffffff" opacity="0.75">TibaTech · tibatechapp-ship-it · مفتوح المصدر</text>
+
+  <!-- العنوان الرئيسي (RTL) -->
+  <text x="1150" y="105" text-anchor="end" font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="56" font-weight="700" fill="#ffffff">Pharma SDL</text>
+  <text x="1150" y="158" text-anchor="end" font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="30" font-weight="600" fill="#c9c4f2">مختبر الفارما الذاتي — منصة عربية لاكتشاف الأدوية</text>
+  <text x="1150" y="200" text-anchor="end" font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="19" fill="#8f88c9">«من الكتاب إلى الكود — من النظرية إلى الاكتشاف»</text>
+
+  <!-- شرائح الهوية -->
+  <g font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="15" font-weight="600">
+    <rect x="1032" y="222" width="118" height="32" rx="16" fill="url(#accent)"/>
+    <text x="1091" y="243" text-anchor="middle" fill="#0f0e1f">v0.17.1</text>
+    <rect x="890" y="222" width="128" height="32" rx="16" fill="url(#chip)" stroke="#667eea" stroke-opacity="0.5"/>
+    <text x="954" y="243" text-anchor="middle" fill="#e8e5ff">API-First</text>
+    <rect x="748" y="222" width="128" height="32" rx="16" fill="url(#chip)" stroke="#667eea" stroke-opacity="0.5"/>
+    <text x="812" y="243" text-anchor="middle" fill="#e8e5ff">عربية أولاً</text>
+    <rect x="600" y="222" width="134" height="32" rx="16" fill="url(#chip)" stroke="#00b8a9" stroke-opacity="0.55"/>
+    <text x="667" y="243" text-anchor="middle" fill="#d8fffb">صفر اشتراكات</text>
+  </g>
+
+  <!-- شريط خط الاكتشاف (يتدفق من اليمين إلى اليسار) -->
+  <g font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="14.5" font-weight="600">
+    <rect x="1010" y="262" width="140" height="26" rx="13" fill="#667eea" fill-opacity="0.16" stroke="#667eea" stroke-opacity="0.45"/>
+    <text x="1080" y="280" text-anchor="middle" fill="#c9c4f2">تنقية البيانات</text>
+    <text x="985" y="280" text-anchor="middle" fill="#764ba2">◀</text>
+    <rect x="835" y="262" width="128" height="26" rx="13" fill="#667eea" fill-opacity="0.16" stroke="#667eea" stroke-opacity="0.45"/>
+    <text x="899" y="280" text-anchor="middle" fill="#c9c4f2">الفرز الافتراضي</text>
+    <text x="810" y="280" text-anchor="middle" fill="#764ba2">◀</text>
+    <rect x="672" y="262" width="116" height="26" rx="13" fill="#667eea" fill-opacity="0.16" stroke="#667eea" stroke-opacity="0.45"/>
+    <text x="730" y="280" text-anchor="middle" fill="#c9c4f2">الربط والفعالية</text>
+    <text x="647" y="280" text-anchor="middle" fill="#764ba2">◀</text>
+    <rect x="528" y="262" width="96" height="26" rx="13" fill="#667eea" fill-opacity="0.16" stroke="#667eea" stroke-opacity="0.45"/>
+    <text x="576" y="280" text-anchor="middle" fill="#c9c4f2">ADMET</text>
+    <text x="503" y="280" text-anchor="middle" fill="#764ba2">◀</text>
+    <rect x="388" y="262" width="92" height="26" rx="13" fill="#667eea" fill-opacity="0.16" stroke="#667eea" stroke-opacity="0.45"/>
+    <text x="434" y="280" text-anchor="middle" fill="#c9c4f2">PGx</text>
+    <text x="363" y="280" text-anchor="middle" fill="#764ba2">◀</text>
+    <rect x="228" y="262" width="112" height="26" rx="13" fill="#00b8a9" fill-opacity="0.16" stroke="#00b8a9" stroke-opacity="0.5"/>
+    <text x="284" y="280" text-anchor="middle" fill="#d8fffb">القرار والتقرير</text>
+  </g>
+
+  <rect x="0" y="296" width="1200" height="4" fill="url(#accent)"/>
 </svg>
