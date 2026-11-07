@@ -83,7 +83,7 @@ jobs:
         run: ls -laR dist
 
       - name: Attach bundles to the tag release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           # المستوى الأعلى فقط: الحزم القابلة للتوزيع (.dmg/.exe/.AppImage/
           # .deb/.blockmap وملفات التحديث). النمط التكراري dist/** يلتقط
