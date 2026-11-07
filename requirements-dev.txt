@@ -1,7 +1,7 @@
 # أدوات التطوير — مثبَّتة بدقة (Hardening P1-1).
 # ملاحظة: pytest-cov 7 يجلب coverage>=7.10 — .coveragerc يعتمد صيغها.
 pytest==9.1.1
-pytest-cov==7.0.0
+pytest-cov==7.1.0
 ruff==0.17.3
 httpx==0.28.1  # TestClient لاختبارات واجهة الـAPI
 pyyaml==6.0.3  # P16: اختبارات التحصين تقرأ docker-compose.yml و workflows بصيغة YAML
