@@ -32,9 +32,9 @@ def test_boot_without_exception(at):
     assert not at.exception, f"boot exception: {at.exception}"
 
 
-def test_fifteen_tabs(at):
-    """14 تبويباً + الصحة العالمية (P15) = 15."""
-    assert len(at.tabs) == 15
+def test_sixteen_tabs(at):
+    """15 تبويباً + التحقق الخارجي (v0.18) = 16."""
+    assert len(at.tabs) == 16
 
 
 def test_sidebar_language_switcher_defaults_to_arabic(at):
@@ -62,6 +62,7 @@ def test_language_switch_roundtrip(at):
     assert any("Docking" in lb for lb in tabs_en)
     assert any("PGx" in lb for lb in tabs_en)
     assert any("ADMET" in lb for lb in tabs_en)
+    assert any("External Validation" in lb for lb in tabs_en)
     at.selectbox(key="lang").set_value("العربية").run()
     assert not at.exception
     assert at.title[0].value == title_ar

@@ -69,20 +69,20 @@ curl -s localhost:8000/api/v1/screening/runs/<job_id> | python3 -m json.tool
 curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 ```
 
-> 🖥️ **الواجهة التفاعلية**: `streamlit run app.py` — 15 مختبراً تفاعلياً بالعربية في 4 مجموعات.
+> 🖥️ **الواجهة التفاعلية**: `streamlit run app.py` — 16 مختبراً تفاعلياً بالعربية في 4 مجموعات.
 > 🌐 **دليل المنصة (GitHub Pages)**: <https://tibatechapp-ship-it.github.io/pharma-sdl/>
 > 📣 **Live Demo عام**: قيد النشر — بانتظار قرار النشر (كل شيء جاهز: `PHARMA_SDL_ENV=production` يفرض مفاتيح API تلقائياً).
 
 ---
 
-## 🖥️ مختبرات المنصة — 15 تبويباً في 4 مجموعات
+## 🖥️ مختبرات المنصة — 16 تبويباً في 4 مجموعات
 
 | المجموعة | التبويبات |
 |----------|-----------|
 | **خط التوليد** | 🏭 Make — توليد SMILES بـ RDKit · 🔬 Test — محاكاة hERG + LDL-C · 🧠 Analyze — تعلم نشط (UCB + Pareto) · 🧬 PROTAC |
 | **المختبرات السريرية** | 💊 MIC Lab — PK/PD للمضادات · 🎯 PROTAC Lab — Hook Effect · 🧫 CYP2C19 — طب شخصي CPIC · 💊 PGx — 5 جينات حية من CPIC · 🌍 الصحة العالمية — الملاريا والسل (Ersilia) |
 | **الأدوات** | 🔌 PubChem — بيانات حية مخزّنة · 🤖 Predict — تنبؤ pIC50 بتعلم آلي · 🧲 Docking — Vina + Meeko + عرض 3Dmol + محرك تسجيل ثانٍ محلي |
-| **التقارير** | 🎓 Capstone — الخط الكامل من الهدف إلى القرار · 🧪 ADMET Hub — ADMET-AI محلي (41 مهمة) ↔ Ersilia حي · 🗂️ التصنيف الدوائي — ATC بـ23 مجموعة |
+| **التقارير** | 🎓 Capstone — الخط الكامل من الهدف إلى القرار · 🧪 ADMET Hub — ADMET-AI محلي (41 مهمة) ↔ Ersilia حي · 🗂️ التصنيف الدوائي — ATC بـ23 مجموعة · 🛡️ التحقق الخارجي — بطاقات نماذج بفترات ثقة + قياس متبادل ADMETlab 3.0 |
 
 كما تتضمن المنصة: 🌱 توسيع المكتبة (PubChem تشابه / BRICS محلي) · 🎯 التوليد الموجّه بالهدف
 (مكافئ ChatChemTS محلي 100%) · ⚙️ القراءة التلقائية (خط كامل بنقرة واحدة) ·
@@ -127,10 +127,10 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 | الميزات | **بصمة Morgan بالتكرارات** (radius=2، 2048 بت) |
 | النموذج | RandomForestRegressor (300 شجرة، `max_features=0.3`، seed=42) |
 | **R² عشوائي** | 0.468 |
-| **R² هيكلي** (5 بذور Scaffold Split) | **0.509 ± 0.090** — يتفوق على المرتكز في كل بذرة |
+| **R² هيكلي** (5 بذور Scaffold Split) | **0.508 ± 0.090** — يتفوق على المرتكز في كل بذرة |
 | MAE هيكلي | 0.559 (وحدة log) |
 | عدم اليقين | تباين الأشجار — إشارة نسبية غير معايَرة تجريبياً |
-| خط الأساس | أقرب جار Tanimoto — يُلغى التفوق الوهمي قبل الاحتفال |
+| خط الأساس | أقرب جار Tanimoto معمّم — يُلغى التفوق الوهمي قبل الاحتفال |
 
 **نتائج سلبية موثقة** (ننشرها كما هي): إضافة الوصف الفيزيوكيميائي لم تفُع
 (R² 0.472) وHistGradientBoosting خسر (0.429) — والهدف الخمسي (0.55) لم يتحقق
@@ -142,8 +142,8 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 
 | المؤشر | القيمة | المصدر |
 |---|---|---|
-| الاختبارات | **735 ناجحاً** + 2 تكامل Postgres متخطى | `pytest -m "not integration"` |
-| Lint | ruff نظيف — 0 ملاحظة على 329 ملفاً | `ruff check .` |
+| الاختبارات | **754 ناجحاً** + 13 تكاملاً منفصلاً بالتوسيمة | `pytest -m "not integration"` |
+| Lint | ruff نظيف — 0 ملاحظة على 334 ملفاً | `ruff check .` |
 | CI | Tests ✓ + Platform ✓ + Pages ✓ — شارة حية من التشغيل الفعلي | [.github/workflows](.github/workflows/) |
 | الإقلاع الآمن | بورت/حدود/خلفية تخزين غير صالحة = رفض إقلاع مُعلَّل | `Settings.validate()` (ADR-0016) |
 | الإنتاج | `PHARMA_SDL_ENV=production` بلا مفاتيح = لا إقلاع | `create_app()` |

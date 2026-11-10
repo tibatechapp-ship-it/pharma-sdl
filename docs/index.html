@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pharma SDL — منصة اكتشاف الأدوية العربية</title>
-<meta name="description" content="منصة عربية مفتوحة المصدر لخط اكتشاف كامل: تنقية ← فرز افتراضي ← فعالية ML ← ربط Vina/Boltz-2 ← ADMET ← صيدلية جينية ← قرار ← تقرير عربي. بلا اشتراكات، وكل رقم مصدره معلن — 735 اختباراً ناجحاً.">
+<meta name="description" content="منصة عربية مفتوحة المصدر لخط اكتشاف كامل: تنقية ← فرز افتراضي ← فعالية ML ← ربط Vina/Boltz-2 ← ADMET ← صيدلية جينية ← قرار ← تقرير عربي. بلا اشتراكات، وكل رقم مصدره معلن — 754 اختباراً ناجحاً.">
 <meta property="og:title" content="Pharma SDL — منصة اكتشاف الأدوية العربية">
 <meta property="og:description" content="خط اكتشاف كامل بلا اشتراكات ولا مفاتيح — كل رقم مصدره معلن وتدهوره صادق.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -282,7 +282,7 @@ footer a:hover{color:var(--teal2)}
 </nav>
 
 <header class="hero wrap">
-  <span class="pill"><span class="dot"></span> الإصدار v0.17.1</span>
+  <span class="pill"><span class="dot"></span> الإصدار v0.18.0</span>
   <h1>من الكتاب إلى الكود —<br><span class="g">من النظرية إلى الاكتشاف</span></h1>
   <p class="sub">
     منصة عربية مفتوحة المصدر تجمع <b>خط اكتشاف كاملاً</b> — بلا اشتراكات، وبلا مفاتيح،
@@ -310,12 +310,12 @@ footer a:hover{color:var(--teal2)}
 
 <div class="stats">
   <div class="in">
-    <div class="stat"><div class="n">735</div><div class="l">اختباراً ناجحاً</div></div>
-    <div class="stat"><div class="n">0</div><div class="l">ملاحظة lint على 329 ملفاً</div></div>
-    <div class="stat"><div class="n">0.509</div><div class="l">R² هيكلي لنموذج الفعالية</div></div>
+    <div class="stat"><div class="n">754</div><div class="l">اختباراً ناجحاً</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">ملاحظة lint على 334 ملفاً</div></div>
+    <div class="stat"><div class="n">0.508</div><div class="l">R² هيكلي لنموذج الفعالية</div></div>
     <div class="stat"><div class="n">41</div><div class="l">مهمة ADMET محلية</div></div>
-    <div class="stat"><div class="n">16</div><div class="l">قراراً معمارياً موثقاً</div></div>
-    <div class="stat"><div class="n">19</div><div class="l">إصداراً منشوراً</div></div>
+    <div class="stat"><div class="n">17</div><div class="l">قراراً معمارياً موثقاً</div></div>
+    <div class="stat"><div class="n">20</div><div class="l">إصداراً منشوراً</div></div>
   </div>
 </div>
 
@@ -353,7 +353,7 @@ footer a:hover{color:var(--teal2)}
 
 <section id="labs" class="wrap">
   <div class="eyebrow">واجهة تفاعلية بالعربية</div>
-  <h2>15 مختبراً تفاعلياً في 4 مجموعات</h2>
+  <h2>16 مختبراً تفاعلياً في 4 مجموعات</h2>
   <p class="lead">
     <code style="font-size:.85em">streamlit run app.py</code> — كل مختبر يعمل في المتصفح مباشرة،
     ومبدّل عربي/إنجليزي يغطي كل المخرجات.
@@ -387,11 +387,12 @@ footer a:hover{color:var(--teal2)}
       </div>
     </div>
     <div class="lab">
-      <div class="hd"><span class="ico">📊</span><h3>التقارير</h3><span class="cnt">3 تقارير</span></div>
+      <div class="hd"><span class="ico">📊</span><h3>التقارير</h3><span class="cnt">4 تقارير</span></div>
       <div class="chips">
         <span class="chip">🎓 Capstone<small>من الهدف إلى القرار</small></span>
         <span class="chip">🧪 ADMET Hub<small>41 مهمة ↔ Ersilia</small></span>
         <span class="chip">🗂️ ATC<small>تصنيف بـ 23 مجموعة</small></span>
+        <span class="chip">🛡️ التحقق الخارجي<small>بطاقات نماذج + قياس متبادل</small></span>
       </div>
     </div>
   </div>
@@ -424,6 +425,7 @@ footer a:hover{color:var(--teal2)}
     <div class="mile"><span class="ver">v0.16.0</span><h3>الصحة العالمية</h3><p>الملاريا والسل بقمع قرار ثلاثي.</p></div>
     <div class="mile alt"><span class="ver">v0.17.0</span><h3>تحصين النشر</h3><p>بوابة مصادقة الإنتاج (ADR-0016).</p></div>
     <div class="mile"><span class="ver">v0.17.1</span><h3>تقييم شامل</h3><p>فحص إقلاع ميت مُصلَح + 39 ملاحظة lint إلى صفر.</p></div>
+    <div class="mile alt"><span class="ver">v0.18.0</span><h3>التحقق الخارجي</h3><p>بطاقات نماذج بفترات ثقة ونطاق قابلية تطبيق + قياس متبادل ADMETlab 3.0 (ADR-0017).</p></div>
   </div>
 </section>
 
@@ -438,7 +440,7 @@ footer a:hover{color:var(--teal2)}
         <tr><td>البيانات</td><td>قياسات IC50 حقيقية لـ SARS-CoV-2 Mpro — <b>900 جزيء</b> (CHEMBL4523582)</td></tr>
         <tr><td>النموذج</td><td>RandomForest على بصمة Morgan (r=2، 2048 بت)</td></tr>
         <tr><td>R² عشوائي</td><td><b>0.468</b></td></tr>
-        <tr><td>R² هيكلي</td><td><span class="ok"><span dir="ltr">0.509 ± 0.090</span></span> — يتفوق على المرتكز في كل بذرة (5 بذور Scaffold)</td></tr>
+        <tr><td>R² هيكلي</td><td><span class="ok"><span dir="ltr">0.508 ± 0.090</span></span> — يتفوق على المرتكز في كل بذرة (5 بذور Scaffold)</td></tr>
         <tr><td>MAE هيكلي</td><td><b>0.559</b> (وحدة log)</td></tr>
         <tr><td>عدم اليقين</td><td>تباين الأشجار — إشارة نسبية غير معايَرة تجريبياً</td></tr>
       </table>
@@ -451,12 +453,12 @@ footer a:hover{color:var(--teal2)}
     <div class="panel">
       <h3>✅ جودة هندسية</h3>
       <table class="kv">
-        <tr><td>الاختبارات</td><td><span class="ok">735 ناجحاً</span> + 2 تكامل Postgres متخطى — بلا شبكة</td></tr>
-        <tr><td>Lint</td><td>ruff نظيف — <span class="ok">0 ملاحظة</span> على 329 ملفاً</td></tr>
+        <tr><td>الاختبارات</td><td><span class="ok">754 ناجحاً</span> + 13 تكاملاً منفصلاً بالتوسيمة — بلا شبكة</td></tr>
+        <tr><td>Lint</td><td>ruff نظيف — <span class="ok">0 ملاحظة</span> على 334 ملفاً</td></tr>
         <tr><td>CI</td><td>Tests ✓ + Platform ✓ + Pages ✓ — شارات حية من التشغيل الفعلي</td></tr>
         <tr><td>الإقلاع الآمن</td><td>بورت/حدود/خلفية تخزين غير صالحة = رفض إقلاع مُعلَّل (<b>ADR-0016</b>)</td></tr>
         <tr><td>الإنتاج</td><td><b>PHARMA_SDL_ENV=production</b> بلا مفاتيح = لا إقلاع</td></tr>
-        <tr><td>القرارات</td><td><b>16 ADR</b> موثقاً: ADR-0001 → ADR-0016</td></tr>
+        <tr><td>القرارات</td><td><b>17 ADR</b> موثقاً: ADR-0001 → ADR-0017</td></tr>
       </table>
     </div>
   </div>
@@ -493,10 +495,10 @@ pip install -r requirements.txt -r requirements-dev.txt
   <h2>كل قرار موثق، وكل رقم مجمّد</h2>
   <div class="docs">
     <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/docs/ARCHITECTURE.md"><h3>🏛️ المعمارية</h3><p>طبقات المنصة الكاملة وعقودها.</p><span class="go">اقرأ ←</span></a>
-    <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/tree/main/docs/adr"><h3>📜 16 قراراً معمارياً</h3><p>ADR-0001 → ADR-0016 ببدائلها ومقايضاتها.</p><span class="go">اقرأ ←</span></a>
+    <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/tree/main/docs/adr"><h3>📜 17 قراراً معمارياً</h3><p>ADR-0001 → ADR-0017 ببدائلها ومقايضاتها.</p><span class="go">اقرأ ←</span></a>
     <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/tree/main/docs/audit"><h3>🧊 تقارير التدقيق</h3><p>الأرقام المُجمَّدة القابلة لإعادة الإنتاج.</p><span class="go">اقرأ ←</span></a>
     <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/docs/STRATEGY-2026.md"><h3>🗺️ الاستراتيجية 2026</h3><p>المقارنة الصريحة بالمنافسين وموقعنا.</p><span class="go">اقرأ ←</span></a>
-    <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/CHANGELOG.md"><h3>📣 سجل الإصدارات</h3><p>19 إصداراً — من P0 إلى v0.17.1.</p><span class="go">اقرأ ←</span></a>
+    <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/CHANGELOG.md"><h3>📣 سجل الإصدارات</h3><p>20 إصداراً — من P0 إلى v0.18.0.</p><span class="go">اقرأ ←</span></a>
     <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/CONTRIBUTING.md"><h3>🤝 المساهمة</h3><p>دليل المساهمة والاستجابة الأمنية.</p><span class="go">اقرأ ←</span></a>
   </div>
 </section>

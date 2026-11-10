@@ -155,6 +155,37 @@ STRINGS: dict[str, dict[str, str]] = {
             "+ hERG/الذوبان) — القيم الغائبة توقف القمع بصدق ولا تُخمَّن."
         ),
         "gh_model_card": "بطاقة النموذج",
+        # ── التحقق الخارجي (v0.18) ──
+        "tab_validation": "🛡️ التحقق الخارجي",
+        "val_title": "🛡️ التحقق الخارجي — بطاقات النماذج والقياس المتبادل",
+        "val_caption": (
+            "رقم بلا فترته لا يُقتبس، ونموذج بلا حدود يُعلَن عنها لا يُؤتمن: "
+            "بطاقة النموذج تعرض الدقة بفترات ثقتها، ومعايرة تنبؤ/ملاحظة، "
+            "ونطاق قابلية التطبيق (داخل النطاق مقابل خارجه) — ثم قياس متبادل "
+            "حي مع ADMETlab 3.0 على نفس الجزيء: الاتفاق يثبت السلوك، "
+            "والاختلاف يعلّم حدود التعميم."
+        ),
+        "val_card_title": "① بطاقة النموذج المعتمد — Mpro pIC50 (البروتوكول المجمَّد)",
+        "val_card_caption": "المصدر: docs/audit/model-cards-p18-results.json — أرقامه تُطابق المرجع المجمَّد model-evaluation-results.json حرفياً",
+        "val_card_missing": (
+            "ملف البطاقة غير موجود — ولّده من مستودع المشروع: "
+            "`python3 scripts/build_model_cards.py` (كل المختبرات الأخرى تعمل كالمعتاد)."
+        ),
+        "val_gap_label": "فجوة التذكّر/التعميم (العشوائي − الهيكلي)",
+        "val_ad_title": "نطاق قابلية التطبيق — الحد المعلن",
+        "val_calib_title": "معايرة تنبؤ/ملاحظة (صناديق على مدى المتنبّأ)",
+        "val_calib_note": "بطاقة سليمة تقارب القطر: متوسط الملاحظة ≈ متوسط التنبؤ في كل صندوق. الصندوق الفارغ لا يُختلَق.",
+        "val_admetlab_title": "② القياس المتبادل الحي — ADMETlab 3.0 (121 نقطة نهاية)",
+        "val_smiles_label": "SMILES (سطر لكل جزيء — تُعالج حتى 10)",
+        "val_run_btn": "🔎 تحقق متبادل عبر الخدمة",
+        "val_wash_btn": "🧼 توحيد SMILES عبر الخدمة (حي)",
+        "val_no_smiles": "أدخل SMILES صالحة أولاً.",
+        "val_ok_status": "الخدمة استجابت: {n_valid} جزيئاً صالحاً من {n_all} — القيم الناقصة نقص يُعرض لا يُخمَّن.",
+        "val_wash_done": "المدخل: `{orig}` ← الموحَّد: `{cleaned}`",
+        "val_wash_none": "تعذر التوحيد عبر الخدمة الآن — غير مانع لأي شيء محلي.",
+        "val_admetai_absent": "ADMET-AI غير مثبت في هذه البيئة — عمود المقارنة المحلي غائب (تثبيته اختياري ولا يعتمد عليه شيء أساسي).",
+        "val_crosswalk_n": "جدول التقاطع: {n} نقطة مشتركة بالتعريف بين المحركين — نموذجان مختلفان لنفس السؤال",
+        "val_lesson_title": "📖 وضع الدرس — لماذا نقيس مقابل خدمة مستقلة؟",
         # ── التصنيف الدوائي (S10) ──
         "tab_classes": "🗂️ التصنيف الدوائي",
         "cls_title": "🗂️ دليل المجموعات الدوائية — المعيار العالمي ATC",
@@ -472,6 +503,38 @@ STRINGS: dict[str, dict[str, str]] = {
             "honestly and are never guessed."
         ),
         "gh_model_card": "Model card",
+        # ── External validation (v0.18) ──
+        "tab_validation": "🛡️ External Validation",
+        "val_title": "🛡️ External Validation — model cards & cross-benchmark",
+        "val_caption": (
+            "A number without its interval is not quotable, and a model without "
+            "declared limits is not trustworthy: the model card shows accuracy "
+            "with bootstrap CIs, predicted-vs-observed calibration, and the "
+            "applicability domain (inside vs outside) — then a live cross-check "
+            "with ADMETlab 3.0 on the same molecule: agreement confirms "
+            "behaviour, disagreement teaches generalization limits."
+        ),
+        "val_card_title": "① Approved model card — Mpro pIC50 (frozen protocol)",
+        "val_card_caption": "Source: docs/audit/model-cards-p18-results.json — metrics match the frozen reference model-evaluation-results.json exactly",
+        "val_card_missing": (
+            "Card file missing — regenerate from the repo: "
+            "`python3 scripts/build_model_cards.py` (all other labs work as usual)."
+        ),
+        "val_gap_label": "Memorization/generalization gap (random − scaffold)",
+        "val_ad_title": "Applicability domain — the declared limit",
+        "val_calib_title": "Predicted-vs-observed calibration (bins over predicted range)",
+        "val_calib_note": "A healthy card hugs the diagonal: observed mean ≈ predicted mean per bin. Empty bins are never fabricated.",
+        "val_admetlab_title": "② Live cross-benchmark — ADMETlab 3.0 (121 endpoints)",
+        "val_smiles_label": "SMILES (one per line — up to 10 processed)",
+        "val_run_btn": "🔎 Cross-check via service",
+        "val_wash_btn": "🧼 Canonicalize SMILES via service (live)",
+        "val_no_smiles": "Enter valid SMILES first.",
+        "val_ok_status": "Service responded: {n_valid} valid molecules of {n_all} — missing values are shown, never guessed.",
+        "val_wash_done": "Input: `{orig}` ← canonical: `{cleaned}`",
+        "val_wash_none": "Could not canonicalize via the service now — nothing local is blocked.",
+        "val_admetai_absent": "ADMET-AI is not installed in this environment — the local comparison column is absent (optional and nothing core depends on it).",
+        "val_crosswalk_n": "Crosswalk: {n} shared endpoints by definition between the two engines",
+        "val_lesson_title": "📖 Lesson mode — why benchmark against an independent service?",
         # ── Drug classification (S10) ──
         "tab_classes": "🗂️ Drug Classes",
         "cls_title": "🗂️ Drug class guide — the global ATC standard",

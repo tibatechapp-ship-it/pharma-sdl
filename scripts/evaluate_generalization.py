@@ -20,7 +20,9 @@
                        التقسيم العشوائي (مصدر تضخم محتمل للرقم المعلن).
 
 الصدق المنهجي:
-    - نفس التمثيل (featurize) ونفس النموذج (RF 300) المستخدمان في الإنتاج.
+    - نفس التمثيل ونفس النموذج المعتمد في الإنتاج حرفياً (P11):
+      بصمة Morgan تكرارات + RF 300 مع max_features=0.3 — والمحاذاة
+      تُتَتبع باختبار (COUNT_BASED/PROD_MAX_FEATURES مقابل الإنتاج).
     - كل المعالجة قبل التقسيم حتمية لكل جزيء (بصمة/هيكل) — لا معلومة
       من الاختبار تتسرب إلى التدريب.
     - كل الأرقام محسوبة فعلياً وتُكتب في docs/audit/ — لا افتراضات.
@@ -54,6 +56,13 @@ from core.ml_potency import featurize, load_dataset
 
 RANDOM_SEED = 42          # نفس بذرة الإنتاج — مقارنة عادلة
 TEST_SIZE = 0.2           # نفس نسبة الإنتاج
+# ── مواءمة بروتوكول الإنتاج المعتمد (P11 / train_default_model) ──
+# النموذج المعتمد v0.12.0: بصمة Morgan تكرارات (count_based=True) +
+# RF 300 مع max_features=0.3. قبل هذه المواءمة كان البروتوكول يحسب
+# بالتكوين التاريخي الثنائي — رقماً صادقاً يومها لكنه لم يعد «مواصفة
+# الإنتاج». المحاذاة تُلزم بطاقات النماذج أن توثّق النموذج الذي يعمل فعلاً.
+COUNT_BASED = True                 # featurize(count_based=True) — كالإنتاج
+PROD_MAX_FEATURES = 0.3            # RandomForestRegressor(max_features=0.3) — كالإنتاج
 BOOTSTRAP_N = 1000
 CI_LEVEL = 0.95
 ACTIVITY_BINS = [(0.0, 5.0, "ضعيف (<5)"), (5.0, 7.0, "متوسط (5–7)"), (7.0, 99.0, "قوي (>7)")]
@@ -117,10 +126,16 @@ def metrics_block(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     return out
 
 
-def fit_rf(X_tr, y_tr, seed: int, n_estimators: int) -> RandomForestRegressor:
-    """نفس مواصفات الإنتاج تماماً: RF 300 شجرة على بصمات Morgan."""
+def fit_rf(
+    X_tr, y_tr, seed: int, n_estimators: int, max_features: float | None = PROD_MAX_FEATURES
+) -> RandomForestRegressor:
+    """نفس مواصفات الإنتاج المعتمد حرفياً: RF 300 + max_features=0.3 (P11)."""
     model = RandomForestRegressor(
-        n_estimators=n_estimators, random_state=seed, n_jobs=-1, oob_score=False
+        n_estimators=n_estimators,
+        max_features=max_features,
+        random_state=seed,
+        n_jobs=-1,
+        oob_score=False,
     )
     model.fit(X_tr, y_tr)
     return model
@@ -163,11 +178,22 @@ def scaffold_split_protocol(scaffolds: list[str | None], n: int, seed: int):
 
 
 def knn_baseline_predict(X_tr, y_tr, X_te) -> np.ndarray:
-    """أقرب جار كيميائي — Tanimoto على بصمات Morgan الثنائية."""
-    # Tanimoto للمتجهات الثنائية: c/(a+b−c)
-    sims = (X_te @ X_tr.T) / (
-        X_te.sum(axis=1, keepdims=True) + X_tr.sum(axis=1) - (X_te @ X_tr.T) + 1e-12
-    )
+    """أقرب جار كيميائي — تانيروتو معمّم Σmin/Σmax على بصمات Morgan.
+
+    بصمات الإنتاج تكرارات، فالصيغة الثنائية c/(a+b−c) مضللة هنا؛
+    الصيغة المعمّمة تتفكك إلى الثنائية حرفياً على المتجهات 0/1
+    (نفس دالة core.model_cards.generalized_tanimoto بلا استيراد دائري).
+    """
+    from scipy.spatial.distance import cdist as _cdist
+
+    X_te = np.asarray(X_te, dtype=float)
+    X_tr = np.asarray(X_tr, dtype=float)
+    sums_te = X_te.sum(axis=1)[:, None]
+    sums_tr = X_tr.sum(axis=1)[None, :]
+    l1 = _cdist(X_te, X_tr, "cityblock")
+    smin = (sums_te + sums_tr - l1) / 2.0
+    smax = (sums_te + sums_tr + l1) / 2.0
+    sims = smin / (smax + 1e-12)
     return y_tr[np.argmax(sims, axis=1)]
 
 
@@ -181,7 +207,7 @@ def run(outdir: Path, n_estimators: int, n_scaffold_seeds: int) -> dict:
     smiles_all = df["smiles"].tolist()
     y_all = df["pchembl_value"].to_numpy(dtype=float)
 
-    X, valid_idx = featurize(smiles_all)
+    X, valid_idx = featurize(smiles_all, count_based=COUNT_BASED)
     y = y_all[valid_idx]
     valid_smiles = [smiles_all[i] for i in valid_idx]
     scaffolds = [murcko_scaffold(s) for s in valid_smiles]
@@ -195,10 +221,13 @@ def run(outdir: Path, n_estimators: int, n_scaffold_seeds: int) -> dict:
             "n_total": len(y),
             "n_invalid_dropped": int(n_invalid),
             "n_unique_scaffolds": int(n_scaffolds),
-            "features": "Morgan FP radius=2, 2048 bit (نفس إنتاج core/ml_potency)",
-            "model": f"RandomForestRegressor(n_estimators={n_estimators}) — نفس مواصفات الإنتاج",
+            "features": "Morgan count fingerprints radius=2, 2048 (count_based=True — التكوين المعتمد P11 في core/ml_potency حرفياً)",
+            "model": f"RandomForestRegressor(n_estimators={n_estimators}, max_features={PROD_MAX_FEATURES}) — نفس مواصفات الإنتاج المعتمد",
             "test_size": TEST_SIZE,
             "bootstrap_resamples": BOOTSTRAP_N,
+            "sklearn_version": __import__("sklearn").__version__,
+            "rdkit_version": __import__("rdkit").__version__,
+            "protocol_alignment": "2026-11-10: محاذاة البروتوكول إلى التكوين المعتمد P11 (counts + max_features=0.3) + تانيروتو معمّم — المرجع أعيد توليده على هذه البيئة",
             "generated_at": time.strftime("%Y-%m-%d %H:%M:%S %Z"),
             "runtime_seconds": None,
         },

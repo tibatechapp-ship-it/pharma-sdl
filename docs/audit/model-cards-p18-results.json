@@ -1,0 +1,536 @@
+{
+  "protocol": {
+    "dataset": "data/mpro_sample.csv (ChEMBL4523582 — SARS-CoV-2 Mpro pChEMBL)",
+    "n_total": 900,
+    "features": "Morgan count fingerprints radius=2, 2048 (count_based=True — التكوين المعتمد P11 في core/ml_potency حرفياً)",
+    "model": "RandomForestRegressor(n_estimators=300, max_features=0.3) — نفس مواصفات الإنتاج المعتمد",
+    "test_size": 0.2,
+    "bootstrap_resamples": 1000,
+    "ad_percentile": 5.0,
+    "sklearn_version": "1.9.1",
+    "generated_at": "2026-11-10 04:36:07 UTC",
+    "frozen_reference": "docs/audit/model-evaluation-results.json — المقاييس يجب أن تطابقه",
+    "scaffold_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "runtime_seconds": 32.2
+  },
+  "model_card_random": {
+    "provenance": {
+      "dataset": "data/mpro_sample.csv (ChEMBL4523582 — SARS-CoV-2 Mpro pChEMBL)",
+      "n_total": 900,
+      "features": "Morgan count fingerprints radius=2, 2048 (count_based=True — التكوين المعتمد P11 في core/ml_potency حرفياً)",
+      "model": "RandomForestRegressor(n_estimators=300, max_features=0.3) — نفس مواصفات الإنتاج المعتمد",
+      "test_size": 0.2,
+      "bootstrap_resamples": 1000,
+      "ad_percentile": 5.0,
+      "sklearn_version": "1.9.1",
+      "generated_at": "2026-11-10 04:36:07 UTC",
+      "split": "random seed=42 (بروتوكول الإنتاج)"
+    },
+    "n_test": 180,
+    "metrics": {
+      "r2": {
+        "point": 0.468,
+        "ci95": [
+          0.312,
+          0.603
+        ],
+        "n": 180,
+        "n_boot": 1000,
+        "seed": 42
+      },
+      "mae": {
+        "point": 0.567,
+        "ci95": [
+          0.488,
+          0.641
+        ],
+        "n": 180,
+        "n_boot": 1000,
+        "seed": 42
+      },
+      "rmse": {
+        "point": 0.754,
+        "ci95": [
+          0.64,
+          0.86
+        ],
+        "n": 180,
+        "n_boot": 1000,
+        "seed": 42
+      }
+    },
+    "calibration_bins": [
+      {
+        "low": 4.373,
+        "high": 4.728,
+        "n": 7,
+        "pred_mean": 4.572,
+        "obs_mean": 4.583,
+        "bin_mae": 0.289
+      },
+      {
+        "low": 4.728,
+        "high": 5.084,
+        "n": 11,
+        "pred_mean": 4.908,
+        "obs_mean": 4.709,
+        "bin_mae": 0.352
+      },
+      {
+        "low": 5.084,
+        "high": 5.439,
+        "n": 34,
+        "pred_mean": 5.249,
+        "obs_mean": 5.301,
+        "bin_mae": 0.555
+      },
+      {
+        "low": 5.439,
+        "high": 5.795,
+        "n": 29,
+        "pred_mean": 5.635,
+        "obs_mean": 5.819,
+        "bin_mae": 0.694
+      },
+      {
+        "low": 5.795,
+        "high": 6.15,
+        "n": 28,
+        "pred_mean": 5.94,
+        "obs_mean": 6.178,
+        "bin_mae": 0.58
+      },
+      {
+        "low": 6.15,
+        "high": 6.506,
+        "n": 34,
+        "pred_mean": 6.326,
+        "obs_mean": 6.432,
+        "bin_mae": 0.432
+      },
+      {
+        "low": 6.506,
+        "high": 6.861,
+        "n": 11,
+        "pred_mean": 6.647,
+        "obs_mean": 6.443,
+        "bin_mae": 0.711
+      },
+      {
+        "low": 6.861,
+        "high": 7.217,
+        "n": 17,
+        "pred_mean": 7.013,
+        "obs_mean": 6.951,
+        "bin_mae": 0.801
+      },
+      {
+        "low": 7.217,
+        "high": 7.572,
+        "n": 5,
+        "pred_mean": 7.425,
+        "obs_mean": 7.792,
+        "bin_mae": 0.367
+      },
+      {
+        "low": 7.572,
+        "high": 7.928,
+        "n": 4,
+        "pred_mean": 7.736,
+        "obs_mean": 7.14,
+        "bin_mae": 0.747
+      }
+    ],
+    "applicability_domain": {
+      "method": "max Tanimoto vs train — threshold = train self-NN p5",
+      "similarity": "generalized Tanimoto Σmin/Σmax (count fingerprints؛ الثنائية = c/(a+b−c) حرفياً)",
+      "percentile": 5.0,
+      "threshold": 0.318,
+      "train_inside_frac": 0.95,
+      "n_test": 180,
+      "inside": {
+        "n": 173,
+        "frac": 0.961,
+        "r2": 0.499,
+        "mae": 0.546
+      },
+      "outside": {
+        "n": 7,
+        "frac": 0.039,
+        "r2": -0.095,
+        "mae": 1.078
+      },
+      "note_ar": "داخل النطاق = الجزيء قريب كيميائياً من التدريب (تشابهه مع أقرب جار تدريب بلغ العتبة). النموذج يُستشهد به داخل النطاق؛ خارجه تنبيه استقراء لا حكم."
+    },
+    "uncertainty_calibration": {
+      "spearman_rho_abserror_vs_treestd": 0.312,
+      "p_value": 1.98e-05
+    }
+  },
+  "model_card_scaffold": {
+    "aggregate": {
+      "r2": {
+        "mean": 0.508,
+        "std": 0.09
+      },
+      "mae": {
+        "mean": 0.559,
+        "std": 0.046
+      },
+      "rmse": {
+        "mean": 0.71,
+        "std": 0.055
+      }
+    },
+    "per_seed": [
+      {
+        "mae": 0.508,
+        "rmse": 0.671,
+        "r2": 0.582,
+        "n_test": 179,
+        "mae_ci95": [
+          0.448,
+          0.577
+        ],
+        "rmse_ci95": [
+          0.588,
+          0.762
+        ],
+        "r2_ci95": [
+          0.481,
+          0.66
+        ],
+        "mae_by_activity_bin": [
+          {
+            "bin": "ضعيف (<5)",
+            "n": 38,
+            "mae": 0.809
+          },
+          {
+            "bin": "متوسط (5–7)",
+            "n": 112,
+            "mae": 0.34
+          },
+          {
+            "bin": "قوي (>7)",
+            "n": 29,
+            "mae": 0.763
+          }
+        ],
+        "seed": 0
+      },
+      {
+        "mae": 0.624,
+        "rmse": 0.787,
+        "r2": 0.373,
+        "n_test": 178,
+        "mae_ci95": [
+          0.558,
+          0.694
+        ],
+        "rmse_ci95": [
+          0.704,
+          0.869
+        ],
+        "r2_ci95": [
+          0.243,
+          0.478
+        ],
+        "mae_by_activity_bin": [
+          {
+            "bin": "ضعيف (<5)",
+            "n": 47,
+            "mae": 0.955
+          },
+          {
+            "bin": "متوسط (5–7)",
+            "n": 113,
+            "mae": 0.465
+          },
+          {
+            "bin": "قوي (>7)",
+            "n": 18,
+            "mae": 0.757
+          }
+        ],
+        "seed": 1
+      },
+      {
+        "mae": 0.522,
+        "rmse": 0.649,
+        "r2": 0.619,
+        "n_test": 180,
+        "mae_ci95": [
+          0.469,
+          0.58
+        ],
+        "rmse_ci95": [
+          0.588,
+          0.714
+        ],
+        "r2_ci95": [
+          0.539,
+          0.678
+        ],
+        "mae_by_activity_bin": [
+          {
+            "bin": "ضعيف (<5)",
+            "n": 37,
+            "mae": 0.785
+          },
+          {
+            "bin": "متوسط (5–7)",
+            "n": 106,
+            "mae": 0.392
+          },
+          {
+            "bin": "قوي (>7)",
+            "n": 37,
+            "mae": 0.633
+          }
+        ],
+        "seed": 2
+      },
+      {
+        "mae": 0.537,
+        "rmse": 0.678,
+        "r2": 0.52,
+        "n_test": 180,
+        "mae_ci95": [
+          0.478,
+          0.6
+        ],
+        "rmse_ci95": [
+          0.601,
+          0.763
+        ],
+        "r2_ci95": [
+          0.4,
+          0.613
+        ],
+        "mae_by_activity_bin": [
+          {
+            "bin": "ضعيف (<5)",
+            "n": 30,
+            "mae": 0.762
+          },
+          {
+            "bin": "متوسط (5–7)",
+            "n": 125,
+            "mae": 0.424
+          },
+          {
+            "bin": "قوي (>7)",
+            "n": 25,
+            "mae": 0.832
+          }
+        ],
+        "seed": 3
+      },
+      {
+        "mae": 0.604,
+        "rmse": 0.765,
+        "r2": 0.445,
+        "n_test": 180,
+        "mae_ci95": [
+          0.537,
+          0.677
+        ],
+        "rmse_ci95": [
+          0.687,
+          0.844
+        ],
+        "r2_ci95": [
+          0.299,
+          0.545
+        ],
+        "mae_by_activity_bin": [
+          {
+            "bin": "ضعيف (<5)",
+            "n": 32,
+            "mae": 0.654
+          },
+          {
+            "bin": "متوسط (5–7)",
+            "n": 115,
+            "mae": 0.496
+          },
+          {
+            "bin": "قوي (>7)",
+            "n": 33,
+            "mae": 0.932
+          }
+        ],
+        "seed": 4
+      }
+    ],
+    "seed0_detail": {
+      "provenance": {
+        "dataset": "data/mpro_sample.csv (ChEMBL4523582 — SARS-CoV-2 Mpro pChEMBL)",
+        "n_total": 900,
+        "features": "Morgan count fingerprints radius=2, 2048 (count_based=True — التكوين المعتمد P11 في core/ml_potency حرفياً)",
+        "model": "RandomForestRegressor(n_estimators=300, max_features=0.3) — نفس مواصفات الإنتاج المعتمد",
+        "test_size": 0.2,
+        "bootstrap_resamples": 1000,
+        "ad_percentile": 5.0,
+        "sklearn_version": "1.9.1",
+        "generated_at": "2026-11-10 04:36:07 UTC",
+        "split": "scaffold seed=0 (تفصيل البذرة الأولى)"
+      },
+      "n_test": 179,
+      "metrics": {
+        "r2": {
+          "point": 0.582,
+          "ci95": [
+            0.481,
+            0.66
+          ],
+          "n": 179,
+          "n_boot": 1000,
+          "seed": 42
+        },
+        "mae": {
+          "point": 0.508,
+          "ci95": [
+            0.448,
+            0.577
+          ],
+          "n": 179,
+          "n_boot": 1000,
+          "seed": 42
+        },
+        "rmse": {
+          "point": 0.671,
+          "ci95": [
+            0.588,
+            0.762
+          ],
+          "n": 179,
+          "n_boot": 1000,
+          "seed": 42
+        }
+      },
+      "calibration_bins": [
+        {
+          "low": 4.748,
+          "high": 5.037,
+          "n": 10,
+          "pred_mean": 4.926,
+          "obs_mean": 4.684,
+          "bin_mae": 0.331
+        },
+        {
+          "low": 5.037,
+          "high": 5.325,
+          "n": 20,
+          "pred_mean": 5.24,
+          "obs_mean": 4.998,
+          "bin_mae": 0.364
+        },
+        {
+          "low": 5.325,
+          "high": 5.614,
+          "n": 30,
+          "pred_mean": 5.465,
+          "obs_mean": 5.203,
+          "bin_mae": 0.556
+        },
+        {
+          "low": 5.614,
+          "high": 5.903,
+          "n": 34,
+          "pred_mean": 5.767,
+          "obs_mean": 5.636,
+          "bin_mae": 0.602
+        },
+        {
+          "low": 5.903,
+          "high": 6.192,
+          "n": 30,
+          "pred_mean": 6.02,
+          "obs_mean": 5.94,
+          "bin_mae": 0.649
+        },
+        {
+          "low": 6.192,
+          "high": 6.48,
+          "n": 14,
+          "pred_mean": 6.318,
+          "obs_mean": 6.517,
+          "bin_mae": 0.35
+        },
+        {
+          "low": 6.48,
+          "high": 6.769,
+          "n": 17,
+          "pred_mean": 6.611,
+          "obs_mean": 6.595,
+          "bin_mae": 0.334
+        },
+        {
+          "low": 6.769,
+          "high": 7.058,
+          "n": 6,
+          "pred_mean": 6.893,
+          "obs_mean": 7.365,
+          "bin_mae": 0.622
+        },
+        {
+          "low": 7.058,
+          "high": 7.347,
+          "n": 12,
+          "pred_mean": 7.22,
+          "obs_mean": 7.318,
+          "bin_mae": 0.523
+        },
+        {
+          "low": 7.347,
+          "high": 7.635,
+          "n": 6,
+          "pred_mean": 7.53,
+          "obs_mean": 7.675,
+          "bin_mae": 0.537
+        }
+      ],
+      "applicability_domain": {
+        "method": "max Tanimoto vs train — threshold = train self-NN p5",
+        "similarity": "generalized Tanimoto Σmin/Σmax (count fingerprints؛ الثنائية = c/(a+b−c) حرفياً)",
+        "percentile": 5.0,
+        "threshold": 0.317,
+        "train_inside_frac": 0.95,
+        "n_test": 179,
+        "inside": {
+          "n": 170,
+          "frac": 0.95,
+          "r2": 0.631,
+          "mae": 0.485
+        },
+        "outside": {
+          "n": 9,
+          "frac": 0.05,
+          "r2": -0.572,
+          "mae": 0.954
+        },
+        "note_ar": "داخل النطاق = الجزيء قريب كيميائياً من التدريب (تشابهه مع أقرب جار تدريب بلغ العتبة). النموذج يُستشهد به داخل النطاق؛ خارجه تنبيه استقراء لا حكم."
+      },
+      "uncertainty_calibration": {
+        "spearman_rho_abserror_vs_treestd": 0.347,
+        "p_value": 1.9e-06
+      }
+    }
+  },
+  "honest_summary_ar": {
+    "r2_random": 0.468,
+    "r2_scaffold_mean": 0.508,
+    "generalization_gap": -0.04,
+    "ad_threshold_random": 0.318,
+    "ad_inside_frac_random": 0.961,
+    "reading_ar": "اقرأ البطاقة هكذا: فجوة (العشوائي − الهيكلي) تقيس «التذكّر مقابل التعميم» مهما كان اتجاهها في بذور بعينها — قيمتها الحالية فوق، وفترات الثقة تمنع اقتباس نقطة بلا مجالها. داخل نطاق قابلية التطبيق النموذج يُستشهد به؛ خارجه استقراء يُعلَن خطره. ومعايرة الصناديق تكشف إن كانت القيم المتوقعة تعني ما تقول."
+  }
+}

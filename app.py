@@ -1,6 +1,9 @@
 """Pharma SDL — Streamlit Web Application."""
 import importlib.util
+import json
+import logging
 import uuid
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
@@ -167,6 +170,7 @@ g_reports = st.tabs([
     "🎓 Capstone",
     t(LANG, "tab_admet"),
     t(LANG, "tab_classes"),
+    t(LANG, "tab_validation"),
 ])
 
 # خريطة مواضع محتوى التبويبات القديمة (tabs[0..13]) إلى المجموعات الجديدة:
@@ -174,7 +178,7 @@ g_reports = st.tabs([
 #   4 MIC→labs[0] · 5 PROTAC Lab→labs[1] · 6 PubChem→tools[0] · 7 CYP→labs[2]
 #   8 Predict→tools[1] · 9 Capstone→reports[0] · 10 Docking→tools[2]
 #  11 PGx→labs[3] · 12 ADMET→reports[1] · 13 Classes (ATC/S10)→reports[2]
-#  + P15: Global Health→labs[4]
+#  + P15: Global Health→labs[4] · v0.18: External Validation→reports[3]
 
 # ═══ Tab 0: Make ═══
 with g_pipeline[0]:
@@ -1531,3 +1535,201 @@ with g_reports[2]:
             st.write(t(LANG, "cls_lesson_text"))
     except Exception as e:  # noqa: BLE001
         st.error(f"خطأ في التصنيف الدوائي: {e}")
+
+
+# ═══ Tab 14 (v0.18): التحقق الخارجي — بطاقات النماذج + القياس المتبادل ═══
+# المبدأ: رقم بلا فترته لا يُقتبس — والنموذج الذي ينشر حدوده يُؤتمن أكثر
+# من نموذج يخفيها. القسم الأول يقرأ البطاقة الرسمية من docs/audit (البروتوكول
+# المجمَّد)، والقسم الثاني قياس متبادل حي مع ADMETlab 3.0 بفشل لطيف موثّق.
+
+
+def _admetlab3_cached(smiles_tuple: tuple[str, ...]) -> "object":
+    """كاش جلسة صريح — النجاحات فقط تُخزَّن، والفشل يُعاد نداؤه لاحقاً
+    (حتى لا يبقى المستخدم عالقاً في رسالة الانقطاع بعد تعافي الخدمة)."""
+    from core.clients import admetlab3_client as al3
+
+    cache: dict = st.session_state.setdefault("admetlab3_cache", {})
+    if smiles_tuple in cache:
+        return cache[smiles_tuple]
+    batch = al3.predict_admet_batch(list(smiles_tuple))
+    if batch.ok:
+        cache[smiles_tuple] = batch
+    return batch
+
+
+with g_reports[3]:
+    st.subheader(t(LANG, "val_title"))
+    st.caption(t(LANG, "val_caption"))
+    try:
+        # ── ① بطاقة النموذج المعتمد — من docs/audit (البروتوكول المجمَّد) ──
+        st.markdown(f"### {t(LANG, 'val_card_title')}")
+        st.caption(t(LANG, "val_card_caption"))
+        card_path = Path(__file__).parent / "docs" / "audit" / "model-cards-p18-results.json"
+        if card_path.exists():
+            card = json.loads(card_path.read_text(encoding="utf-8"))
+            rnd = card["model_card_random"]
+            scaf = card["model_card_scaffold"]["aggregate"]
+            summ = card["honest_summary_ar"]
+
+            cm1, cm2, cm3, cm4 = st.columns(4)
+            cm1.metric(
+                "R² (عشوائي، seed=42)",
+                f'{rnd["metrics"]["r2"]["point"]:.3f}',
+                f'CI95 {rnd["metrics"]["r2"]["ci95"]}',
+            )
+            cm2.metric(
+                "R² (هيكلي، 5 بذور)",
+                f'{scaf["r2"]["mean"]:.3f}',
+                f'± {scaf["r2"]["std"]}',
+            )
+            cm3.metric(
+                "MAE (عشوائي)",
+                f'{rnd["metrics"]["mae"]["point"]:.3f}',
+                f'CI95 {rnd["metrics"]["mae"]["ci95"]}',
+            )
+            cm4.metric(t(LANG, "val_gap_label"), f'{summ["generalization_gap"]:+.3f}')
+
+            ad = rnd["applicability_domain"]
+            with st.expander(f"🧭 {t(LANG, 'val_ad_title')}", expanded=True):
+                st.dataframe(
+                    pd.DataFrame(
+                        [
+                            {
+                                "المنطقة": "داخل النطاق (قريب من التدريب)",
+                                "العدد": ad["inside"]["n"],
+                                "النسبة": f'{ad["inside"]["frac"]:.1%}',
+                                "R²": ad["inside"]["r2"],
+                                "MAE": ad["inside"]["mae"],
+                            },
+                            {
+                                "المنطقة": "خارج النطاق (استقراء)",
+                                "العدد": ad["outside"]["n"],
+                                "النسبة": f'{ad["outside"]["frac"]:.1%}',
+                                "R²": ad["outside"]["r2"],
+                                "MAE": ad["outside"]["mae"],
+                            },
+                        ]
+                    ),
+                    hide_index=True,
+                    width="stretch",
+                )
+                st.caption(
+                    f'العتبة: أعلى تشابه تانيروتو ≥ {ad["threshold"]} مقابل '
+                    f'التدريب (المئين {ad["percentile"]} من التشابه الذاتي) — {ad["note_ar"]}'
+                )
+
+            with st.expander(f"📉 {t(LANG, 'val_calib_title')}"):
+                st.dataframe(pd.DataFrame(rnd["calibration_bins"]), hide_index=True, width="stretch")
+                st.caption(t(LANG, "val_calib_note"))
+        else:
+            st.warning(t(LANG, "val_card_missing"))
+
+        st.divider()
+
+        # ── ② القياس المتبادل الحي — ADMETlab 3.0 (فشل لطيف موثّق) ──
+        st.markdown(f"### {t(LANG, 'val_admetlab_title')}")
+        from core.clients import admetlab3_client as al3
+
+        val_text = st.text_area(
+            t(LANG, "val_smiles_label"),
+            value="CC(=O)Oc1ccccc1C(=O)O\nCN1C=NC2=C1C(=O)N(C)C(=O)N2C",
+            key="val_smiles",
+        )
+        smiles_in = [s.strip() for s in val_text.splitlines() if s.strip()][:10]
+
+        vb1, vb2 = st.columns(2)
+        if vb1.button(t(LANG, "val_run_btn"), type="primary", key="val_run"):
+            if not smiles_in:
+                st.info(t(LANG, "val_no_smiles"))
+            else:
+                with st.spinner("⏳ ADMETlab 3.0…"):
+                    batch = _admetlab3_cached(tuple(smiles_in))
+                if not batch.ok:
+                    st.info(al3.reason_message(batch.reason, LANG))
+                else:
+                    st.success(
+                        t(LANG, "val_ok_status").format(
+                            n_valid=batch.n_valid, n_all=batch.n_all
+                        )
+                    )
+                    rows = []
+                    for res in batch.results:
+                        for key, ep in al3.ENDPOINTS.items():
+                            v = res.get(key)
+                            if v is not None:
+                                rows.append(
+                                    {
+                                        "SMILES": res.smiles,
+                                        "نقطة النهاية": f"{ep.name_ar} ({key})",
+                                        "القيمة": v,
+                                        "الوحدة": ep.unit_ar,
+                                    }
+                                )
+                    if rows:
+                        st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
+
+                    # المقارنة الجانبية مع ADMET-AI المحلي إن توفّر — القياس المتبادل
+                    ai_rows = []
+                    ai_available = False
+                    try:
+                        from core.clients import admet_ai_client as aic
+
+                        ai_available = bool(aic.is_available())
+                        if ai_available:
+                            ai_results = aic.predict_admet_ai_batch(smiles_in)
+                            ai_by_smiles = {r.smiles: r for r in ai_results}
+                            for res in batch.results:
+                                ai = ai_by_smiles.get(res.smiles)
+                                if ai is None:
+                                    continue
+                                for key3, task_id in al3.CROSSWALK_TO_ADMET_AI.items():
+                                    v3 = res.get(key3)
+                                    va = ai.get(task_id)
+                                    if v3 is None or va is None:
+                                        continue
+                                    label = (
+                                        aic.TASKS[task_id].name_ar
+                                        if task_id in aic.TASKS
+                                        else key3
+                                    )
+                                    ai_rows.append(
+                                        {
+                                            "SMILES": res.smiles,
+                                            "نقطة النهاية": label,
+                                            "ADMET-AI (محلي)": round(va, 3),
+                                            "ADMETlab 3.0": round(v3, 3),
+                                            "الفارق": round(v3 - va, 3),
+                                        }
+                                    )
+                    except Exception:  # المقارنة رفاهية لا أساس — تسجل صمتاً
+                        logging.getLogger(__name__).debug(
+                            "ADMET-AI crosswalk unavailable", exc_info=True
+                        )
+                    if ai_rows:
+                        st.markdown(
+                            f"**{t(LANG, 'val_crosswalk_n').format(n=len(al3.CROSSWALK_TO_ADMET_AI))}**"
+                        )
+                        st.dataframe(pd.DataFrame(ai_rows), hide_index=True, width="stretch")
+                    elif not ai_available:
+                        st.caption(t(LANG, "val_admetai_absent"))
+
+        if vb2.button(t(LANG, "val_wash_btn"), key="val_wash"):
+            if not smiles_in:
+                st.info(t(LANG, "val_no_smiles"))
+            else:
+                with st.spinner("⏳ washmol…"):
+                    cleaned = al3.washmol(smiles_in[0])
+                if cleaned:
+                    st.success(
+                        t(LANG, "val_wash_done").format(orig=smiles_in[0], cleaned=cleaned)
+                    )
+                else:
+                    st.info(t(LANG, "val_wash_none"))
+
+        with st.expander(t(LANG, "val_lesson_title"), expanded=False):
+            st.write(
+                al3.ADMETLAB3_LESSON[LANG].format(n=len(al3.CROSSWALK_TO_ADMET_AI))
+            )
+            st.write(al3.DISCLAIMER_AR if LANG == "ar" else al3.DISCLAIMER_EN)
+    except Exception as e:  # noqa: BLE001
+        st.error(f"خطأ في التحقق الخارجي: {e}")
