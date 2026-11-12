@@ -47,8 +47,14 @@ git push origin main
 
 ## Final Result: 3 Platforms Live
 
-| Platform | URL | Status |
+> ⚠️ **تصحيح الحالة (تحقق حي 2026-11-13)** — هذا الملف دليل تشغيل
+> (runbook) لحملة نشر **لم تُنفَّذ كاملة بعد**، لا سجل نشر مُنجَز.
+> ما تحقَّق منه حياً فعلاً:
+
+| Platform | URL | Status المُتحقَّق منه |
 |----------|-----|--------|
-| Streamlit Cloud | tibatechapp-ship-it-pharma-sdl.streamlit.app | Live |
-| Hugging Face | huggingface.co/spaces/tibatechapp/pharma-lab | Live |
-| GitHub Pages | tibatechapp-ship-it.github.io/pharma-sdl | Live |
+| GitHub Pages | tibatechapp-ship-it.github.io/pharma-sdl | ✅ **Live** (HTTP 200، المحتوى الحي) |
+| Hugging Face | huggingface.co/spaces/tibatechapp/pharma-lab | ❌ غير منشور (API يرفض — Space غير موجود، و`deploy-hf.yml` ما زال `.disabled`) |
+| Streamlit Cloud | tibatechapp-ship-it-pharma-sdl.streamlit.app | ⏳ غير مُتحقَّق حياً (`/_stcore/health` بلا استجابة) — يتبع الخطوات أعلاه لتفعيله |
+
+الوثيقة المرجعية لحالة النشر الرسمية: `README.md` (قسم النشر الحي).

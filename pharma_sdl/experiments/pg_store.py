@@ -43,13 +43,21 @@ CREATE INDEX IF NOT EXISTS idx_experiments_status  ON experiments(status);
 
 
 def _load_psycopg():
-    """استيراد psycopg برسالة تثبيت صادقة — التبعية اختيارية لا مخفية."""
+    """استيراد psycopg برسالة تثبيت صادقة — غيابه = خلفية غير قابلة للوصول.
+
+    الصدق بنيوياً عبر كل البيئات: غياب التعريف يعني أن خلفية postgres
+    غير قابلة للوصول فعلاً — `StoreUnavailableError` (503) لا `PlatformError`
+    عامة (500)، فتترجمها طبقة الـAPI إلى فشل صريح مترجم لا انهيار غامض،
+    سلوكاً واحداً مكسوباً في بيئات الـCI والإنتاج على حد سواء.
+    """
     try:
         import psycopg
 
         return psycopg
-    except ImportError as exc:  # pragma: no cover — بيئة بلا extras «pg»
-        raise PlatformError(
+    except ImportError as exc:
+        from pharma_sdl.errors import StoreUnavailableError
+
+        raise StoreUnavailableError(
             "خلفية postgres مطلوبة لكن psycopg غير مركَّب — ثبّتها بالأمر: "
             "pip install 'pharma-sdl[pg]'",
             "postgres backend requested but psycopg is not installed — "

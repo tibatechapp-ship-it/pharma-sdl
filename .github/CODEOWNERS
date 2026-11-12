@@ -1,0 +1,20 @@
+# CODEOWNERS — مراجعة إلزامية وفق معايير Google (كل مسار له مالك مسؤول)
+# الصيغة: https://docs.github.com/en/repositories/managing-a-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# المالك الافتراضي — كل ما لم يُغطَّ صراحةً يمر عبر المالكين:
+*                               @tibatechapp-ship-it
+
+# قلب المنصة العلمي — تغييراته تحتاج عيناً مالكة دائماً:
+/pharma_sdl/                    @tibatechapp-ship-it
+/core/                          @tibatechapp-ship-it
+
+# الأمان والنشر — لا استثناءات:
+/deploy/                        @tibatechapp-ship-it
+/Dockerfile                     @tibatechapp-ship-it
+/docker-compose.yml             @tibatechapp-ship-it
+/.github/workflows/             @tibatechapp-ship-it
+
+# العقد العام (README/الوثائق/الترخيص):
+/README.md                      @tibatechapp-ship-it
+/LICENSE                        @tibatechapp-ship-it
+/CHANGELOG.md                   @tibatechapp-ship-it
+/SECURITY.md                    @tibatechapp-ship-it

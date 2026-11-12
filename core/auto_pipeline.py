@@ -188,14 +188,18 @@ def run_auto_pipeline(
         )
 
     # 4) المحلل الداخلي — على أفضل بوز لكل جزيء
-    poses = [r["poses"][0] for r in dock_rows]
+    # جزيء تجهّز بنجاح لكنه أنتج صفر بوز (نادر من Vina) يُتخطى بلا
+    # IndexError يُسقط الخط الآلي كله (تدقيق 2026-11) — والتراص مع
+    # contacts يبقى محافظاً لأن الفلترة تطبق على الصفوف نفسها.
+    scored_rows = [r for r in dock_rows if r["poses"]]
+    poses = [r["poses"][0] for r in scored_rows]
     contacts: list[PoseContacts] = []
     if poses:
         try:
             contacts = score_poses(receptor.receptor_file_path, poses)
         except (ValueError, FileNotFoundError):
             contacts = []
-    for row, pc in zip(dock_rows, contacts):
+    for row, pc in zip(scored_rows, contacts):
         row["inhouse"] = pc.score
         row["hbonds"] = pc.n_hbonds
         row["clashes"] = pc.n_clashes

@@ -17,7 +17,7 @@
   <a href=".github/workflows/platform.yml"><img src="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/platform.yml/badge.svg" alt="Platform API"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white" alt="Python 3.11 | 3.12">
-  <img src="https://img.shields.io/badge/API-v0.17.1-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.17.1 — واجهة API مبنية بFastAPI">
+  <img src="https://img.shields.io/badge/API-v0.18.0-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.18.0 — واجهة API مبنية بFastAPI">
 </p>
 
 ---
@@ -111,6 +111,8 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 | P15 | v0.16.0 | الصحة العالمية: الملاريا والسل بقمع قرار ثلاثي | [تقرير P15](docs/audit/GLOBAL-HEALTH-P15.md) |
 | P16 | v0.17.0 | تحصين النشر: بوابة مصادقة الإنتاج (ADR-0016) | ADR-0016 |
 | تدقيق | v0.17.1 | تقييم شامل: فحص الإقلاع الميت + 39 ملاحظة lint | [CHANGELOG](CHANGELOG.md) |
+| P18 | v0.18.0 | مركز التحقق الخارجي: عميل ADMETlab 3.0 + بطاقات نماذج | [ADR-0017](docs/adr/ADR-0017-external-validation-center.md) |
+| تدقيق | v0.18.1 | معالجة الثغرات: 503 صادقة + إصلاحات تدقيق الكود والوثائق | [CHANGELOG](CHANGELOG.md) |
 
 ---
 
@@ -142,7 +144,7 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 
 | المؤشر | القيمة | المصدر |
 |---|---|---|
-| الاختبارات | **754 ناجحاً** + 13 تكاملاً منفصلاً بالتوسيمة | `pytest -m "not integration"` |
+| الاختبارات | **767 ناجحاً** + 3 تكاملاً منفصلاً بالتوسيمة | `pytest -m "not integration"` |
 | Lint | ruff نظيف — 0 ملاحظة على 334 ملفاً | `ruff check .` |
 | CI | Tests ✓ + Platform ✓ + Pages ✓ — شارة حية من التشغيل الفعلي | [.github/workflows](.github/workflows/) |
 | الإقلاع الآمن | بورت/حدود/خلفية تخزين غير صالحة = رفض إقلاع مُعلَّل | `Settings.validate()` (ADR-0016) |
@@ -167,11 +169,11 @@ python3 scripts/build_audit_report.py        # JSON → التقرير
 | المستند | المحتوى |
 |---------|---------|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | معمارية المنصة الكاملة |
-| [docs/adr/](docs/adr/) | 16 قراراً معمارياً موثقاً (ADR-0001 → ADR-0016) |
+| [docs/adr/](docs/adr/) | 17 قراراً معمارياً موثقاً (ADR-0001 → ADR-0017) |
 | [docs/audit/](docs/audit/) | تقارير التقييم المستقلة والأرقام المجمّدة |
 | [docs/INTEGRATION-ROADMAP.md](docs/INTEGRATION-ROADMAP.md) | سجل دمج كل أداة خارجية وقرار كل فرع |
 | [docs/STRATEGY-2026.md](docs/STRATEGY-2026.md) | المقارنة الصريحة بالمنافسين وموقعنا |
-| [docs/HANDOFF.md](docs/HANDOFF.md) | القرارات البشرية المعلقة (جهاز · مفتاح · نشر) |
+| [HANDOFF.md](HANDOFF.md) | القرارات البشرية المعلقة (جهاز · مفتاح · نشر) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) | المساهمة والإبلاغ الأمني |
 
 ---

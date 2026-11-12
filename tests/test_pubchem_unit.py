@@ -164,3 +164,43 @@ def test_get_cid_from_smiles(mock_get, mock_sleep):
     mock_get.return_value = MockResponse(200, {"IdentifierList": {"CID": [2244]}})
     client = PubChemClient()
     assert client.get_cid_from_smiles("CC(=O)OC1=CC=CC=C1C(=O)O") == 2244
+
+
+# ═══════════════════════════════════════════════════════════════
+# تدقيق 2026-11 — ترميز مسار URL إلزامي (مدخل مستخدم خام)
+# ═══════════════════════════════════════════════════════════════
+
+@patch("core.pubchem_client.time.sleep", return_value=None)
+@patch("core.pubchem_client.requests.Session.get")
+def test_get_cid_url_encodes_path(mock_get, mock_sleep):
+    """محارف المسار ؟ # / في اسم من المستخدم تُرمَّز — لا تشويه طلب."""
+    mock_get.return_value = MockResponse(200, {"IdentifierList": {"CID": [2244]}})
+    client = PubChemClient()
+    client.get_cid("aspirin?query=1#frag")
+    called_url = mock_get.call_args[0][0]
+    segment = called_url.split("/compound/name/")[1].split("/cids")[0]
+    assert "?" not in segment and "#" not in segment
+    assert "aspirin%3Fquery%3D1%23frag" in called_url
+
+
+@patch("core.pubchem_client.time.sleep", return_value=None)
+@patch("core.pubchem_client.requests.Session.get")
+def test_get_cid_url_encodes_spaces(mock_get, mock_sleep):
+    """الأسماء ذات المسافات تصل مُرمَّزة لا خاماً."""
+    mock_get.return_value = MockResponse(200, {"IdentifierList": {"CID": [2244]}})
+    client = PubChemClient()
+    client.get_cid("acetyl salicylic acid")
+    called_url = mock_get.call_args[0][0]
+    assert "acetyl%20salicylic%20acid" in called_url
+
+
+@patch("core.pubchem_client.time.sleep", return_value=None)
+@patch("core.pubchem_client.requests.Session.get")
+def test_get_cid_from_smiles_url_encodes_stereo(mock_get, mock_sleep):
+    """شرطات الستيريو / و \\ في SMILES تُرمَّز — لا مسار مكسور."""
+    mock_get.return_value = MockResponse(200, {"IdentifierList": {"CID": [2244]}})
+    client = PubChemClient()
+    client.get_cid_from_smiles("CC(=O)O[C@@H]1/C=C/C=C1")
+    called_url = mock_get.call_args[0][0]
+    segment = called_url.split("/compound/smiles/")[1].split("/cids")[0]
+    assert "/" not in segment  # الشرطة الفاصلة الوحيدة هي حوالي الجزء

@@ -181,3 +181,57 @@ def test_pipeline_no_model_no_crash(offline, receptor, monkeypatch):
     rep = ap.run_auto_pipeline(ASPIRIN, receptor, n_library=4, dock_top=2)
     assert rep.results
     assert rep.report_pdf is None
+
+
+# ── تدقيق 2026-11: صفر بوز لا يُسقط الخط الآلي ───────────────
+
+
+def _empty_pose_result(smiles, receptor, exhaustiveness=4):
+    """نتيجة ربط بلا أي بوز — جزيء تجهّز لكن Vina لم يُنتج بوزاً."""
+    return DockingResult(
+        smiles=smiles,
+        receptor_id=receptor.id,
+        scores=[],
+        energies=[],
+        poses_pdbqt=[],
+        exhaustiveness=exhaustiveness,
+    )
+
+
+def test_pipeline_all_zero_poses_survives(offline, receptor, monkeypatch):
+    """جزيء نجح تجهيزه لكن أعاد Vina صفر بوز — يُتخطى بلا IndexError
+    يُسقط الخط الآلي كله (تدقيق 2026-11) والتقرير يبقى متسقاً."""
+
+    def _flaky_dock(smiles, receptor_, n_poses=3, exhaustiveness=4):
+        return _empty_pose_result(smiles, receptor_, exhaustiveness)
+
+    monkeypatch.setattr(ap, "dock_ligand", _flaky_dock)
+    rep = ap.run_auto_pipeline(ASPIRIN, receptor, n_library=4, dock_top=2)
+    assert rep.funnel["أُربط بـVina"] >= 1  # الربط حُسب وليس التجهيز فاشلاً
+    assert rep.best_vina is None  # لا بوز ⇒ لا أفضلية مُختلقة
+    assert rep.best_inhouse is None  # لا تحليل اتصالات بلا بوز
+
+
+def test_pipeline_zero_pose_alignment(offline, receptor, monkeypatch):
+    """ثلاثة جزيئات، الأوسط بلا بوز — inhouse/hbonds/clashes تبقى
+    مربوطة بجزيئها لا منزاحة على الجار (تدقيق 2026-11)."""
+
+    analogues = ["CC(=O)NC1=CC=CC=C1C(=O)O", "CC(=O)OC1=CCC=CC1C(=O)O"]
+
+    def _expand(seed, n=8, mode="auto"):
+        return ([s for s in analogues if s != seed], "brics")
+
+    def _selective_dock(smiles, receptor_, n_poses=3, exhaustiveness=4):
+        if smiles == analogues[1]:  # الجزيء الأوسط: صفر بوز
+            return _empty_pose_result(smiles, receptor_, exhaustiveness)
+        return _fake_dock(smiles, receptor_, n_poses, exhaustiveness)
+
+    monkeypatch.setattr(ap, "expand_library", _expand)
+    monkeypatch.setattr(ap, "dock_ligand", _selective_dock)
+    rep = ap.run_auto_pipeline(
+        ASPIRIN, receptor, n_library=4, dock_top=3, model=FakeModel()
+    )
+    by_smiles = {r["smiles"]: r for r in rep.results}
+    assert by_smiles[ASPIRIN]["inhouse"] is not None
+    assert by_smiles[analogues[0]]["inhouse"] is not None
+    assert "inhouse" not in by_smiles[analogues[1]]  # بلا بوز ⇒ بلا تحليل

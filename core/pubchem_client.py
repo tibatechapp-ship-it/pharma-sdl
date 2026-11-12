@@ -4,6 +4,7 @@
 يتعامل بمرونة مع تغيّرات أسماء حقول PubChem عبر الإصدارات.
 """
 import time
+from urllib.parse import quote
 
 import requests
 
@@ -30,7 +31,10 @@ class PubChemClient:
             return None
 
     def get_cid(self, name: str) -> int | None:
-        url = f"{self.BASE}/compound/name/{name}/cids/JSON"
+        # ترميز مسار URL إلزامي (safe="" حتى `/` تُرمَّز — الافتراضي
+        # تتركه وتكسر المسار): اسم من المستخدم قد يحمل ؟ # / أحرف
+        # تشوّه الطلب أو تعيد نتائج صامتة خاطئة (تدقيق 2026-11).
+        url = f"{self.BASE}/compound/name/{quote(name, safe='')}/cids/JSON"
         r = self._get(url)
         if r is None:
             return None
@@ -40,7 +44,10 @@ class PubChemClient:
             return None
 
     def get_cid_from_smiles(self, smiles: str) -> int | None:
-        url = f"{self.BASE}/compound/smiles/{smiles}/cids/JSON"
+        # SMILES يحمل شرطات ستريو و / و \ تكسر المسار خاماً — الترميز
+        # الكامل (safe="") يجعلها %2F فتصل PubChem كما تُفسَّر النية
+        # (تدقيق 2026-11).
+        url = f"{self.BASE}/compound/smiles/{quote(smiles, safe='')}/cids/JSON"
         r = self._get(url)
         if r is None:
             return None

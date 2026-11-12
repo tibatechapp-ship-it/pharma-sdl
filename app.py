@@ -14,6 +14,21 @@ from core.i18n import t
 # Check RDKit availability (not available on Stlite/WASM)
 HAS_RDKIT = importlib.util.find_spec("rdkit") is not None
 
+
+def _sync_preset_to_input(select_key: str, input_key: str, presets: dict[str, str]):
+    """ربط صادق بين قائمة الأمثلة وحقل الإدخال (تدقيق UX 2026-11).
+
+    Streamlit يتجاهل `value=` لحقل نصي إذا وُجدت قيمة سابقة في
+    `session_state` — فتتغير القائمة المحددة بلا تغيّر النص المُحلَّل
+    فعلياً (نتيجة خاطئة صامتة على المستخدم). الربط عبر `on_change`
+    يعيد السلوك المتوقع: اختيار مثال ⇒ النص يتبعه حرفياً.
+    """
+
+    def _on_change() -> None:
+        st.session_state[input_key] = presets[st.session_state[select_key]]
+
+    return _on_change
+
 st.set_page_config(page_title="Pharma SDL — مختبر الفارما الذاتي", page_icon="🧬", layout="wide")
 
 # ═══════════════════════════════════════════════════════════
@@ -407,7 +422,12 @@ with g_tools[1]:
             "أسبرين — مزخرف (ليس مثبط Mpro)": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "إيبوبروفين — مزخرف": "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",
         }
-        sel = st.selectbox("أمثلة جاهزة", list(PRESETS), key="pred_sel")
+        sel = st.selectbox(
+            "أمثلة جاهزة",
+            list(PRESETS),
+            key="pred_sel",
+            on_change=_sync_preset_to_input("pred_sel", "pred_smi", PRESETS),
+        )
         smi = st.text_input("أو الصق SMILES الخاص بك", value=PRESETS[sel], key="pred_smi")
 
         if st.button("تنبؤ", key="pred_btn", type="primary"):
@@ -830,7 +850,6 @@ with g_tools[2]:
             dock_ligand,
             load_receptors,
             pic50_to_dg_kcal,
-            prepare_ligand,
         )
 
         receptors = load_receptors()
@@ -862,7 +881,12 @@ with g_tools[2]:
                 ),
             }
             preset = st.selectbox(
-                t(LANG, "dock_preset"), list(preset_labels), key="dock_preset_sel"
+                t(LANG, "dock_preset"),
+                list(preset_labels),
+                key="dock_preset_sel",
+                on_change=_sync_preset_to_input(
+                    "dock_preset_sel", "dock_smi", preset_labels
+                ),
             )
             smi = st.text_input(
                 t(LANG, "dock_custom"), value=preset_labels[preset], key="dock_smi"
@@ -879,7 +903,8 @@ with g_tools[2]:
             if dock_run and (HAS_VINA and HAS_MEEKO):
                 with st.status(t(LANG, "dock_status_title"), expanded=True) as status:
                     st.write(t(LANG, "dock_phase1"))
-                    prepare_ligand(smi)
+                    # prepare_ligand يُستدعى داخل dock_ligand ذاته — استدعاء
+                    # مكرر هنا كان يضاعف Embed 3D+MMFF (أغلى خطوة في المسار).
                     st.write(t(LANG, "dock_phase2"))
                     st.write(t(LANG, "dock_phase3"))
                     result = dock_ligand(
