@@ -292,3 +292,33 @@ def test_ci_workflow_scopes_write_to_badge_job_only():
     assert wf["jobs"]["badge"]["permissions"] == {"contents": "write"}
     assert "permissions" not in wf["jobs"]["test"]
     assert wf["jobs"]["badge"]["needs"] == "test"
+
+
+def test_landing_page_badge_matches_pyproject_version():
+    """شارة «الإصدار» في الصفحة الحية مقيدة بمصدر الحقيقة (pyproject.toml)."""
+    import re
+    import tomllib
+
+    version = tomllib.loads(
+        (REPO / "pyproject.toml").read_text(encoding="utf-8")
+    )["project"]["version"]
+    html = (REPO / "docs" / "index.html").read_text(encoding="utf-8")
+    m = re.search(r"الإصدار v(\d+\.\d+\.\d+)", html)
+    assert m, "شارة الإصدار مفقودة من الصفحة الحية docs/index.html"
+    assert m.group(1) == version, (
+        f"انجراف شارة الصفحة الحية: {m.group(1)} ≠ pyproject {version}"
+    )
+
+
+def test_readme_api_badge_matches_pyproject_version():
+    """شارة API في README مقيدة بمصدر الحقيقة نفسه."""
+    import re
+    import tomllib
+
+    version = tomllib.loads(
+        (REPO / "pyproject.toml").read_text(encoding="utf-8")
+    )["project"]["version"]
+    readme = (REPO / "README.md").read_text(encoding="utf-8")
+    m = re.search(r"API-v(\d+\.\d+\.\d+)-", readme)
+    assert m, "شارة API مفقودة من README.md"
+    assert m.group(1) == version, f"انجراف شارة API: {m.group(1)} ≠ pyproject {version}"
