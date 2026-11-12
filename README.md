@@ -144,7 +144,7 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 
 | المؤشر | القيمة | المصدر |
 |---|---|---|
-| الاختبارات | **767 ناجحاً** + 3 تكاملاً منفصلاً بالتوسيمة | `pytest -m "not integration"` |
+| الاختبارات | **777 ناجحاً** على CI (بيئة كاملة مع extras pg) | الشارة الحية — يُحدّثها CI من التشغيل الفعلي |
 | Lint | ruff نظيف — 0 ملاحظة على 334 ملفاً | `ruff check .` |
 | CI | Tests ✓ + Platform ✓ + Pages ✓ — شارة حية من التشغيل الفعلي | [.github/workflows](.github/workflows/) |
 | الإقلاع الآمن | بورت/حدود/خلفية تخزين غير صالحة = رفض إقلاع مُعلَّل | `Settings.validate()` (ADR-0016) |
