@@ -21,7 +21,7 @@ from . import (
 from .errors import RykoError, RykoInputError, RykoUnknownOpError
 from .receipts import RykoReceipt
 
-RYKO_VERSION = "0.19.0"
+RYKO_VERSION = "0.20.0"
 
 
 @dataclass(frozen=True)
@@ -102,6 +102,11 @@ _register("math", "linear_fit", OpSpec(
     fn=math_core.linear_fit,
     unit="slope", formula="least squares", source="closed form",
     inputs=(("xs", "السينات (قائمة)"), ("ys", "الصادات (قائمة)")),
+))
+_register("math", "pic50_to_ic50", OpSpec(
+    fn=math_core.pic50_to_ic50,
+    unit="nM", formula="IC50[nM] = 10^(9−pIC50)", source="standard pIC50 definition",
+    inputs=(("pic50", "pIC50"),),
 ))
 
 # ── physics ──

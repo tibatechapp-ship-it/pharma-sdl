@@ -17,7 +17,7 @@
   <a href=".github/workflows/platform.yml"><img src="https://github.com/tibatechapp-ship-it/pharma-sdl/actions/workflows/platform.yml/badge.svg" alt="Platform API"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white" alt="Python 3.11 | 3.12">
-  <img src="https://img.shields.io/badge/API-v0.19.0-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.19.0 — واجهة API مبنية بFastAPI">
+  <img src="https://img.shields.io/badge/API-v0.20.0-009688?logo=fastapi&logoColor=white" alt="إصدار المنصة 0.20.0 — واجهة API مبنية بFastAPI">
 </p>
 
 ---
@@ -116,6 +116,7 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 | تغطية | v0.18.2 | تغطية أضعف الوحدات (الإجماع 0٪ + تدهور المحركين) + حارس اتساق الإصدار | [CHANGELOG](CHANGELOG.md) |
 | اتساق | v0.18.3 | ضبط شارة الإصدار الحية + حارسا اتساق للهبوط وREADME | [CHANGELOG](CHANGELOG.md) |
 | Ryko | v0.19.0 | العقل العلمي: 6 وحدات/43 عملية بإيصالات قابلة للتحقق (P19) | [الخطة](docs/ryko/RYKO-MASTER-PLAN.md) |
+| P20 | v0.20.0 | Ryko على الواجهة: تبويب بصري بإيصالات + جسر سلسلة القرار + تقارير PDF تحمل البصمات | [الخطة](docs/ryko/RYKO-MASTER-PLAN.md) |
 
 ---
 
@@ -147,7 +148,7 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 
 | المؤشر | القيمة | المصدر |
 |---|---|---|
-| الاختبارات | **888 ناجحاً** على CI (بيئة كاملة مع extras pg) | الشارة الحية — يُحدّثها CI من التشغيل الفعلي |
+| الاختبارات | **905 ناجحاً** على CI (بيئة كاملة مع extras pg) | الشارة الحية — يُحدّثها CI من التشغيل الفعلي |
 | Lint | ruff نظيف — 0 ملاحظة على 334 ملفاً | `ruff check .` |
 | CI | Tests ✓ + Platform ✓ + Pages ✓ — شارة حية من التشغيل الفعلي | [.github/workflows](.github/workflows/) |
 | الإقلاع الآمن | بورت/حدود/خلفية تخزين غير صالحة = رفض إقلاع مُعلَّل | `Settings.validate()` (ADR-0016) |

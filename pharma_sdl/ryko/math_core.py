@@ -181,6 +181,23 @@ def ci95_mean(values):
     }
 
 
+def pic50_to_ic50(pic50: float):
+    """IC50[nM] = 10^(9−pIC50) — التعريف القياسي لمقياس pIC50 (P20).
+
+    الذهبي: pIC50 = 7.0 ⇒ IC50 = 100 nM.
+    """
+    v = float(pic50)
+    if not math.isfinite(v) or not (2.0 <= v <= 13.0):
+        raise RykoInputError(
+            f"pIC50 يجب أن يكون بين 2 و13 (وصل: {pic50}) — خارج هذا المدى "
+            "القيمة ليست فعالية قابلة للقياس تجريبياً.",
+            f"pIC50 must be within [2, 13] (got: {pic50}) — outside this range "
+            "the value is not a measurable potency.",
+        )
+    ic50_nm = 10.0 ** (9.0 - v)
+    return ic50_nm, {"ic50_um": ic50_nm / 1e3, "ic50_m": ic50_nm / 1e9}
+
+
 def linear_fit(xs, ys):
     """انحدار خطي بأقل مربعات (إغلاقي): ميل، تقاطع، R²."""
     x, y = [float(v) for v in xs], [float(v) for v in ys]

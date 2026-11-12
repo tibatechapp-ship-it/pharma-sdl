@@ -15,10 +15,10 @@ def engine():
 
 def test_stats_honest_counts(engine):
     s = engine.stats()
-    assert s["version"] == RYKO_VERSION == "0.19.0"
+    assert s["version"] == RYKO_VERSION == "0.20.0"
     assert s["modules"] == 6
     assert s["operations"] == sum(len(o) for o in OPS.values())
-    assert s["operations"] >= 40
+    assert s["operations"] >= 44
 
 
 def test_catalog_is_declared_contract(engine):

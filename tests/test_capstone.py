@@ -207,6 +207,29 @@ def test_pdf_report_valid_bytes(library, model):
     assert len(pdf) > 5000
 
 
+def test_pdf_report_embeds_ryko_receipts(library, model):
+    """P20: تقرير PDF يحمل جدول إيصالات Ryko — البصمات داخل المستند المنشور."""
+    from pharma_sdl.ryko.decision_bridge import (
+        receipts_for_candidate,
+    )
+    from pharma_sdl.ryko.decision_bridge import (
+        stored as ryko_stored,
+    )
+
+    res = run_pipeline(library, dose_mg=300, source="اختبار", model=model)
+    valid = res.top.dropna(subset=["pic50"])
+    recs = receipts_for_candidate(
+        pic50=float(valid.iloc[0].pic50),
+        conc_nm=float(c90_nm(float(valid.iloc[0].pic50))),
+    )
+    pdf = build_pdf_report(res, ryko_receipts=ryko_stored(recs))
+    if pdf is None:
+        pytest.skip("reportlab غير متاح")
+    assert pdf[:4] == b"%PDF"
+    # الإيصالات زادت حجم المستند بجدول البصمات
+    assert len(pdf) > len(build_pdf_report(res) or b"")
+
+
 def test_pdf_report_fonts_shipped():
     from core.capstone import FONTS_DIR
 

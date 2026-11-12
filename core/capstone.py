@@ -251,8 +251,24 @@ class PipelineResult:
         self.top = pkpd_outlook(self.ranked, self.dose_mg)
 
 
-def build_markdown_report(res: PipelineResult, target_name: str = "SARS-CoV-2 Mpro") -> str:
-    """تقرير Markdown — يعمل دائماً بلا تبعيات إضافية."""
+def _receipt_value_str(value: object) -> str:
+    """تنسيق قيمة الإيصال للتقرير (رقم بأربعة أرقام معنوية، أو نص كما هو)."""
+    try:
+        return f"{float(value):.4g}"  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def build_markdown_report(
+    res: PipelineResult,
+    target_name: str = "SARS-CoV-2 Mpro",
+    ryko_receipts: list[dict] | None = None,
+) -> str:
+    """تقرير Markdown — يعمل دائماً بلا تبعيات إضافية.
+
+    ryko_receipts: إيصالات Ryko المخزّنة (P20) — تُطبع في قسم خاص
+    فتحمل كل رقم في التقرير معادلة ومصدراً وبصمة قابلة لإعادة الحساب.
+    """
     from pharma_sdl.scores import DISCLAIMER_AR  # عقد الصدق الواحد (تدقيق P0)
     lines = [
         f"# تقرير خط الاكتشاف — {target_name}",
@@ -296,6 +312,30 @@ def build_markdown_report(res: PipelineResult, target_name: str = "SARS-CoV-2 Mp
             "حصراً — ليس قياساً تجريبياً، ولا درجة التحام؛ النشاط التجريبي مسار مستقل "
             "يُراجع من ChEMBL عند توافره."
         ),
+    ]
+    if ryko_receipts:
+        lines += [
+            "",
+            "## إيصالات Ryko — قابلة للتحقق دون اتصال (P20)",
+            "",
+            "| العملية | القيمة | الوحدة | المعادلة | المصدر | البصمة |",
+            "|---|---|---|---|---|---|",
+        ]
+        for r in ryko_receipts:
+            digest = str(r.get("digest", ""))[:12] + "…"
+            lines.append(
+                f"| {r.get('module')}.{r.get('op')} | {_receipt_value_str(r.get('value'))} "
+                f"| {r.get('unit')} | {r.get('formula')} | {r.get('source')} | `{digest}` |"
+            )
+        lines += [
+            "",
+            (
+                "> التحقق دون اتصال: أعد حساب SHA-256 من الحقول حصراً — "
+                "`RykoReceipt.verify_stored(json)`؛ أي تعديل حرفيّ في القيمة أو المعادلة "
+                "أو المصدر يُكتشف فوراً."
+            ),
+        ]
+    lines += [
         "",
         f"> ⚠️ {DISCLAIMER_AR}",
     ]
@@ -313,8 +353,16 @@ def shape_arabic(text: str) -> str:
         return text
 
 
-def build_pdf_report(res: PipelineResult, target_name: str = "SARS-CoV-2 Mpro") -> bytes | None:
-    """تقرير PDF عربي بـ reportlab — None إذا لم تتوفر المكتبات."""
+def build_pdf_report(
+    res: PipelineResult,
+    target_name: str = "SARS-CoV-2 Mpro",
+    ryko_receipts: list[dict] | None = None,
+) -> bytes | None:
+    """تقرير PDF عربي بـ reportlab — None إذا لم تتوفر المكتبات.
+
+    ryko_receipts: إيصالات Ryko المخزّنة (P20) — جدول خاص يحمل العملية
+    والقيمة والوحدة والبصمة، فالتقرير المنشور قابل للتحقق دون اتصال.
+    """
     try:
         from reportlab.lib import colors
         from reportlab.lib.pagesizes import A4
@@ -430,6 +478,43 @@ def build_pdf_report(res: PipelineResult, target_name: str = "SARS-CoV-2 Mpro") 
             ),
             st_small,
         ),
+    ]
+    if ryko_receipts:
+        story.append(Paragraph(shape_arabic("إيصالات Ryko — أرقام بمعادلة ومصدر وبصمة (P20)"), st_h))
+        head_r = [shape_arabic(c) for c in ["العملية", "القيمة", "الوحدة", "البصمة (12)"]]
+        body_r = []
+        for r in ryko_receipts:
+            body_r.append([
+                shape_arabic(f"{r.get('module')}.{r.get('op')}"),
+                _receipt_value_str(r.get("value")),
+                shape_arabic(str(r.get("unit"))),
+                str(r.get("digest", ""))[:12],
+            ])
+        tbl_r = Table([head_r] + body_r, colWidths=[58 * mm, 32 * mm, 28 * mm, 52 * mm])
+        tbl_r.setStyle(
+            TableStyle(
+                [
+                    ("FONTNAME", (0, 0), (-1, -1), "Tajawal"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8.5),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#7c3aed")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("ALIGN", (1, 0), (2, -1), "CENTER"),
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+                ]
+            )
+        )
+        story.append(tbl_r)
+        story.append(
+            Paragraph(
+                shape_arabic(
+                    "التحقق دون اتصال: أعد حساب البصمة من الحقول حصراً عبر "
+                    "RykoReceipt.verify_stored — أي تعديل حرفيّ في القيمة أو المعادلة يُكتشف."
+                ),
+                st_small,
+            )
+        )
+    story += [
         Spacer(1, 4),
         Paragraph(shape_arabic("⚠️ تنبيه علمي وطبي: " + DISCLAIMER_PDF_TEXT), st_body),
     ]

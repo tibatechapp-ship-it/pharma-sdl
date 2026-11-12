@@ -32,9 +32,72 @@ def test_boot_without_exception(at):
     assert not at.exception, f"boot exception: {at.exception}"
 
 
-def test_sixteen_tabs(at):
-    """15 تبويباً + التحقق الخارجي (v0.18) = 16."""
-    assert len(at.tabs) == 16
+def test_seventeen_tabs(at):
+    """16 تبويباً (حتى v0.19) + تبويب Ryko (P20) = 17."""
+    assert len(at.tabs) == 17
+
+
+def test_ryko_tab_present_with_stats(at):
+    """P20: تبويب Ryko يظهر بمقاييسه الثلاثة (الإصدار/الوحدات/العمليات)."""
+    labels = [tb.label for tb in at.tabs]
+    assert "🧠 Ryko" in labels
+    metrics = [m.label for m in at.metric]
+    assert "إصدار Ryko" in metrics
+    assert "الوحدات" in metrics
+    assert "العمليات المعلنة" in metrics
+
+
+def test_ryko_compute_produces_receipt(at):
+    """P20: حاسبة Ryko تحسب half_life وتضيف الإيصال لسجل الجلسة."""
+    from pharma_sdl.ryko import MODULE_TITLES
+
+    at.selectbox(key="ryko_mod").select(MODULE_TITLES["math"]).run()
+    assert not at.exception
+    at.selectbox(key="ryko_op_math").select("half_life").run()
+    assert not at.exception
+    at.text_input(key="ryko_in_math_half_life_ke").set_value("0.231").run()
+    assert not at.exception
+    at.button(key="ryko_compute").click().run()
+    assert not at.exception
+    log = at.session_state["ryko_log"]
+    assert log, "السجل فارغ رغم نجاح الحساب"
+    rec = log[0]
+    assert rec["op"] == "half_life"
+    assert abs(rec["value"] - 3.0) < 0.01  # ln2/0.231 ≈ 3.0h (الذهبي)
+    # حكم التحقق الظاهر: إيصال سليم
+    assert any("سليم" in s.value for s in at.success)
+
+
+def test_ryko_verify_station_roundtrip(at):
+    """P20: محطة التحقق — إيصال حي يمر، وإيصال معدّل يُرفض."""
+    import json as _json
+
+    from pharma_sdl.ryko import get_engine
+
+    rec = get_engine().compute("math", "pic50_to_ic50", pic50=7.0)
+    good = _json.dumps(rec.to_dict(), ensure_ascii=False)
+    at.text_area(key="ryko_verify_in").set_value(good).run()
+    at.button(key="ryko_verify_btn").click().run()
+    assert not at.exception
+    assert any("صادق" in s.value for s in at.success)
+    tampered = _json.loads(good)
+    tampered["value"] = 42.0  # تلاعب حرفيّ
+    at.text_area(key="ryko_verify_in").set_value(_json.dumps(tampered, ensure_ascii=False)).run()
+    at.button(key="ryko_verify_btn").click().run()
+    assert not at.exception
+    assert any("تلاعب" in e.value for e in at.error)
+
+
+def test_ryko_decision_chain_receipts(at):
+    """P20: قسم سلسلة القرار — pIC50 يتحول لإيصالات معروضة ومتحققة."""
+    at.text_input(key="ryko_chain_pic").set_value("7.0").run()
+    at.button(key="ryko_chain_btn").click().run()
+    assert not at.exception
+    joined_md = " ".join(m.value for m in at.markdown)
+    assert "سلسلة القرار" in joined_md and "three_tier" in joined_md
+    # إيصال IC50 ظهر وحكم التحقق «سليم» معروض
+    assert any("سليم" in s.value for s in at.success)
+
 
 
 def test_sidebar_language_switcher_defaults_to_arabic(at):

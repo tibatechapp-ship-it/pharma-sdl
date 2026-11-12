@@ -1,4 +1,4 @@
-# Pharma SDL v0.19.0 — خدمات المنصة + PostgreSQL الاختياري (P3) بحوكمة نشر صادقة (P16):
+# Pharma SDL v0.20.0 — خدمات المنصة + PostgreSQL الاختياري (P3) بحوكمة نشر صادقة (P16):
 #   api       : بوابة المنصة API-First (FastAPI/Uvicorn) — OpenAPI على /docs (تطوير: sqlite)
 #   dashboard : لوحة Streamlit التعليمية القائمة (تبقى تعمل كما هي)
 #   postgres  : خلفية التخزين الحية (P3) — تُفعَّل بملف التعريف "pg" فقط
@@ -16,7 +16,7 @@
 services:
   api:
     build: .
-    image: pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.19.0}
+    image: pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.20.0}
     ports:
       - "8000:8000"
     environment:
@@ -47,7 +47,7 @@ services:
 
   api-pg:
     build: .
-    image: pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.19.0}
+    image: pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.20.0}
     profiles: ["pg"]
     ports:
       - "8001:8000"
@@ -76,7 +76,7 @@ services:
     restart: unless-stopped
 
   dashboard:
-    image: pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.19.0}
+    image: pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.20.0}
     build: .
     command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
     ports:

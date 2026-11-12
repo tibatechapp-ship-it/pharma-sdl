@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pharma SDL — منصة اكتشاف الأدوية العربية</title>
-<meta name="description" content="منصة عربية مفتوحة المصدر لخط اكتشاف كامل: تنقية ← فرز افتراضي ← فعالية ML ← ربط Vina/Boltz-2 ← ADMET ← صيدلية جينية ← قرار ← تقرير عربي. بلا اشتراكات، وكل رقم مصدره معلن — 888 اختباراً ناجحاً على CI.">
+<meta name="description" content="منصة عربية مفتوحة المصدر لخط اكتشاف كامل: تنقية ← فرز افتراضي ← فعالية ML ← ربط Vina/Boltz-2 ← ADMET ← صيدلية جينية ← قرار ← تقرير عربي. بلا اشتراكات، وكل رقم مصدره معلن — 905 اختباراً ناجحاً على CI.">
 <meta property="og:title" content="Pharma SDL — منصة اكتشاف الأدوية العربية">
 <meta property="og:description" content="خط اكتشاف كامل بلا اشتراكات ولا مفاتيح — كل رقم مصدره معلن وتدهوره صادق.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -282,7 +282,7 @@ footer a:hover{color:var(--teal2)}
 </nav>
 
 <header class="hero wrap">
-  <span class="pill"><span class="dot"></span> الإصدار v0.19.0</span>
+  <span class="pill"><span class="dot"></span> الإصدار v0.20.0</span>
   <h1>من الكتاب إلى الكود —<br><span class="g">من النظرية إلى الاكتشاف</span></h1>
   <p class="sub">
     منصة عربية مفتوحة المصدر تجمع <b>خط اكتشاف كاملاً</b> — بلا اشتراكات، وبلا مفاتيح،
@@ -310,7 +310,7 @@ footer a:hover{color:var(--teal2)}
 
 <div class="stats">
   <div class="in">
-    <div class="stat"><div class="n">888</div><div class="l">اختباراً ناجحاً على CI</div></div>
+    <div class="stat"><div class="n">905</div><div class="l">اختباراً ناجحاً على CI</div></div>
     <div class="stat"><div class="n">0</div><div class="l">ملاحظة lint على 334 ملفاً</div></div>
     <div class="stat"><div class="n">0.508</div><div class="l">R² هيكلي لنموذج الفعالية</div></div>
     <div class="stat"><div class="n">41</div><div class="l">مهمة ADMET محلية</div></div>
@@ -430,6 +430,7 @@ footer a:hover{color:var(--teal2)}
     <div class="mile alt"><span class="ver">v0.18.2</span><h3>تغطية واتساق</h3><p>اختبارات أضعف الوحدات (الإجماع 0٪ + تدهور المحركين) + حارس اتساق الإصدار الديناميكي (799 اختباراً).</p></div>
     <div class="mile"><span class="ver">v0.18.3</span><h3>ضبط الوسم</h3><p>شارة الصفحة الحية على الإصدار الفعلي + حارسا اتساق للهبوط وREADME (801 اختباراً).</p></div>
     <div class="mile alt"><span class="ver">v0.19.0</span><h3>العقل العلمي Ryko</h3><p>43 عملية في 6 وحدات (رياضيات، فيزياء، كيمياء، صيدلانيات، فارما + بذرة تشخيص) بإيصالات قابلة للتحقق دون اتصال (888 اختباراً).</p></div>
+    <div class="mile"><span class="ver">v0.20.0</span><h3>Ryko على الواجهة</h3><p>تبويب «Ryko» يعرض الإيصالات بصرياً + جسر سلسلة القرار (three_tier) + تقارير PDF تحمل بصمات SHA-256 — 44 عملية معلنة (905 اختباراً).</p></div>
   </div>
 </section>
 
@@ -457,7 +458,7 @@ footer a:hover{color:var(--teal2)}
     <div class="panel">
       <h3>✅ جودة هندسية</h3>
       <table class="kv">
-        <tr><td>الاختبارات</td><td><span class="ok">888 ناجحاً على CI</span> — بيئة كاملة مع extras pg، بلا شبكة</td></tr>
+        <tr><td>الاختبارات</td><td><span class="ok">905 ناجحاً على CI</span> — بيئة كاملة مع extras pg، بلا شبكة</td></tr>
         <tr><td>Lint</td><td>ruff نظيف — <span class="ok">0 ملاحظة</span> على 334 ملفاً</td></tr>
         <tr><td>CI</td><td>Tests ✓ + Platform ✓ + Pages ✓ — شارات حية من التشغيل الفعلي</td></tr>
         <tr><td>الإقلاع الآمن</td><td>بورت/حدود/خلفية تخزين غير صالحة = رفض إقلاع مُعلَّل (<b>ADR-0016</b>)</td></tr>
@@ -502,7 +503,7 @@ pip install -r requirements.txt -r requirements-dev.txt
     <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/tree/main/docs/adr"><h3>📜 17 قراراً معمارياً</h3><p>ADR-0001 → ADR-0017 ببدائلها ومقايضاتها.</p><span class="go">اقرأ ←</span></a>
     <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/tree/main/docs/audit"><h3>🧊 تقارير التدقيق</h3><p>الأرقام المُجمَّدة القابلة لإعادة الإنتاج.</p><span class="go">اقرأ ←</span></a>
     <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/docs/STRATEGY-2026.md"><h3>🗺️ الاستراتيجية 2026</h3><p>المقارنة الصريحة بالمنافسين وموقعنا.</p><span class="go">اقرأ ←</span></a>
-    <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/CHANGELOG.md"><h3>📣 سجل الإصدارات</h3><p>24 إصداراً — من P0 إلى v0.19.0.</p><span class="go">اقرأ ←</span></a>
+    <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/CHANGELOG.md"><h3>📣 سجل الإصدارات</h3><p>25 إصداراً — من P0 إلى v0.20.0.</p><span class="go">اقرأ ←</span></a>
     <a class="doc" href="https://github.com/tibatechapp-ship-it/pharma-sdl/blob/main/CONTRIBUTING.md"><h3>🤝 المساهمة</h3><p>دليل المساهمة والاستجابة الأمنية.</p><span class="go">اقرأ ←</span></a>
   </div>
 </section>

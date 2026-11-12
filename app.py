@@ -88,6 +88,63 @@ def rdkit_warning() -> bool:
     return True
 
 
+# ═══════════════════════════════════════════════════════════
+# Ryko — العقل العلمي (P20): مساعدات الإيصالات
+# ═══════════════════════════════════════════════════════════
+
+_RYKO_TRUE = {"true", "1", "yes", "y", "نعم", "صح", "صحيح"}
+_RYKO_FALSE = {"false", "0", "no", "n", "لا", "خطأ", "خاطئ"}
+
+
+def _parse_ryko_value(raw: str):
+    """نص الحقل ← قيمة Ryko (رقم / منطقي / قائمة أرقام / سلسلة نصية).
+
+    الفارغ يعني اختياري غائب (لا يدخل الحساب). قائمة مفصولة بفواصل
+    (أو فواصل منقوطة) تتحول إلى قائمة أرقام — كما في AUC والانحلال.
+    ValueError للقوائم غير الرقمية يتصاعد — صادق ولا صمت.
+    """
+    s = raw.strip()
+    if not s:
+        return None
+    low = s.lower()
+    if low in _RYKO_TRUE:
+        return True
+    if low in _RYKO_FALSE:
+        return False
+    parts = [p for p in s.replace("؛", ",").replace(";", ",").split(",") if p.strip()]
+    if len(parts) > 1:
+        return [float(p) for p in parts]
+    try:
+        return float(parts[0])
+    except ValueError:
+        return s  # سلسلة نصية: SMILES، أسماء أدوية، وحدات
+
+
+def _render_ryko_receipt(rec_dict: dict):
+    """عرض إيصال Ryko بصرياً: القيمة والوحدة، المعادلة والمصدر والافتراضات،
+    البصمة، وحكم التحقق الفوري (إعادة حساب SHA-256 من الحقول)."""
+    from pharma_sdl.ryko import RykoReceipt
+
+    v = rec_dict.get("value")
+    shown = f"{float(v):.6g}" if isinstance(v, (int, float)) and not isinstance(v, bool) else str(v)
+    m1, m2 = st.columns([3, 1])
+    m1.metric(f"⚙️ {rec_dict.get('module')}.{rec_dict.get('op')}", shown)
+    m2.metric("الوحدة", rec_dict.get("unit"))
+    st.caption(
+        f"**المعادلة:** `{rec_dict.get('formula')}`  ·  **المصدر:** {rec_dict.get('source')}"
+    )
+    if rec_dict.get("assumptions"):
+        st.caption("الافتراضات: " + " · ".join(rec_dict["assumptions"]))
+    extra = rec_dict.get("extra") or {}
+    if extra:
+        st.caption("تفصيل فرعي: " + " · ".join(f"{k}={v}" for k, v in extra.items()))
+    if RykoReceipt.verify_stored(rec_dict):
+        st.success("✅ إيصال سليم — البصمة تُحسب من الحقول حرفياً (تحقق دون اتصال)")
+    else:
+        st.error("❌ فشل التحقق — الحقول لا تنتج البصمة المخزنة")
+    st.code(str(rec_dict.get("digest")), language=None)
+
+
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_drug_cached(name: str) -> dict | None:
     """نداء PubChem مخزَّن (ساعة) — يمنع إعادة استدعاء API عند كل إعادة رسم."""
@@ -180,6 +237,9 @@ g_tools = st.tabs([
     t(LANG, "tab_docking"),
 ])
 
+st.caption(t(LANG, "group_ryko"))
+g_ryko = st.tabs(["🧠 Ryko"])
+
 st.caption(t(LANG, "group_reports"))
 g_reports = st.tabs([
     "🎓 Capstone",
@@ -194,6 +254,152 @@ g_reports = st.tabs([
 #   8 Predict→tools[1] · 9 Capstone→reports[0] · 10 Docking→tools[2]
 #  11 PGx→labs[3] · 12 ADMET→reports[1] · 13 Classes (ATC/S10)→reports[2]
 #  + P15: Global Health→labs[4] · v0.18: External Validation→reports[3]
+#  + P20: Ryko→ryko[0] (مجموعة مستقلة — العقل العلمي له بابه)
+
+# ═══ تبويب Ryko: العقل العلمي بإيصالات قابلة للتحقق (P20) ═══
+with g_ryko[0]:
+    st.subheader("🧠 Ryko — العقل العلمي: كل رقم بإيصال")
+    st.caption(
+        "حتمي بالبايت، بلا شبكة ولا مفاتيح. كل عملية تُعلن معادلتها ومصدرها وافتراضاتها، "
+        "والناتج إيصال ببصمة SHA-256 تُعاد فحصها دون اتصال — أي تعديل حرفيّ في القيمة "
+        "أو المعادلة أو المصدر يُكتشف فوراً (P19–P20 من خارطة Ryko)."
+    )
+    from pharma_sdl.ryko import RykoError, RykoReceipt, get_engine
+    from pharma_sdl.ryko.decision_bridge import (
+        receipts_for_reading,
+    )
+    from pharma_sdl.ryko.decision_bridge import (
+        stored as ryko_stored,
+    )
+
+    _eng = get_engine()
+    _stats = _eng.stats()
+    _k1, _k2, _k3 = st.columns(3)
+    _k1.metric("إصدار Ryko", _stats["version"])
+    _k2.metric("الوحدات", _stats["modules"])
+    _k3.metric("العمليات المعلنة", _stats["operations"])
+
+    # ── الحاسبة المعلنة: كتالوج → مدخلات → إيصال ──
+    st.markdown("#### 🧮 الحاسبة المعلنة")
+    _cat = _eng.catalog()
+    _mod_names = {_cat[m]["title"]: m for m in _cat}
+    _mod_title = st.selectbox("الوحدة", list(_mod_names), key="ryko_mod")
+    _mod = _mod_names[_mod_title]
+    _op = st.selectbox("العملية", list(_cat[_mod]["ops"]), key=f"ryko_op_{_mod}")
+    _spec = _cat[_mod]["ops"][_op]
+    st.caption(f"**{_spec['formula']}** — {_spec['source']}")
+    if _spec["assumptions"]:
+        st.caption("الافتراضات: " + " · ".join(_spec["assumptions"]))
+
+    _inputs: dict = {}
+    for _name, _desc in _spec["inputs"].items():
+        _raw = st.text_input(
+            f"{_desc} ({_name})", key=f"ryko_in_{_mod}_{_op}_{_name}"
+        )
+        if _raw and _raw.strip():
+            try:
+                _val = _parse_ryko_value(_raw)
+            except ValueError:
+                st.error(f"قيمة غير مفهومة للمدخل «{_name}»: {_raw}")
+                _val = None
+            if _val is not None:
+                _inputs[_name] = _val
+
+    if st.button("⚙️ احسب + إيصال", type="primary", key="ryko_compute"):
+        if not _inputs:
+            st.warning("أدخل مدخلاً واحداً على الأقل — الحساب من فراغ مرفوض مسبقاً.")
+        else:
+            try:
+                _rec = _eng.compute(_mod, _op, **_inputs)
+            except RykoError as e:
+                st.error(str(e))  # تدهور صادق — الرسالة ثنائية اللغة نفسها
+            else:
+                st.session_state.setdefault("ryko_log", []).insert(0, _rec.to_dict())
+                st.success("أُنجز الحساب — هذا إيصالك:")
+                _render_ryko_receipt(_rec.to_dict())
+                st.download_button(
+                    "⬇️ إيصال JSON",
+                    json.dumps(_rec.to_dict(), ensure_ascii=False, indent=2, sort_keys=True),
+                    file_name=f"ryko_{_mod}_{_op}_receipt.json",
+                    mime="application/json",
+                    key="ryko_dl_last",
+                )
+
+    # ── محطة التحقق: إعادة الحساب دون اتصال ──
+    st.divider()
+    st.markdown("#### 🖨️ محطة التحقق — إعادة الحساب دون اتصال")
+    st.caption(
+        "الصق أي إيصال JSON (من السجل أو من تقرير منشور) — تُشتق البصمة مجدداً "
+        "من الحقول حصراً وتُقارن بالمخزنة."
+    )
+    _pasted = st.text_area("إيصال JSON", key="ryko_verify_in", height=140)
+    if st.button("🔍 تحقق", key="ryko_verify_btn"):
+        try:
+            _doc = json.loads(_pasted)
+        except json.JSONDecodeError as e:
+            st.error(f"JSON غير صالح: {e}")
+            _doc = None
+        if isinstance(_doc, dict):
+            if RykoReceipt.verify_stored(_doc):
+                st.success("✅ الإيصال صادق — الحقول تطابق البصمة بالبايت.")
+            else:
+                st.error("❌ تلاعب أو تلف: الحقول لا تنتج البصمة المخزنة.")
+
+    # ── سجل الجلسة ──
+    _log = st.session_state.get("ryko_log", [])
+    with st.expander(f"🗂️ سجل إيصالات الجلسة ({len(_log)})", expanded=False):
+        if _log:
+            st.download_button(
+                "⬇️ السجل الكامل JSON",
+                json.dumps(_log, ensure_ascii=False, indent=2, sort_keys=True),
+                file_name="ryko_receipt_log.json",
+                mime="application/json",
+                key="ryko_dl_log",
+            )
+            for _rd in _log:
+                st.caption(
+                    f"**{_rd['module']}.{_rd['op']}** = {_rd['value']} {_rd['unit']} "
+                    f"— `{str(_rd['digest'])[:16]}…`"
+                )
+        else:
+            st.caption("لا إيصالات بعد — احسب عملية أعلاه.")
+
+    # ── سلسلة القرار: قراءات three_tier ← إيصالات ──
+    st.divider()
+    st.markdown("#### 🔗 سلسلة القرار — إيصالات على قراءات three_tier")
+    st.caption(
+        "الطبقات الثلاث تفرز: ML (بصمة+RF) ← Vina ← Boltz-2، ثم التجربة تحكم. "
+        "أدخل قراءة أي طبقة وRyko يحوّلها إيصالات قابلة للتحقق: IC50 من pIC50، "
+        "وKd من ΔG، وKi بتصحيح Cheng-Prusoff عند توفر [L] وKd."
+    )
+    _c1, _c2, _c3 = st.columns(3)
+    _chain_pic = _c1.text_input("pIC50 (طبقة ML) — اختياري", key="ryko_chain_pic")
+    _chain_dg = _c2.text_input("ΔG kcal/mol (طبقة Vina) — اختياري", key="ryko_chain_dg")
+    _chain_temp = _c3.slider("الحرارة °C", 20, 40, 25, key="ryko_chain_temp")
+    _cl1, _cl2 = st.columns(2)
+    _chain_lig = _cl1.text_input("[L] نانومولار (لـKi) — اختياري", key="ryko_chain_lig")
+    _chain_kd = _cl2.text_input("Kd نانومولار (لـKi) — اختياري", key="ryko_chain_kd")
+    if st.button("🔗 توليد إيصالات السلسلة", key="ryko_chain_btn", type="secondary"):
+        try:
+            _reading: dict = {"status": "ok", "tier": 1, "engine": "manual"}
+            if _chain_pic.strip():
+                _reading["pic50"] = float(_chain_pic)
+            if _chain_dg.strip():
+                _reading["tier"] = 2
+                _reading["dg_kcal"] = float(_chain_dg)
+            _kwargs: dict = {"temp_c": float(_chain_temp)}
+            if _chain_lig.strip() and _chain_kd.strip():
+                _kwargs["ligand_nm"] = float(_chain_lig)
+                _kwargs["kd_nm"] = float(_chain_kd)
+            _recs = receipts_for_reading(_reading, **_kwargs)
+        except (RykoError, ValueError) as e:
+            st.error(f"رفض مُعلَّل: {e}")
+        else:
+            if not _recs:
+                st.info("أدخل pIC50 أو ΔG أولاً — لا إيصال من فراغ.")
+            for _rd in ryko_stored(_recs):
+                _render_ryko_receipt(_rd)
+                st.divider()
 
 # ═══ Tab 0: Make ═══
 with g_pipeline[0]:
@@ -580,6 +786,7 @@ with g_reports[0]:
         import plotly.graph_objects as go
 
         from core.capstone import (
+            PK_PARAMS,
             build_markdown_report,
             build_pdf_report,
             c90_nm,
@@ -718,15 +925,50 @@ with g_reports[0]:
             )
             st.plotly_chart(fig_ci, width="stretch")
 
+            # ── إيصالات Ryko على المرشح الأول (P20): فعالية ← تركيز ← أثر ──
+            st.markdown("#### 🧠 إيصالات Ryko — المرشح الأول")
+            from pharma_sdl.ryko import RykoReceipt
+            from pharma_sdl.ryko.decision_bridge import (
+                receipts_for_candidate,
+            )
+            from pharma_sdl.ryko.decision_bridge import (
+                stored as ryko_stored_cap,
+            )
+
+            cap_stored: list[dict] = []
+            if valid.empty:
+                st.caption("لا مرشح صالح لإصدار إيصالات — شغّل الخط أولاً.")
+            else:
+                _best = valid.iloc[0]
+                cap_receipts = receipts_for_candidate(
+                    pic50=float(_best.pic50),
+                    conc_nm=float(c90_nm(float(_best.pic50))),
+                    hill_coeff=float(PK_PARAMS["gamma"]),
+                )
+                cap_stored = ryko_stored_cap(cap_receipts)
+                st.caption(
+                    "سلسلة القرار كإيصالات: فعالية (pIC50) ← تركيز (IC50) ← أثر Hill عند C90 — "
+                    "كل رقم بمعادلة ومصدر وبصمة SHA-256، والإيصال يُتحقق دون اتصال، "
+                    "وهي نفسها الإيصالات المحمولة في تقرير Markdown/PDF أدناه."
+                )
+                if all(RykoReceipt.verify_stored(d) for d in cap_stored):
+                    st.success("✅ جميع الإيصالات سليمة — البصمات تُحسب من الحقول حرفياً")
+                else:
+                    st.error("❌ إيصال غير سليم — الحقول لا تطابق البصمة")
+                _cr1, _cr2 = st.columns(2)
+                for _ci_, _rd_c in enumerate(cap_stored):
+                    with (_cr1 if _ci_ == 0 else _cr2):
+                        _render_ryko_receipt(_rd_c)
+
             # ── التقارير ──
             st.markdown("#### 📄 التقارير")
             d1, d2 = st.columns(2)
-            md = build_markdown_report(res)
+            md = build_markdown_report(res, ryko_receipts=cap_stored or None)
             d1.download_button(
                 "⬇️ تقرير Markdown", md, file_name="capstone_report.md",
                 mime="text/markdown", key="cap_md", width="stretch",
             )
-            pdf = build_pdf_report(res)
+            pdf = build_pdf_report(res, ryko_receipts=cap_stored or None)
             if pdf:
                 d2.download_button(
                     "⬇️ تقرير PDF (عربي)", pdf, file_name="capstone_report.pdf",
