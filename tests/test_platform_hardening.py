@@ -255,13 +255,25 @@ def test_compose_contract_pg_profile_is_actually_wired():
     assert "pg_isready" in compose["services"]["postgres"]["healthcheck"]["test"][1]
 
 
-def test_compose_image_tag_is_not_stale():
-    """لا وسم صورة مجمد قديماً — المصدر واحد من متغير بقيمة افتراضية حيّة."""
+def test_compose_image_tag_matches_pyproject_version():
+    """حارس اتساق الإصدار: الافتراضي في compose يطابق pyproject.toml دائماً.
+
+    كان الاختبار سابقاً يثبّت قيمة حرفية (0.17.0) فسَمح بانجراف pyproject
+    (0.18.0) عن compose خلافاً لقاعدة P16 (مصدر وسم الصورة واحد) — الآن
+    يُقارَن الافتراضي بمصدر الحقيقة نفسه فلا انجراف ممكن مستقبلاً.
+    """
+    import tomllib
+
     raw = (REPO / "docker-compose.yml").read_text(encoding="utf-8")
     assert "pharma-sdl:0.5.0" not in raw
+    version = tomllib.loads(
+        (REPO / "pyproject.toml").read_text(encoding="utf-8")
+    )["project"]["version"]
     compose = yaml.safe_load(raw)
     for svc in ("api", "api-pg", "dashboard"):
-        assert compose["services"][svc]["image"] == "pharma-sdl:${PHARMA_SDL_IMAGE_TAG:-0.17.0}"
+        assert compose["services"][svc]["image"] == (
+            f"pharma-sdl:${{PHARMA_SDL_IMAGE_TAG:-{version}}}"
+        )
 
 
 def test_dockerfile_runs_as_non_root():

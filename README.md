@@ -113,6 +113,7 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 | تدقيق | v0.17.1 | تقييم شامل: فحص الإقلاع الميت + 39 ملاحظة lint | [CHANGELOG](CHANGELOG.md) |
 | P18 | v0.18.0 | مركز التحقق الخارجي: عميل ADMETlab 3.0 + بطاقات نماذج | [ADR-0017](docs/adr/ADR-0017-external-validation-center.md) |
 | تدقيق | v0.18.1 | معالجة الثغرات: 503 صادقة + إصلاحات تدقيق الكود والوثائق | [CHANGELOG](CHANGELOG.md) |
+| تغطية | v0.18.2 | تغطية أضعف الوحدات (الإجماع 0٪ + تدهور المحركين) + حارس اتساق الإصدار | [CHANGELOG](CHANGELOG.md) |
 
 ---
 
@@ -144,7 +145,7 @@ curl -s "localhost:8000/api/v1/screening/runs/<job_id>/report?lang=ar"
 
 | المؤشر | القيمة | المصدر |
 |---|---|---|
-| الاختبارات | **777 ناجحاً** على CI (بيئة كاملة مع extras pg) | الشارة الحية — يُحدّثها CI من التشغيل الفعلي |
+| الاختبارات | **799 ناجحاً** على CI (بيئة كاملة مع extras pg) | الشارة الحية — يُحدّثها CI من التشغيل الفعلي |
 | Lint | ruff نظيف — 0 ملاحظة على 334 ملفاً | `ruff check .` |
 | CI | Tests ✓ + Platform ✓ + Pages ✓ — شارة حية من التشغيل الفعلي | [.github/workflows](.github/workflows/) |
 | الإقلاع الآمن | بورت/حدود/خلفية تخزين غير صالحة = رفض إقلاع مُعلَّل | `Settings.validate()` (ADR-0016) |
