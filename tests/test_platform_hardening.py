@@ -322,3 +322,31 @@ def test_readme_api_badge_matches_pyproject_version():
     m = re.search(r"API-v(\d+\.\d+\.\d+)-", readme)
     assert m, "شارة API مفقودة من README.md"
     assert m.group(1) == version, f"انجراف شارة API: {m.group(1)} ≠ pyproject {version}"
+
+
+def test_package_version_matches_pyproject():
+    """إغلاق الانجراف الثالث: pharma_sdl.__version__ = مصدر الحقيقة (كان عالقاً على 0.14.0)."""
+    import tomllib
+
+    version = tomllib.loads(
+        (REPO / "pyproject.toml").read_text(encoding="utf-8")
+    )["project"]["version"]
+    from pharma_sdl import __version__
+
+    assert __version__ == version, (
+        f"انجراف نسخة الحزمة: {__version__} ≠ pyproject {version}"
+    )
+
+
+def test_ryko_version_matches_pyproject():
+    """نسخة Ryko مقيدة بمصدر الحقيقة نفسه — العقل لا يسبق جسمه."""
+    import tomllib
+
+    version = tomllib.loads(
+        (REPO / "pyproject.toml").read_text(encoding="utf-8")
+    )["project"]["version"]
+    from pharma_sdl.ryko import RYKO_VERSION
+
+    assert RYKO_VERSION == version, (
+        f"انجراف نسخة Ryko: {RYKO_VERSION} ≠ pyproject {version}"
+    )

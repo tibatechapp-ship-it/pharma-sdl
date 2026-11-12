@@ -29,6 +29,7 @@ from pharma_sdl.api.routes import (
     lab,
     loop,
     metrics,
+    ryko,
     screening,
     targets,
     tibb,
@@ -110,6 +111,7 @@ def create_app() -> FastAPI:
     app.include_router(campaigns.router, prefix="/api/v1")
     app.include_router(tibb.router, prefix="/api/v1")
     app.include_router(metrics.router, prefix="/api/v1")
+    app.include_router(ryko.router, prefix="/api/v1")
 
     @app.get(
         "/api/v1/auth/whoami",

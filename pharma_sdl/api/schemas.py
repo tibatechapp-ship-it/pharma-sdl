@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -324,3 +324,36 @@ class MetricsOut(BaseModel):
     engines_available: list[str]
     auth_mode: str
     demo_mode: bool
+
+
+# ── Ryko — العقل العلمي (P19) ──
+class RykoComputeIn(BaseModel):
+    """طلب حساب Ryko: وحدة + عملية + مدخلات (أرقام أو سلاسل أو قوائم)."""
+
+    module: str
+    op: str
+    inputs: dict[str, Any] = Field(default_factory=dict)
+
+
+class RykoReceiptOut(BaseModel):
+    """إيصال Ryko القابل للتحقق — قيمة + معادلة + مصدر + افتراضات + بصمة."""
+
+    module: str
+    op: str
+    inputs: dict[str, Any]
+    value: float | str
+    unit: str
+    formula: str
+    source: str
+    assumptions: list[str]
+    extra: dict[str, Any]
+    digest: str
+
+
+class RykoCatalogOut(BaseModel):
+    """الكتالوج المعلن — كل عملية بوحدتها ومعادلتها ومصدرها ومدخلاتها."""
+
+    version: str
+    modules: int
+    operations: int
+    catalog: dict[str, Any]
