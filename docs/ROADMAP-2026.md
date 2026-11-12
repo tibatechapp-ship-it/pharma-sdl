@@ -48,13 +48,15 @@
 2. **تبويب PGx حي**: CPIC API (كاش 24h) + احتياطي مدمج لـ5 جينات (أُضيف CYP2C19 وCYP3A5 للمخطط الأصلي)
 3. مبدّل عربي/إنجليزي (core/i18n.py) · GitHub Pages (docs/index.html ثنائي الاتجاه)
 
-### سبرنت 5 (مقترح من هذا البحث)
-4. **Lab07**: قياس نموذجنا على TDC benchmark (ثقافة القياس الصادق)
-5. **تحسين Predict**: إضافة descriptors للميزات → رفع R² (تحديث Model Card)
-6. **Lab08 Boltz-2 على Colab**: من التسلسل إلى الـ affinity — تكتمل القصة (جين → بنية → ربط → PK/PD → قرار)
+### سبرنت 5 (✅ مكتمل — تشرين الثاني 2026)
+4. **Lab07**: قياس نموذجنا على TDC benchmark — ✅ مُنجز في v0.13.0 (P12): [تقرير التقييم الرسمي](docs/audit/MODEL-BENCHMARK-TDC-P12.md)
+5. **تحسين Predict**: إضافة descriptors للميزات — ✅ اختُبرت الفرضية في v0.12.0 (P11، ذراع B) و**رُفضت تجريبياً** — نتيجة سلبية منشورة: R² هيكلي 0.472 < خط الأساس 0.489 وMAE أسوأ (0.585 > 0.564)؛ البدائل الواقعية موثقة في [تقرير P11](docs/audit/MODEL-UPGRADE-P11.md)
+6. **Lab08 Boltz-2 على Colab**: من التسلسل إلى الـ affinity — ✅ مُنجز: [Lab08_Boltz2_CoFolding.ipynb](notebooks/Lab08_Boltz2_CoFolding.ipynb) وثلاثية الطبقات في v0.15.0 (P14)
 
-### سبرنت 6
-7. تكامل Ersilia (الصحة العالمية) · دفتر REINVENT 4 توليدي · ترقية ADME بـ ML
+### سبرنت 6 (◐ جارٍ — إدخالان من ثلاثة)
+7. ✅ **تكامل Ersilia (الصحة العالمية)** — مُنجز في v0.16.0 (P15): الملاريا والسل بقمع قرار ثلاثي — [تقرير P15](docs/audit/GLOBAL-HEALTH-P15.md) و`core/clients/ersilia_client.py`
+8. ✅ **ترقية ADME بـ ML** — مُنجز: P13 رفع مركز ADMET من نموذجين إلى 41 مهمة (ADMET-AI، v0.14.0) ثم P18 أضاف عميل ADMETlab 3.0 بـ 121 نقطة مع بطاقات نماذج (v0.18.0)
+9. ⏳ **دفتر REINVENT 4 توليدي (Lab09)** — المتبقي الوحيد: أخذ عينات من priors المنشورة + توجيهها بنموذجنا pIC50 (يتطلب GPU Colab)
 
 ## المصادر المُتحقق منها
 - Boltz-2: PubMed 40667369 (Passaro et al. 2025) · tamarind.bio/tools/boltz · github.com/jwohlwend/boltz
