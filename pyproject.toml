@@ -52,7 +52,7 @@ admet = [
 dev = [
     "pytest==9.2.0",
     "pytest-cov==7.1.0",
-    "ruff==0.17.3",
+    "ruff==0.17.4",
     "httpx==0.28.1",
     "psycopg[binary]==3.3.7",
     "pgserver==0.1.4",
