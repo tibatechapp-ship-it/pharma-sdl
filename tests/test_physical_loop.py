@@ -62,7 +62,7 @@ def _forward_transport(gw_client: TestClient):
         fwd_headers = {
             k: v
             for k, v in headers.items()
-            if k.lower() not in {"content-type", "accept", "content-length", "host"}
+            if k.lower() not in {"accept", "content-length", "host"}
         }
         resp = gw_client.request(method, parsed.path, content=body, headers=fwd_headers)
         return resp.status_code, resp.content
